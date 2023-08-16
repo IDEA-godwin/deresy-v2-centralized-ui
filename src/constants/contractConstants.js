@@ -1,4 +1,4 @@
-// ABI for the StudioUno contract (always replace for current version)
+// ABI for the Deresy contract (always replace for current version)
 export const DERESY_CONTRACT_ABI = [
   {
     anonymous: false,
