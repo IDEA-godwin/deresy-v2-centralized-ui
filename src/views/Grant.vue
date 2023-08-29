@@ -184,7 +184,10 @@
               </el-col>
             </el-row>
             <hr />
-            <el-row class="section__review-scoring">
+            <el-row
+              v-if="reviewForm.questions[10] && reviewForm.questions[11]"
+              class="section__review-scoring"
+            >
               <div class="section__title">
                 <h3>Review Scoring</h3>
               </div>
@@ -214,8 +217,8 @@
                   />
                 </el-table>
               </el-card>
+              <hr />
             </el-row>
-            <hr />
             <el-row>
               <el-col :span="24" class="reviews-col">
                 <el-col class="review-title-col">
@@ -239,27 +242,59 @@
                         </div>
                       </template>
                       <div class="review-body">
-                        <span style="font-weight: bolder">Target</span><br />
-                        <a
-                          :href="reviewRequest.targets[review.targetIndex]"
-                          target="_blank"
-                          style="text-decoration: none"
-                        >
-                          {{ reviewRequest.targets[review.targetIndex] }} </a
-                        ><br /><br />
-                        <span style="font-weight: bolder">Target IPFS Hash</span
+                        <span style="font-weight: bolder">EAS Schema ID</span
                         ><br />
                         <a
-                          :href="`https://ipfs.io/ipfs/${
-                            reviewRequest.targetsIPFSHashes[review.targetIndex]
-                          }`"
+                          :href="`${easExplorerUrl}/schema/view/${reviewForm.easSchemaID}`"
                           target="_blank"
                           style="text-decoration: none"
                         >
-                          {{
+                          {{ reviewForm.easSchemaID }} </a
+                        ><br /><br />
+                        <span style="font-weight: bolder">Attestation ID</span
+                        ><br />
+                        <a
+                          :href="`${easExplorerUrl}/attestation/view/${review.attestationID}`"
+                          target="_blank"
+                          style="text-decoration: none"
+                        >
+                          {{ review.attestationID }} </a
+                        ><br /><br />
+                        <span style="font-weight: bolder">Hypercert ID</span
+                        ><br />
+                        <a
+                          :href="
+                            reviewRequest.hypercertTargetIDs[review.targetIndex]
+                          "
+                          target="_blank"
+                          style="text-decoration: none"
+                        >
+                          {{ review.hypercertID }} </a
+                        ><br /><br />
+                        <div
+                          v-if="
                             reviewRequest.targetsIPFSHashes[review.targetIndex]
-                          }}
-                        </a>
+                          "
+                        >
+                          <span style="font-weight: bolder"
+                            >Target IPFS Hash</span
+                          ><br />
+                          <a
+                            :href="`https://ipfs.io/ipfs/${
+                              reviewRequest.targetsIPFSHashes[
+                                review.targetIndex
+                              ]
+                            }`"
+                            target="_blank"
+                            style="text-decoration: none"
+                          >
+                            {{
+                              reviewRequest.targetsIPFSHashes[
+                                review.targetIndex
+                              ]
+                            }}
+                          </a>
+                        </div>
                         <div
                           v-for="(question, index) in reviewForm.questions"
                           :key="index"
@@ -373,6 +408,7 @@ export default {
     const reviews = ref([]);
     const reviewForm = ref(null);
     const ipfsBaseUrl = ref("");
+    const easExplorerUrl = ref("");
     const walletAddress = computed(() => user.walletAddress);
 
     const loading = ref(true);
@@ -430,9 +466,7 @@ export default {
     const fetchReviews = async () => {
       const reviewsResponse = await getReviews(grant.value.request_name);
       reviews.value = reviewsResponse.response?.reviews.filter(
-        (r) =>
-          Number(r.targetIndex) ===
-          reviewRequest.value.targets.indexOf(grant.value.request_target)
+        (r) => Number(r.hypercertID) === grant.value.hypercertID
       );
     };
 
@@ -495,6 +529,7 @@ export default {
         getReviewScoring();
       }
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
+      easExplorerUrl.value = process.env.VUE_APP_EAS_EXPLORER_URL;
       loading.value = false;
     });
 
@@ -514,6 +549,7 @@ export default {
       state,
       aboutContent,
       ipfsBaseUrl,
+      easExplorerUrl,
       getSummaries,
       markdownToHtml,
       goToSubmitReview,

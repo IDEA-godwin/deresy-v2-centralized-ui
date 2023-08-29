@@ -86,7 +86,13 @@
           label="Total reviews"
           min-width="100"
         />
-        <el-table-column prop="score" sortable label="Score" min-width="100" />
+        <el-table-column
+          v-if="false"
+          prop="score"
+          sortable
+          label="Score"
+          min-width="100"
+        />
         <el-table-column
           prop="region"
           sortable
@@ -158,6 +164,9 @@ export default {
           (rr) => rr.requestName === grant.request_name
         )[0];
 
+        console.log(reviewObj);
+        console.log(reviewRequest.hypercertTargetIDs.indexOf());
+
         const grantObj = {
           id: grant.id,
           image: grant.logo_url,
@@ -167,9 +176,7 @@ export default {
           funds: parseFloat(grant.amount_received),
           reviews: reviewObj
             ? reviewObj.reviews.filter(
-                (r) =>
-                  r.targetIndex ==
-                  reviewRequest.targets.indexOf(grant.request_target)
+                (r) => r.hypercertID == grant.hypercertID
               ).length
             : 0,
           score: grant.score.toFixed(1),
