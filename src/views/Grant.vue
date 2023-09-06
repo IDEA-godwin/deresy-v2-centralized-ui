@@ -271,6 +271,14 @@
                         >
                           {{ review.hypercertID }} </a
                         ><br /><br />
+                        <span style="font-weight: bolder">PDF File</span><br />
+                        <a
+                          :href="`https://ipfs.io/ipfs/${review.pdfIpfsHash}`"
+                          target="_blank"
+                          style="text-decoration: none"
+                        >
+                          https://ipfs.io/ipfs/{{ review.pdfIpfsHash }} </a
+                        ><br /><br />
                         <div
                           v-if="
                             reviewRequest.targetsIPFSHashes[review.targetIndex]

@@ -45,7 +45,7 @@ const routes = [
   },
   {
     path: "/grants/:grant_id/submit-review/",
-    component: () => import("@/views/GrantSubmitReview"),
+    component: () => import("@/views/SubmitReview"),
   },
 ];
 

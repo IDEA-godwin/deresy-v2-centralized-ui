@@ -1,4 +1,8 @@
 import { ElNotification } from "element-plus";
+import {
+  EAS_CONTRACT_ABI,
+  EAS_CONTRACT_ADDRESS,
+} from "../constants/contractConstants";
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -55,8 +59,6 @@ export const createReviewForm = async (web3, contract, params) => {
 export const getReviewForm = async (params) => {
   const { contractMethods, reviewFormIndex } = params;
   try {
-    console.log("Getting review form");
-
     const response = await contractMethods
       .getReviewForm(reviewFormIndex)
       .call();
@@ -71,8 +73,6 @@ export const getReviewForm = async (params) => {
 export const getReviewFormsTotal = async (params) => {
   const { contractMethods } = params;
   try {
-    console.log("Getting review forms total");
-
     const response = contractMethods.reviewFormsTotal().call();
 
     return response;
@@ -152,8 +152,6 @@ export const getRequest = async (params) => {
 export const getRequestNames = async (params) => {
   const { contractMethods } = params;
   try {
-    console.log("Getting request names");
-
     const response = contractMethods.getReviewRequestsNames().call();
 
     return response;
@@ -195,19 +193,76 @@ export const closeRequest = async (web3, contract, params) => {
 };
 
 export const submitReview = async (web3, contract, params) => {
-  const { name, targetIndex, answers, walletAddress, contractAddress } = params;
+  const { name, hypercertID, answers, walletAddress } = params;
 
   const { methods } = contract;
+  const { eth } = web3;
+
+  const easContract = new eth.Contract(EAS_CONTRACT_ABI, EAS_CONTRACT_ADDRESS, {
+    from: walletAddress,
+  });
 
   let response;
 
   try {
-    console.log("Submitting review");
+    const requestReviewForm = await methods.getRequestReviewForm(name).call();
+
+    // Fixed positions based on smart-contract
+    const pdfRequestData = {
+      name: name,
+      accountID: walletAddress,
+      hypercertID: hypercertID,
+      easSchemaID: requestReviewForm[3],
+      questions: requestReviewForm[0],
+      questionOptions: requestReviewForm[2],
+      answers: answers,
+    };
+
+    const pdfResponse = await fetch(
+      process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + "/api/generate_pdf",
+      {
+        method: "POST",
+        body: JSON.stringify(pdfRequestData),
+      }
+    );
+
+    const pdfData = await pdfResponse?.json();
+
+    const ipfsHashID = pdfData?.IpfsHash;
+
+    const abi = [
+      { type: "string", name: "requestName" },
+      { type: "uint256", name: "hypercertID" },
+      { type: "string[]", name: "answers" },
+      { type: "string", name: "pdfIpfsHash" },
+    ];
+
+    const encodedData = web3.eth.abi.encodeParameters(abi, [
+      name,
+      hypercertID,
+      answers,
+      ipfsHashID,
+    ]);
+
+    const data = await easContract.methods
+      .attest({
+        schema: requestReviewForm[3],
+        data: {
+          recipient: "0x0000000000000000000000000000000000000000",
+          expirationTime: 0n,
+          revocable: false,
+          refUID:
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+          data: encodedData,
+          value: 0,
+        },
+      })
+      .encodeABI();
 
     const transaction = {
       from: walletAddress,
-      to: contractAddress,
-      data: methods.submitReview(name, targetIndex, answers).encodeABI(),
+      to: EAS_CONTRACT_ADDRESS,
+      data,
     };
 
     await web3.eth
