@@ -44,19 +44,24 @@
                 !requestObject.isClosed &&
                 requestObject.reviewers.includes(walletAddressRef)
               "
+              style="width: 45%"
             >
               <el-col :span="24">
-                <el-form-item label="Target">
+                <el-form-item label="Hypercert ID">
                   <el-select
                     v-model="reviewObject.targetIndex"
-                    placeholder="Select the target for your review"
+                    placeholder="Select the Hypercert ID for your review"
                     size="large"
                     style="width: 100%"
                   >
                     <el-option
-                      v-for="(o, index) in requestObject.targets"
+                      v-for="(id, index) in requestObject.hypercertTargetIDs"
                       :key="index"
-                      :label="requestObject.targets[index]"
+                      :label="`${
+                        hypercertNames[index]
+                          ? hypercertNames[index]
+                          : 'Name unavailable'
+                      } (ID: ${id})`"
                       :value="index"
                     />
                   </el-select>
@@ -65,13 +70,17 @@
                   </span>
                 </el-form-item>
               </el-col>
-              <el-col :span="24" v-if="targetSelected()" class="targetHashDiv">
+              <el-col
+                :span="24"
+                v-if="targetSelected() && !isEmptyHashes()"
+                class="targetHashDiv"
+              >
                 <span>Target IPFS Hash</span><br />
                 <a
                   :href="`https://ipfs.io/ipfs/${
                     requestObject.targetsIPFSHashes[reviewObject.targetIndex]
                   }`"
-                  style="text-decoration: none; margin-top: 5px"
+                  style="text-decoration: none; margin-wtop: 5px"
                   target="_blank"
                 >
                   {{
@@ -154,7 +163,11 @@
 </template>
 
 <script>
-import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
+import {
+  DERESY_CONTRACT_ADDRESS,
+  HYPERCERT_CONTRACT_ADDRESS,
+  HYPERCERT_CONTRACT_ABI,
+} from "@/constants/contractConstants";
 import {
   getRequest,
   getReviewForm,
@@ -166,6 +179,8 @@ import { watch, computed, ref, onBeforeMount, reactive } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
+import { web3InfuraClient } from "@/web3";
+
 export default {
   name: "SubmitReview",
   setup() {
@@ -185,6 +200,8 @@ export default {
     const walletAddressRef = ref(walletAddress);
     const requestObject = ref();
     const reviewForm = ref({});
+    const hypercertNames = ref([]);
+    const IPFSHashes = ref([]);
 
     const reviewObject = reactive({
       requestName: "",
@@ -229,6 +246,10 @@ export default {
       return reviewObject.targetIndex != null;
     };
 
+    const isEmptyHashes = () => {
+      return IPFSHashes.value.every((hash) => hash === "");
+    };
+
     const onRequestSelection = () => {
       reviewObject.targetIndex = null;
       requestObject.value = null;
@@ -241,6 +262,37 @@ export default {
         contractMethods: contract.value.methods,
       };
       requestObject.value = await getRequest(requestPayload);
+
+      const optimismWeb3 = web3InfuraClient();
+
+      const hypercertContract = new optimismWeb3.eth.Contract(
+        HYPERCERT_CONTRACT_ABI,
+        HYPERCERT_CONTRACT_ADDRESS,
+        {
+          from: walletAddress.value,
+        }
+      );
+
+      const hypercertIds = requestObject.value.hypercertTargetIDs;
+
+      IPFSHashes.value = requestObject.value.targetsIPFSHashes;
+
+      const requestTargetsNames = [];
+
+      hypercertNames.value = await Promise.all(
+        hypercertIds.map(async (id) => {
+          const uri = await hypercertContract.methods.uri(id).call();
+          if (uri) {
+            const data = await (
+              await fetch(`http://ipfs.io/ipfs/${uri}`)
+            ).json();
+            requestTargetsNames.push(data?.name);
+            return data.name;
+          } else {
+            return null;
+          }
+        })
+      );
 
       const reviewFormPayload = {
         reviewFormIndex: requestObject.value.reviewFormIndex,
@@ -258,13 +310,19 @@ export default {
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
+
         const reviewsAnswers = reviewObject.reviews.map((review) => {
           return review.answer;
         });
+
+        const selectedHypercertID =
+          requestObject.value.hypercertTargetIDs[reviewObject.targetIndex];
+
         const payload = {
           name: reviewObject.requestName,
           targetIndex: reviewObject.targetIndex,
           answers: reviewsAnswers,
+          hypercertID: selectedHypercertID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           walletAddress: walletAddress.value,
         };
@@ -328,9 +386,12 @@ export default {
       walletAddressRef,
       reviewObject,
       requestNames,
+      hypercertNames,
+      IPFSHashes,
       requestObject,
       reviewForm,
       targetSelected,
+      isEmptyHashes,
       forbiddenMessage,
       allowToSubmit,
       onRequestSelection,
