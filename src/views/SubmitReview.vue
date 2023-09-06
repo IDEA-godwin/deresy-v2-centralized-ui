@@ -284,7 +284,7 @@ export default {
           const uri = await hypercertContract.methods.uri(id).call();
           if (uri) {
             const data = await (
-              await fetch(`http://ipfs.io/ipfs/${uri}`)
+              await fetch(`https://ipfs.io/ipfs/${uri}`)
             ).json();
             requestTargetsNames.push(data?.name);
             return data.name;
