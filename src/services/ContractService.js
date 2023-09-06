@@ -3,6 +3,7 @@ import {
   EAS_CONTRACT_ABI,
   EAS_CONTRACT_ADDRESS,
 } from "../constants/contractConstants";
+import axios from 'axios';
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -218,13 +219,10 @@ export const submitReview = async (web3, contract, params) => {
       answers: answers,
     };
 
-    const pdfResponse = await fetch(
-      process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + "/api/generate_pdf",
-      {
-        method: "POST",
-        body: JSON.stringify(pdfRequestData),
-      }
-    );
+    const pdfResponse = await axios.post(
+      process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + '/api/generate_pdf',
+      pdfRequestData
+    )
 
     const pdfData = await pdfResponse?.json();
 
