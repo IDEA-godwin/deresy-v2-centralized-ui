@@ -219,7 +219,7 @@ export const submitReview = async (web3, contract, params) => {
     };
 
     const pdfResponse = await fetch(
-      process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + "/generate_pdf",
+      process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + "/api/generate_pdf",
       {
         method: "POST",
         body: JSON.stringify(pdfRequestData),
