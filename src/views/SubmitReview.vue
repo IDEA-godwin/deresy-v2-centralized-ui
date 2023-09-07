@@ -44,7 +44,7 @@
                 !requestObject.isClosed &&
                 requestObject.reviewers.includes(walletAddressRef)
               "
-              style="width: 45%"
+              style="width: 60%"
             >
               <el-col :span="24">
                 <el-form-item label="Hypercert ID">
@@ -94,14 +94,13 @@
                 v-for="(question, index) in reviewForm[0]"
                 :key="index"
               >
-                <el-form-item :label="question">
-                  <el-input
+                <el-form-item :label="question" :style="{ display: 'block' }">
+                  <textarea
                     v-if="reviewForm[1][index] == '0'"
-                    style="margin-top: 5px; width: 100%"
-                    v-model="reviewObject.reviews[index].answer"
-                    type="text"
-                    placeholder="Enter your answer"
-                  />
+                    :id="'simplemde-' + index"
+                    class="textarea-markdown"
+                  ></textarea>
+
                   <el-radio-group
                     v-if="reviewForm[1][index] == '1'"
                     v-model="reviewObject.reviews[index].answer"
@@ -163,6 +162,7 @@
 </template>
 
 <script>
+import { nextTick } from 'vue';
 import {
   DERESY_CONTRACT_ADDRESS,
   HYPERCERT_CONTRACT_ADDRESS,
@@ -180,6 +180,8 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
 import { web3InfuraClient } from "@/web3";
+import "@/scripts/simplemde.min.css";
+import SimpleMDE from "@/scripts/simplemde.min.js";
 
 export default {
   name: "SubmitReview",
@@ -202,6 +204,7 @@ export default {
     const reviewForm = ref({});
     const hypercertNames = ref([]);
     const IPFSHashes = ref([]);
+    const simpleMDEInstances = ref([]);
 
     const reviewObject = reactive({
       requestName: "",
@@ -304,8 +307,29 @@ export default {
       for (let i = 0; i < reviewForm.value[0].length; i++) {
         reviewObject.reviews.push({ answer: "" });
       }
+
+      await simpleMDEInitializer();
     };
 
+    const simpleMDEInitializer = async () => {
+      await nextTick();
+
+      const textAreas = document.getElementsByClassName("textarea-markdown");
+      for (let textArea of textAreas) {
+        const index = parseInt(textArea.id.replace('simplemde-', ''), 10);
+        const simplemde = new SimpleMDE({ element: textArea, forceSync: true });
+        simpleMDEInstances.value.push(simplemde);
+
+        const parentContent = textArea.closest('.el-form-item__content');
+        if (parentContent) {
+            parentContent.style.display = 'block';
+        }
+
+        simplemde.codemirror.on("change", function() {
+            reviewObject.reviews[index].answer = simplemde.value();
+        });
+      }    
+    }
     const sendBtn = async () => {
       v$.value.$validate();
       if (!v$.value.$error) {
@@ -371,6 +395,9 @@ export default {
         };
         requestNames.value = await getRequestNames(payload);
       }
+
+      simpleMDEInstances.value.forEach(instance => instance.toTextArea());
+      simpleMDEInstances.value = [];
     });
 
     watch([contractRef], async () => {
@@ -388,6 +415,7 @@ export default {
       requestNames,
       hypercertNames,
       IPFSHashes,
+      simpleMDEInstances,
       requestObject,
       reviewForm,
       targetSelected,

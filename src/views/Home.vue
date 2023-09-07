@@ -160,12 +160,6 @@ export default {
         const reviewObj = reviews.value.find(
           (r) => r.requestName === grant.request_name
         );
-        const reviewRequest = reviewRequests.value.filter(
-          (rr) => rr.requestName === grant.request_name
-        )[0];
-
-        console.log(reviewObj);
-        console.log(reviewRequest.hypercertTargetIDs.indexOf());
 
         const grantObj = {
           id: grant.id,
