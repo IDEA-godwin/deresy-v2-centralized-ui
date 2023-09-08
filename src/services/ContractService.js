@@ -32,8 +32,6 @@ export const createReviewForm = async (web3, contract, params) => {
   let response;
 
   try {
-    console.log("Creating review form");
-
     const transaction = {
       from: walletAddress,
       to: contractAddress,
@@ -100,8 +98,6 @@ export const createRequest = async (web3, contract, params) => {
   let response;
 
   try {
-    console.log("Creating review form");
-
     const transaction = {
       from: walletAddress,
       to: contractAddress,
@@ -138,8 +134,6 @@ export const createRequest = async (web3, contract, params) => {
 export const getRequest = async (params) => {
   const { requestName, contractMethods } = params;
   try {
-    console.log("Getting request");
-
     const response = contractMethods.getRequest(requestName).call();
 
     return response;
@@ -168,8 +162,6 @@ export const closeRequest = async (web3, contract, params) => {
   let response;
 
   try {
-    console.log("Closing review request");
-
     const transaction = {
       from: walletAddress,
       to: contractAddress,

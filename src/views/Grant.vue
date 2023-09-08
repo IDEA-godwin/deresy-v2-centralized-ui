@@ -260,25 +260,25 @@
                         >
                           {{ review.attestationID }} </a
                         ><br /><br />
-                        <span style="font-weight: bolder">Hypercert ID</span
-                        ><br />
+                        <span style="font-weight: bolder">Hypercert</span><br />
                         <a
-                          :href="
-                            reviewRequest.hypercertTargetIDs[review.targetIndex]
-                          "
+                          :href="hypercertLink"
                           target="_blank"
                           style="text-decoration: none"
                         >
-                          {{ review.hypercertID }} </a
+                          {{ `${hypercertName}(ID: ${hypercertName})` }} </a
                         ><br /><br />
-                        <span style="font-weight: bolder">PDF File</span><br />
-                        <a
-                          :href="`https://ipfs.io/ipfs/${review.pdfIpfsHash}`"
-                          target="_blank"
-                          style="text-decoration: none"
-                        >
-                          https://ipfs.io/ipfs/{{ review.pdfIpfsHash }} </a
-                        ><br /><br />
+                        <div v-if="review.pdfIpfsHash">
+                          <span style="font-weight: bolder">PDF File</span
+                          ><br />
+                          <a
+                            :href="`https://ipfs.io/ipfs/${review.pdfIpfsHash}`"
+                            target="_blank"
+                            style="text-decoration: none"
+                          >
+                            https://ipfs.io/ipfs/{{ review.pdfIpfsHash }} </a
+                          ><br /><br />
+                        </div>
                         <div
                           v-if="
                             reviewRequest.targetsIPFSHashes[review.targetIndex]
@@ -387,6 +387,12 @@ import {
   ArrowDownBold,
 } from "@element-plus/icons";
 
+import {
+  HYPERCERT_CONTRACT_ADDRESS,
+  HYPERCERT_CONTRACT_ABI,
+} from "@/constants/contractConstants";
+import { optimismWeb3 } from "@/web3";
+
 export default {
   name: "Grant",
   components: {
@@ -418,6 +424,8 @@ export default {
     const ipfsBaseUrl = ref("");
     const easExplorerUrl = ref("");
     const walletAddress = computed(() => user.walletAddress);
+    const hypercertLink = ref("");
+    const hypercertName = ref("");
 
     const loading = ref(true);
     const grantNotFound = ref(true);
@@ -474,7 +482,7 @@ export default {
     const fetchReviews = async () => {
       const reviewsResponse = await getReviews(grant.value.request_name);
       reviews.value = reviewsResponse.response?.reviews.filter(
-        (r) => Number(r.hypercertID) === grant.value.hypercertID
+        (r) => r.hypercertID === grant.value.hypercertID
       );
     };
 
@@ -526,6 +534,26 @@ export default {
       return sums;
     };
 
+    const getHypercertName = async () => {
+      const hypercertContract = new optimismWeb3.eth.Contract(
+        HYPERCERT_CONTRACT_ABI,
+        HYPERCERT_CONTRACT_ADDRESS,
+        {
+          from: walletAddress.value,
+        }
+      );
+
+      const uri = await hypercertContract.methods
+        .uri(grant.value.hypercertID.toString())
+        .call();
+      if (uri) {
+        const data = await (await fetch(`https://ipfs.io/ipfs/${uri}`)).json();
+        return data.name;
+      } else {
+        return "Name unavailable";
+      }
+    };
+
     onBeforeMount(async () => {
       await fetchGrant();
 
@@ -538,6 +566,12 @@ export default {
       }
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
       easExplorerUrl.value = process.env.VUE_APP_EAS_EXPLORER_URL;
+      hypercertLink.value = `${
+        process.env.VUE_APP_HYPERCERTS_BASE_URL
+      }${process.env.VUE_APP_HYPERCERT_CONTRACT_ADDRESS.toLowerCase()}-${
+        grant.value.hypercertID
+      }`;
+      hypercertName.value = await getHypercertName();
       loading.value = false;
     });
 
@@ -558,6 +592,8 @@ export default {
       aboutContent,
       ipfsBaseUrl,
       easExplorerUrl,
+      hypercertLink,
+      hypercertName,
       getSummaries,
       markdownToHtml,
       goToSubmitReview,
