@@ -5,6 +5,10 @@ export const web3InfuraClient = () => {
   return new Web3(provider);
 };
 
+export const optimismWeb3 = new Web3(
+  "https://optimism-mainnet.infura.io/v3/93cf3e10ca0044cdad4ac63eecdc04fc"
+);
+
 export const web3WalletClient = (provider) => {
   const web3 = new Web3(provider);
 
