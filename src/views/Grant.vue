@@ -92,7 +92,10 @@
                 </el-button>
               </div>
               <div v-else>
-                <div v-if="reviewRequest.isClosed" class="warning custom-block">
+                <div
+                  v-if="reviewRequest && reviewRequest.isClosed"
+                  class="warning custom-block"
+                >
                   This request is closed and does no longer accept reviews.
                 </div>
                 <div class="warning custom-block">
@@ -185,7 +188,11 @@
             </el-row>
             <hr />
             <el-row
-              v-if="reviewForm.questions[10] && reviewForm.questions[11]"
+              v-if="
+                reviewForm &&
+                reviewForm.questions[10] &&
+                reviewForm.questions[11]
+              "
               class="section__review-scoring"
             >
               <div class="section__title">
@@ -488,13 +495,13 @@ export default {
 
     const fetchReviewForm = async () => {
       const reviewFormResponse = await getReviewForm(
-        reviewRequest.value.reviewFormIndex
+        reviewRequest.value?.reviewFormIndex
       );
       reviewForm.value = reviewFormResponse.response;
     };
 
     const getReviewScoring = () => {
-      dataTable.value = reviews.value.map((review, i) => {
+      dataTable.value = reviews.value?.map((review, i) => {
         const answer1Score = Number(review.answers[10]);
         const answer2Score = Number(review.answers[11]);
         const average = (answer1Score + answer2Score) / 2;
