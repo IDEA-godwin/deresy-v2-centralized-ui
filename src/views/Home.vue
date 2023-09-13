@@ -198,9 +198,7 @@ export default {
 
     onBeforeMount(async () => {
       const store = useStore();
-      const {
-        dispatch,
-      } = store;
+      const { dispatch } = store;
 
       dispatch("showVersionNotification");
 
