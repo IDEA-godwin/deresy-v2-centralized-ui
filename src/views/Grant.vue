@@ -279,11 +279,13 @@
                           <span style="font-weight: bolder">PDF File</span
                           ><br />
                           <a
-                            :href="`https://ipfs.io/ipfs/${review.pdfIpfsHash}`"
+                            :href="`${pinataGatewayUrl}/ipfs/${review.pdfIpfsHash}`"
                             target="_blank"
                             style="text-decoration: none"
                           >
-                            https://ipfs.io/ipfs/{{ review.pdfIpfsHash }} </a
+                            {{ pinataGatewayUrl }}/ipfs/{{
+                              review.pdfIpfsHash
+                            }} </a
                           ><br /><br />
                         </div>
                         <div
@@ -429,6 +431,7 @@ export default {
     const reviews = ref([]);
     const reviewForm = ref(null);
     const ipfsBaseUrl = ref("");
+    const pinataGatewayUrl = ref("");
     const easExplorerUrl = ref("");
     const walletAddress = computed(() => user.walletAddress);
     const hypercertLink = ref("");
@@ -572,6 +575,7 @@ export default {
         getReviewScoring();
       }
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
+      pinataGatewayUrl.value = process.env.VUE_APP_PINATA_GATEWAY_BASE_URL;
       easExplorerUrl.value = process.env.VUE_APP_EAS_EXPLORER_URL;
       hypercertLink.value = `${
         process.env.VUE_APP_HYPERCERTS_BASE_URL
@@ -598,6 +602,7 @@ export default {
       state,
       aboutContent,
       ipfsBaseUrl,
+      pinataGatewayUrl,
       easExplorerUrl,
       hypercertLink,
       hypercertName,
