@@ -5,6 +5,7 @@
         <el-header class="header">
           <div class="logo-container">
             <Logo :logo="require('../../assets/images/logo-deresy.png')" />
+            &nbsp;<strong>v2</strong>
           </div>
           <div class="menu-container">
             <div class="desktop">
