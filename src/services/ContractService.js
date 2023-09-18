@@ -185,7 +185,7 @@ export const closeRequest = async (web3, contract, params) => {
 };
 
 export const submitReview = async (web3, contract, params) => {
-  const { name, hypercertID, answers, walletAddress } = params;
+  const { name, hypercertID, answers, grantID, walletAddress } = params;
 
   const { methods } = contract;
   const { eth } = web3;
@@ -204,6 +204,7 @@ export const submitReview = async (web3, contract, params) => {
       name: name,
       accountID: walletAddress,
       hypercertID: hypercertID,
+      grantID: grantID,
       easSchemaID: requestReviewForm[3],
       questions: requestReviewForm[0],
       questionOptions: requestReviewForm[2],

@@ -289,6 +289,7 @@ export default {
         const payload = {
           name: reviewObject.requestName,
           answers: reviewsAnswers,
+          grantID: grantID,
           hypercertID: reviewObject.hypercertID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           walletAddress: walletAddress.value,
