@@ -19,6 +19,12 @@
                 <el-menu-item index="/grants" @click="goToPath('/grants')">
                   Grants
                 </el-menu-item>
+                <el-menu-item
+                  index="/create-review-request"
+                  @click="goToPath('/create-review-request')"
+                >
+                  Create Review Request
+                </el-menu-item>
               </el-menu>
               <div class="wallet-container">
                 <Wallet />
@@ -78,6 +84,12 @@
       >
         <el-menu-item index="/grants" @click="goToPath('/grants')">
           Grants
+        </el-menu-item>
+        <el-menu-item
+          index="/create-review-request"
+          @click="goToPath('/create-review-request')"
+        >
+          Create Review Request
         </el-menu-item>
       </el-menu>
     </el-drawer>
