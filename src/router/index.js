@@ -20,7 +20,7 @@ const routes = [
     component: () => import("@/views/GetReviewForm"),
   },
   {
-    path: "/create-review-request-only-admin-auth",
+    path: "/create-review-request",
     component: () => import("@/views/CreateReviewRequest"),
   },
   {

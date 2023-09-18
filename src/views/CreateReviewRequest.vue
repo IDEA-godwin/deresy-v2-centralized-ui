@@ -1,206 +1,193 @@
 <template>
-  <div class="form-container">
+  <div v-loading="isFormLoading" class="form-container">
     <el-row>
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-form label-position="top">
+      <el-col :span="24">
+        <el-form label-position="top" class="review-form">
           <h1>Create Review Request</h1>
-          <el-row :gutter="20">
-            <el-row style="width: 100%">
-              <el-col :span="24">
-                <el-form-item label="Name">
-                  <el-input
-                    v-model="requestObject.name"
-                    label="Name"
-                    type="text"
-                    placeholder="Enter a name for the request"
-                  />
-                  <span class="vuelidation-error" v-if="v$.name.$error">
-                    {{ v$.name.$errors[0].$message }}
-                  </span>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row style="width: 100%">
-              <el-col :span="24">
-                <el-form-item label="Review Form Index">
-                  <el-select
-                    v-model="requestObject.reviewFormIndex"
-                    placeholder="Select a review form index"
-                    size="large"
-                    style="width: 100%"
-                  >
-                    <el-option
-                      v-for="(o, index) in parseInt(reviewFormsTotal)"
-                      :key="index"
-                      :label="`Index ${index}`"
-                      :value="index"
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Name">
+                <el-input
+                  v-model="requestObject.name"
+                  placeholder="Enter a name for the request"
+                />
+                <span class="vuelidation-error" v-if="v$.name.$error">{{
+                  v$.name.$errors[0].$message
+                }}</span>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Review Form Index">
+                <el-select
+                  v-model="requestObject.reviewFormIndex"
+                  placeholder="Select a review form index"
+                  size="large"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="(o, index) in parseInt(reviewFormsTotal)"
+                    :key="index"
+                    :label="`Index ${index}`"
+                    :value="index"
+                  ></el-option>
+                </el-select>
+                <span
+                  class="vuelidation-error"
+                  v-if="v$.reviewFormIndex.$error"
+                  >{{ v$.reviewFormIndex.$errors[0].$message }}</span
+                >
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="20">
+              <label class="el-form-item__label">Reviewers</label>
+            </el-col>
+            <el-col :span="24">
+              <div
+                v-for="(reviewer, index) in requestObject.reviewers"
+                :key="index"
+                class="review-row"
+              >
+                <el-row :gutter="20">
+                  <el-col :span="22">
+                    <el-input
+                      v-model="requestObject.reviewers[index].address"
+                      placeholder="Enter a reviewer address"
                     />
-                  </el-select>
-                  <span
-                    class="vuelidation-error"
-                    v-if="v$.reviewFormIndex.$error"
-                  >
-                    {{ v$.reviewFormIndex.$errors[0].$message }}
-                  </span>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row style="width: 100%; text-align: left">
-              <el-col :span="20">
-                <label class="el-form-item__label">Reviewers</label>
-              </el-col>
-            </el-row>
-            <div
-              v-for="(reviewer, index) in requestObject.reviewers"
-              :key="index"
-              style="width: 100%"
-            >
-              <el-row :gutter="20">
-                <el-col :span="22">
-                  <el-input
-                    style="margin-top: 5px"
-                    v-model="requestObject.reviewers[index].address"
-                    label="Reviewer"
-                    type="text"
-                    placeholder="Enter a reviewer address"
-                  />
-                  <div v-if="v$.reviewers.$error" style="margin: 2% 0% 0% 0%">
-                    <span class="vuelidation-error">
-                      {{ v$.reviewers.$errors[0].$message[index][0] }}
-                    </span>
-                  </div>
-                </el-col>
-                <el-col :span="1">
+                    <div v-if="v$.reviewers.$error" style="margin-top: 10px">
+                      <span class="vuelidation-error">{{
+                        v$.reviewers.$errors[0].$message[index][0]
+                      }}</span>
+                    </div>
+                  </el-col>
+                  <el-col :span="2">
+                    <el-button
+                      circle
+                      type="danger"
+                      :icon="CloseBold"
+                      size="small"
+                      @click="removeReviewer(index)"
+                      v-if="index > 0"
+                    ></el-button>
+                  </el-col>
+                </el-row>
+              </div>
+              <el-row class="form-section">
+                <el-col :span="24">
                   <el-button
-                    circle
-                    type="danger"
-                    :icon="CloseBold"
-                    size="small"
-                    @click="removeReviewer(index)"
-                    style="margin-top: 5px"
-                    v-if="index > 0"
-                  ></el-button>
+                    @click="addReviewer()"
+                    class="add-btn"
+                    type="primary"
+                    >Add Reviewer</el-button
+                  >
                 </el-col>
               </el-row>
-            </div>
-            <el-row>
-              <el-col :span="24">
-                <el-button
-                  @click="addReviewer()"
-                  class="add-btn"
-                  type="primary"
-                  style="margin: 10% 0%"
-                >
-                  Add Reviewer
-                </el-button>
-              </el-col>
-            </el-row>
-            <el-row style="width: 100%; text-align: left">
-              <el-col :span="12">
-                <label class="el-form-item__label">Targets</label>
-              </el-col>
-              <el-col :span="12">
-                <label class="el-form-item__label">Target IPFS Hashes</label>
-              </el-col>
-            </el-row>
-            <div
-              v-for="(reviewer, index) in requestObject.targets"
-              :key="index"
-              style="width: 100%"
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="11"
+              ><label class="el-form-item__label">Targets</label></el-col
             >
-              <el-row :gutter="20">
-                <el-col :span="12">
-                  <el-input
-                    style="margin-top: 5px"
-                    v-model="requestObject.targets[index].address"
-                    label="Target"
-                    type="text"
-                    placeholder="Enter a target address"
-                  />
-                  <div v-if="v$.targets.$error" style="margin: 2% 0% 0% 0%">
-                    <span class="vuelidation-error">
-                      {{ v$.targets.$errors[0]?.$message[index][0] }}
-                    </span>
-                  </div>
-                </el-col>
-                <el-col :span="11">
-                  <el-input
-                    style="margin-top: 5px"
-                    v-model="requestObject.targets[index].ipfsHash"
-                    label="Target IPFS Hash"
-                    type="text"
-                    placeholder="Enter a target IPFS Hash"
-                  />
-                </el-col>
-                <el-col :span="1">
-                  <el-button
-                    circle
-                    type="danger"
-                    :icon="CloseBold"
-                    size="small"
-                    @click="removeTarget(index)"
-                    style="margin-top: 5px"
-                    v-if="index > 0"
-                  ></el-button>
+            <el-col :span="11" style="padding-left: 10px"
+              ><label class="el-form-item__label"
+                >Target IPFS Hashes</label
+              ></el-col
+            >
+            <el-col :span="24">
+              <div
+                v-for="(target, index) in requestObject.targets"
+                :key="index"
+                class="target-row"
+              >
+                <el-row :gutter="20">
+                  <el-col :span="11">
+                    <el-input
+                      v-model="requestObject.targets[index].address"
+                      placeholder="Enter a target address"
+                    />
+                    <div v-if="v$.targets.$error" style="margin-top: 10px">
+                      <span class="vuelidation-error">{{
+                        v$.targets.$errors[0]?.$message[index][0]
+                      }}</span>
+                    </div>
+                  </el-col>
+                  <el-col :span="11">
+                    <el-input
+                      v-model="requestObject.targets[index].ipfsHash"
+                      placeholder="Enter a target IPFS Hash"
+                    />
+                  </el-col>
+                  <el-col :span="2">
+                    <el-button
+                      circle
+                      type="danger"
+                      :icon="CloseBold"
+                      size="small"
+                      @click="removeTarget(index)"
+                      v-if="index > 0"
+                    ></el-button>
+                  </el-col>
+                </el-row>
+              </div>
+              <el-row class="form-section">
+                <el-col :span="24">
+                  <el-button @click="addTarget()" class="add-btn" type="primary"
+                    >Add Target</el-button
+                  >
                 </el-col>
               </el-row>
-            </div>
-            <el-row>
-              <el-col :span="24">
-                <el-button
-                  @click="addTarget()"
-                  class="add-btn"
-                  type="primary"
-                  style="margin: 10% 0%"
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Request IPFS Hash">
+                <el-input
+                  v-model="requestObject.requestHash"
+                  placeholder="Enter a request IPFS Hash"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Reward per review">
+                <el-input
+                  v-model="requestObject.rewardPerReview"
+                  type="number"
+                  placeholder="Enter the rewards per review"
+                />
+                <span
+                  class="vuelidation-error"
+                  v-if="v$.rewardPerReview.$error"
+                  >{{ v$.rewardPerReview.$errors[0].$message }}</span
                 >
-                  Add Target
-                </el-button>
-              </el-col>
-            </el-row>
-            <el-row style="width: 100%">
-              <el-col :span="24">
-                <el-form-item label="Request IPFS Hash">
-                  <el-input
-                    v-model="requestObject.requestHash"
-                    label="Request IPFS Hash"
-                    type="text"
-                    placeholder="Enter a request IPFS Hash"
-                  />
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-row style="width: 100%">
-              <el-col :span="24">
-                <el-form-item label="Reward per review">
-                  <el-input
-                    v-model="requestObject.rewardPerReview"
-                    label="Reward per review"
-                    type="number"
-                    placeholder="Enter the rewards per review"
-                  />
-                  <span
-                    class="vuelidation-error"
-                    v-if="v$.rewardPerReview.$error"
-                  >
-                    {{ v$.rewardPerReview.$errors[0].$message }}
-                  </span>
-                </el-form-item>
-              </el-col>
-            </el-row>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-button
+                @click="sendBtn()"
+                class="send-btn"
+                type="success"
+                size="large"
+                >Send</el-button
+              >
+            </el-col>
           </el-row>
         </el-form>
       </el-col>
     </el-row>
-    <el-col :span="24">
-      <el-button
-        @click="sendBtn()"
-        class="send-btn"
-        type="success"
-        size="large"
-      >
-        Send
-      </el-button>
-    </el-col>
   </div>
 </template>
 
@@ -230,6 +217,7 @@ export default {
 
     const reviewFormsTotal = ref(0);
     const contractRef = ref(contract);
+    const isFormLoading = ref(false);
 
     const requestObject = reactive({
       name: "",
@@ -280,6 +268,7 @@ export default {
     };
 
     const sendBtn = async () => {
+      isFormLoading.value = true;
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
@@ -350,6 +339,7 @@ export default {
         }
         dispatch("setLoading", false);
       }
+      isFormLoading.value = false;
     };
 
     onBeforeMount(async () => {
@@ -377,6 +367,7 @@ export default {
       CloseBold,
       requestObject,
       reviewFormsTotal,
+      isFormLoading,
       addReviewer,
       addTarget,
       removeReviewer,
@@ -390,22 +381,37 @@ export default {
 
 <style scoped>
 .form-container {
-  padding: 2% 5%;
+  text-align: left;
+  padding: 2% 10%;
 }
 
-.add-btn {
-  margin: 0px 0px 15px 0px;
-  float: left;
+.review-form {
+  width: 100%;
 }
+
+.form-section {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
 .send-btn {
   margin: 10px 0px;
   float: left;
 }
+
+.add-btn {
+  margin: 10px 0px;
+}
+
 .vuelidation-error {
   color: #dd0c0c;
   font-size: 12px;
   font-weight: bolder;
-  float: left;
-  margin-bottom: 5px;
+  text-align: left;
+  margin-top: 5px;
+}
+.target-row + .target-row,
+.review-row + .review-row {
+  margin-top: 20px;
 }
 </style>
