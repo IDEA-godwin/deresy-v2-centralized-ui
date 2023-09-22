@@ -275,6 +275,7 @@ export default {
         });
       }
     };
+
     const sendBtn = async () => {
       isFormLoading.value = true;
 
@@ -366,7 +367,7 @@ export default {
       }
       grantReviews.value = (
         await getReviews(requestObject.value.requestName)
-      ).response.reviews.filter(
+      ).response?.reviews.filter(
         (r) => r.hypercertID == grantObj.value.hypercertID
       );
       hypercertName.value = await getHypercertName();

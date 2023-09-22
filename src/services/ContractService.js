@@ -80,7 +80,7 @@ export const getReviewFormsTotal = async (params) => {
   }
 };
 
-export const createRequest = async (web3, contract, params) => {
+export const handleRequest = async (web3, contract, params, isPaid) => {
   const {
     name,
     reviewFormIndex,
@@ -95,24 +95,27 @@ export const createRequest = async (web3, contract, params) => {
   } = params;
   const { methods } = contract;
 
+  let methodName = isPaid ? "createRequest" : "createNonPayableRequest";
+  let methodArgs = isPaid
+    ? [
+        name,
+        reviewers,
+        targets,
+        targetHashes,
+        requestHash,
+        rewardPerReview,
+        reviewFormIndex,
+      ]
+    : [name, reviewers, targets, targetHashes, requestHash, reviewFormIndex];
+
   let response;
 
   try {
     const transaction = {
       from: walletAddress,
       to: contractAddress,
-      value: totalReward,
-      data: methods
-        .createRequest(
-          name,
-          reviewers,
-          targets,
-          targetHashes,
-          requestHash,
-          rewardPerReview,
-          reviewFormIndex
-        )
-        .encodeABI(),
+      value: isPaid ? totalReward : 0,
+      data: methods[methodName](...methodArgs).encodeABI(),
     };
 
     await web3.eth
@@ -124,7 +127,7 @@ export const createRequest = async (web3, contract, params) => {
         response = receipt;
       });
   } catch (e) {
-    console.error("An error ocurred while creating review form.", e);
+    console.error("An error occurred while processing the request.", e);
     throw e;
   }
 
