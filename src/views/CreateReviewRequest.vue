@@ -159,11 +159,23 @@
 
           <el-row class="form-section">
             <el-col :span="24">
+              <el-form-item label="Paid Review">
+                <el-radio-group v-model="requestObject.isPaidReview">
+                  <el-radio-button :label="true">Yes</el-radio-button>
+                  <el-radio-button :label="false">No</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
               <el-form-item label="Reward per review">
                 <el-input
                   v-model="requestObject.rewardPerReview"
                   type="number"
                   placeholder="Enter the rewards per review"
+                  :disabled="isRewardDisabled"
                 />
                 <span
                   class="vuelidation-error"
@@ -194,7 +206,7 @@
 <script>
 import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { CloseBold } from "@element-plus/icons";
-import { getReviewFormsTotal, createRequest } from "@/services/ContractService";
+import { getReviewFormsTotal, handleRequest } from "@/services/ContractService";
 import { useStore } from "vuex";
 import { reactive, computed, ref, watch, onBeforeMount } from "vue";
 import { ElNotification } from "element-plus";
@@ -226,7 +238,11 @@ export default {
       reviewers: [],
       requestHash: "",
       rewardPerReview: "",
+      isPaidReview: true,
     });
+
+    const isRewardDisabled = computed(() => !requestObject.isPaidReview);
+    const requestFunction = handleRequest;
 
     const rules = computed(() => {
       return {
@@ -305,7 +321,12 @@ export default {
         };
 
         try {
-          await createRequest(web3.value, contract.value, payload);
+          await requestFunction(
+            web3.value,
+            contract.value,
+            payload,
+            requestObject.isPaidReview
+          );
 
           ElNotification({
             title: "Success",
@@ -363,10 +384,18 @@ export default {
       }
     });
 
+    watch(
+      () => requestObject.isPaidReview,
+      (newVal) => {
+        requestObject.rewardPerReview = newVal ? "" : "0";
+      }
+    );
+
     return {
       CloseBold,
       requestObject,
       reviewFormsTotal,
+      isRewardDisabled,
       isFormLoading,
       addReviewer,
       addTarget,

@@ -74,6 +74,96 @@ export const DERESY_CONTRACT_ABI = [
     anonymous: false,
     inputs: [
       {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "schema",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "time",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "expirationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "revocationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "refUID",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "attester",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "revocable",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        indexed: false,
+        internalType: "struct Attestation",
+        name: "_attestation",
+        type: "tuple",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "_requestName",
+        type: "string",
+      },
+    ],
+    name: "OnReviewCallback",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: false,
         internalType: "string",
         name: "_requestName",
@@ -155,6 +245,19 @@ export const DERESY_CONTRACT_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "callbackContract",
+    outputs: [
+      {
+        internalType: "contract IOnReviewable",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "string",
@@ -194,12 +297,50 @@ export const DERESY_CONTRACT_ABI = [
       },
       {
         internalType: "uint256[]",
-        name: "hypercertTargetIDs",
+        name: "hypercertIDs",
         type: "uint256[]",
       },
       {
         internalType: "string[]",
-        name: "targetsIPFSHashes",
+        name: "hypercertIPFSHashes",
+        type: "string[]",
+      },
+      {
+        internalType: "string",
+        name: "formIpfsHash",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "reviewFormIndex",
+        type: "uint256",
+      },
+    ],
+    name: "createNonPayableRequest",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "address[]",
+        name: "reviewers",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "hypercertIDs",
+        type: "uint256[]",
+      },
+      {
+        internalType: "string[]",
+        name: "hypercertIPFSHashes",
         type: "string[]",
       },
       {
@@ -274,12 +415,12 @@ export const DERESY_CONTRACT_ABI = [
       },
       {
         internalType: "uint256[]",
-        name: "hypercertTargetIDs",
+        name: "hypercertIDs",
         type: "uint256[]",
       },
       {
         internalType: "string[]",
-        name: "targetsIPFSHashes",
+        name: "hypercertIPFSHashes",
         type: "string[]",
       },
       {
@@ -374,12 +515,12 @@ export const DERESY_CONTRACT_ABI = [
     outputs: [
       {
         internalType: "string[]",
-        name: "",
+        name: "questions",
         type: "string[]",
       },
       {
         internalType: "enum DeresyResolver.QuestionType[]",
-        name: "",
+        name: "questionTypes",
         type: "uint8[]",
       },
       {
@@ -389,7 +530,7 @@ export const DERESY_CONTRACT_ABI = [
       },
       {
         internalType: "bytes32",
-        name: "",
+        name: "easSchemaID",
         type: "bytes32",
       },
     ],
@@ -576,6 +717,26 @@ export const DERESY_CONTRACT_ABI = [
   },
   {
     inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "reviewFormsTotal",
     outputs: [
       {
@@ -656,6 +817,32 @@ export const DERESY_CONTRACT_ABI = [
       },
     ],
     stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_callbackContractAddress",
+        type: "address",
+      },
+    ],
+    name: "setCallbackContract",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
