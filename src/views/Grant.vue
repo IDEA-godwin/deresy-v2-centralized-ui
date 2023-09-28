@@ -557,7 +557,8 @@ export default {
         .uri(grant.value.hypercertID.toString())
         .call();
       if (uri) {
-        const data = await (await fetch(`https://ipfs.io/ipfs/${uri}`)).json();
+        const sanitizedUri = uri.replace(/^ipfs:\/\//, '');
+        const data = await (await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)).json();
         return data.name;
       } else {
         return "Name unavailable";
