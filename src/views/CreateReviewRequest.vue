@@ -6,7 +6,7 @@
           <h1>Create Review Request</h1>
 
           <el-row class="form-section">
-            <el-col :span="24">
+            <el-col :span="22">
               <el-form-item label="Name">
                 <el-input
                   v-model="requestObject.name"
@@ -20,7 +20,7 @@
           </el-row>
 
           <el-row class="form-section">
-            <el-col :span="24">
+            <el-col :span="22">
               <el-form-item label="Review Form Index">
                 <el-select
                   v-model="requestObject.reviewFormIndex"
@@ -108,10 +108,23 @@
               >
                 <el-row :gutter="20">
                   <el-col :span="11">
-                    <el-input
+                    <el-select
                       v-model="requestObject.targets[index].address"
-                      placeholder="Enter a target address"
-                    />
+                      filterable
+                      remote
+                      reserve-keyword
+                      placeholder="Please enter a keyword"
+                      :remote-method="remoteMethod"
+                      :loading="hypercertsLoading"
+                      style="width: 100%"
+                    >
+                      <el-option
+                        v-for="item in hypercertOptions"
+                        :key="item.tokenID"
+                        :label="item.name"
+                        :value="item.tokenID"
+                      />
+                    </el-select>
                     <div v-if="v$.targets.$error" style="margin-top: 10px">
                       <span class="vuelidation-error">{{
                         v$.targets.$errors[0]?.$message[index][0]
@@ -147,7 +160,7 @@
           </el-row>
 
           <el-row class="form-section">
-            <el-col :span="24">
+            <el-col :span="22">
               <el-form-item label="Request IPFS Hash">
                 <el-input
                   v-model="requestObject.requestHash"
@@ -169,7 +182,7 @@
           </el-row>
 
           <el-row class="form-section">
-            <el-col :span="24">
+            <el-col :span="22">
               <el-form-item label="Reward per review">
                 <el-input
                   v-model="requestObject.rewardPerReview"
@@ -230,6 +243,8 @@ export default {
     const reviewFormsTotal = ref(0);
     const contractRef = ref(contract);
     const isFormLoading = ref(false);
+    const hypercertOptions = ref([]);
+    const hypercertsLoading = ref(false);
 
     const requestObject = reactive({
       name: "",
@@ -281,6 +296,26 @@ export default {
 
     const removeTarget = (index) => {
       requestObject.targets.splice(index, 1);
+    };
+
+    const remoteMethod = async (query) => {
+      if (query) {
+        hypercertsLoading.value = true;
+        try {
+          const response = await fetch(
+            process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
+              "/api/search_hypercerts?searchInput=" +
+              query
+          );
+          const data = await response.json();
+          hypercertOptions.value = data;
+        } catch (error) {
+          console.error("Failed to fetch options:", error);
+        }
+        hypercertsLoading.value = false;
+      } else {
+        hypercertOptions.value = [];
+      }
     };
 
     const sendBtn = async () => {
@@ -397,6 +432,9 @@ export default {
       reviewFormsTotal,
       isRewardDisabled,
       isFormLoading,
+      hypercertOptions,
+      hypercertsLoading,
+      remoteMethod,
       addReviewer,
       addTarget,
       removeReviewer,
