@@ -220,8 +220,10 @@ export default {
         .uri(grantObj.value.hypercertID.toString())
         .call();
       if (uri) {
-        const sanitizedUri = uri.replace(/^ipfs:\/\//, '');
-        const data = await (await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)).json();
+        const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
+        const data = await (
+          await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)
+        ).json();
         return data.name;
       } else {
         return "Name unavailable";
