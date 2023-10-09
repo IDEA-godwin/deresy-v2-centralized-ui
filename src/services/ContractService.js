@@ -1,7 +1,10 @@
 import { ElNotification } from "element-plus";
 import {
+  DEFAULT_PAYMENT_ADDRESS,
   EAS_CONTRACT_ABI,
   EAS_CONTRACT_ADDRESS,
+  ERC_20_ABI,
+  PAYMENT_OPTIONS,
 } from "../constants/contractConstants";
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
@@ -80,6 +83,28 @@ export const getReviewFormsTotal = async (params) => {
   }
 };
 
+export const getPaymentOptions = async (params) => {
+  const { contractMethods } = params;
+  try {
+    const response = await contractMethods.getWhitelistedTokens().call();
+
+    let newPaymentOptions = {};
+
+    for (let address of response) {
+      if (PAYMENT_OPTIONS[address]) {
+        newPaymentOptions[address] = PAYMENT_OPTIONS[address];
+      } else {
+        newPaymentOptions[address] = address;
+      }
+    }
+
+    return newPaymentOptions;
+  } catch (e) {
+    console.error("An error ocurred while getting the review form.", e);
+    throw e;
+  }
+};
+
 export const handleRequest = async (web3, contract, params, isPaid) => {
   const {
     name,
@@ -91,11 +116,13 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
     rewardPerReview,
     totalReward,
     contractAddress,
+    paymentTokenAddress,
     walletAddress,
   } = params;
   const { methods } = contract;
 
   let methodName = isPaid ? "createRequest" : "createNonPayableRequest";
+
   let methodArgs = isPaid
     ? [
         name,
@@ -104,6 +131,7 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
         targetHashes,
         requestHash,
         rewardPerReview,
+        paymentTokenAddress,
         reviewFormIndex,
       ]
     : [name, reviewers, targets, targetHashes, requestHash, reviewFormIndex];
@@ -111,6 +139,16 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
   let response;
 
   try {
+    if (isPaid && paymentTokenAddress !== DEFAULT_PAYMENT_ADDRESS) {
+      const tokenContract = new web3.eth.Contract(
+        ERC_20_ABI,
+        paymentTokenAddress
+      );
+      await tokenContract.methods
+        .approve(contractAddress, totalReward)
+        .send({ from: walletAddress });
+    }
+
     const transaction = {
       from: walletAddress,
       to: contractAddress,

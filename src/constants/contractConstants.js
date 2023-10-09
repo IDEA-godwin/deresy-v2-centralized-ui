@@ -17,6 +17,77 @@ export const DERESY_CONTRACT_ABI = [
     type: "error",
   },
   {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "schema",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "time",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "expirationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "revocationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "refUID",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "attester",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "revocable",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Attestation",
+        name: "attestation",
+        type: "tuple",
+      },
+    ],
+    name: "attest",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "InsufficientValue",
     type: "error",
@@ -45,6 +116,19 @@ export const DERESY_CONTRACT_ABI = [
     type: "event",
   },
   {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+    ],
+    name: "closeReviewRequest",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     anonymous: false,
     inputs: [
       {
@@ -69,6 +153,278 @@ export const DERESY_CONTRACT_ABI = [
     ],
     name: "CreatedReviewRequest",
     type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "address[]",
+        name: "reviewers",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "hypercertIDs",
+        type: "uint256[]",
+      },
+      {
+        internalType: "string[]",
+        name: "hypercertIPFSHashes",
+        type: "string[]",
+      },
+      {
+        internalType: "string",
+        name: "formIpfsHash",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "reviewFormIndex",
+        type: "uint256",
+      },
+    ],
+    name: "createNonPayableRequest",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "address[]",
+        name: "reviewers",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "hypercertIDs",
+        type: "uint256[]",
+      },
+      {
+        internalType: "string[]",
+        name: "hypercertIPFSHashes",
+        type: "string[]",
+      },
+      {
+        internalType: "string",
+        name: "formIpfsHash",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "rewardPerReview",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "paymentTokenAddress",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "reviewFormIndex",
+        type: "uint256",
+      },
+    ],
+    name: "createRequest",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "easSchemaID",
+        type: "bytes32",
+      },
+      {
+        internalType: "string[]",
+        name: "questions",
+        type: "string[]",
+      },
+      {
+        internalType: "string[][]",
+        name: "choices",
+        type: "string[][]",
+      },
+      {
+        internalType: "enum DeresyResolver.QuestionType[]",
+        name: "questionTypes",
+        type: "uint8[]",
+      },
+    ],
+    name: "createReviewForm",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "schema",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "time",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "expirationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "revocationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "refUID",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "attester",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "revocable",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Attestation[]",
+        name: "attestations",
+        type: "tuple[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "values",
+        type: "uint256[]",
+      },
+    ],
+    name: "multiAttest",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "uid",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "schema",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint64",
+            name: "time",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "expirationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "revocationTime",
+            type: "uint64",
+          },
+          {
+            internalType: "bytes32",
+            name: "refUID",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "recipient",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "attester",
+            type: "address",
+          },
+          {
+            internalType: "bool",
+            name: "revocable",
+            type: "bool",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Attestation[]",
+        name: "attestations",
+        type: "tuple[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "values",
+        type: "uint256[]",
+      },
+    ],
+    name: "multiRevoke",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
   },
   {
     anonymous: false,
@@ -161,17 +517,18 @@ export const DERESY_CONTRACT_ABI = [
     type: "event",
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "_requestName",
-        type: "string",
-      },
-    ],
-    name: "SubmittedReview",
-    type: "event",
+    inputs: [],
+    name: "pause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
@@ -233,7 +590,7 @@ export const DERESY_CONTRACT_ABI = [
         type: "tuple",
       },
     ],
-    name: "attest",
+    name: "revoke",
     outputs: [
       {
         internalType: "bool",
@@ -243,6 +600,82 @@ export const DERESY_CONTRACT_ABI = [
     ],
     stateMutability: "payable",
     type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_callbackContractAddress",
+        type: "address",
+      },
+    ],
+    name: "setCallbackContract",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "_requestName",
+        type: "string",
+      },
+    ],
+    name: "SubmittedReview",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "unpause",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "tokenAddress",
+        type: "address",
+      },
+    ],
+    name: "unwhitelistToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "tokenAddress",
+        type: "address",
+      },
+    ],
+    name: "whitelistToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
   },
   {
     inputs: [],
@@ -258,19 +691,6 @@ export const DERESY_CONTRACT_ABI = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
-    ],
-    name: "closeReviewRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "contractVersion",
     outputs: [
@@ -281,121 +701,6 @@ export const DERESY_CONTRACT_ABI = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
-      {
-        internalType: "address[]",
-        name: "reviewers",
-        type: "address[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "hypercertIDs",
-        type: "uint256[]",
-      },
-      {
-        internalType: "string[]",
-        name: "hypercertIPFSHashes",
-        type: "string[]",
-      },
-      {
-        internalType: "string",
-        name: "formIpfsHash",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "reviewFormIndex",
-        type: "uint256",
-      },
-    ],
-    name: "createNonPayableRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
-      {
-        internalType: "address[]",
-        name: "reviewers",
-        type: "address[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "hypercertIDs",
-        type: "uint256[]",
-      },
-      {
-        internalType: "string[]",
-        name: "hypercertIPFSHashes",
-        type: "string[]",
-      },
-      {
-        internalType: "string",
-        name: "formIpfsHash",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "rewardPerReview",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "reviewFormIndex",
-        type: "uint256",
-      },
-    ],
-    name: "createRequest",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "easSchemaID",
-        type: "bytes32",
-      },
-      {
-        internalType: "string[]",
-        name: "questions",
-        type: "string[]",
-      },
-      {
-        internalType: "string[][]",
-        name: "choices",
-        type: "string[][]",
-      },
-      {
-        internalType: "enum DeresyResolver.QuestionType[]",
-        name: "questionTypes",
-        type: "uint8[]",
-      },
-    ],
-    name: "createReviewForm",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -552,6 +857,19 @@ export const DERESY_CONTRACT_ABI = [
   },
   {
     inputs: [],
+    name: "getWhitelistedTokens",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "isPayable",
     outputs: [
       {
@@ -566,69 +884,12 @@ export const DERESY_CONTRACT_ABI = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
-          },
-          {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
-          },
-          {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
-          },
-          {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
-          },
-          {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
-          },
-          {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "attester",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
-          },
-          {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
-        ],
-        internalType: "struct Attestation[]",
-        name: "attestations",
-        type: "tuple[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "values",
-        type: "uint256[]",
+        internalType: "address",
+        name: "tokenAddress",
+        type: "address",
       },
     ],
-    name: "multiAttest",
+    name: "isTokenWhitelisted",
     outputs: [
       {
         internalType: "bool",
@@ -636,83 +897,7 @@ export const DERESY_CONTRACT_ABI = [
         type: "bool",
       },
     ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
-          },
-          {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
-          },
-          {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
-          },
-          {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
-          },
-          {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
-          },
-          {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "attester",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
-          },
-          {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
-        ],
-        internalType: "struct Attestation[]",
-        name: "attestations",
-        type: "tuple[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "values",
-        type: "uint256[]",
-      },
-    ],
-    name: "multiRevoke",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "payable",
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -730,9 +915,15 @@ export const DERESY_CONTRACT_ABI = [
   },
   {
     inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
+    name: "paused",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -749,103 +940,6 @@ export const DERESY_CONTRACT_ABI = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
-          },
-          {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
-          },
-          {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
-          },
-          {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
-          },
-          {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
-          },
-          {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "attester",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
-          },
-          {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
-        ],
-        internalType: "struct Attestation",
-        name: "attestation",
-        type: "tuple",
-      },
-    ],
-    name: "revoke",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_callbackContractAddress",
-        type: "address",
-      },
-    ],
-    name: "setCallbackContract",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "version",
     outputs: [
@@ -857,10 +951,6 @@ export const DERESY_CONTRACT_ABI = [
     ],
     stateMutability: "view",
     type: "function",
-  },
-  {
-    stateMutability: "payable",
-    type: "receive",
   },
 ];
 
@@ -2968,3 +3058,234 @@ export const EAS_CONTRACT_ABI = [
 ];
 
 export const EAS_CONTRACT_ADDRESS = process.env.VUE_APP_EAS_CONTRACT_ADDRESS;
+
+export const DEFAULT_PAYMENT_ADDRESS =
+  "0x0000000000000000000000000000000000000000";
+
+export const PAYMENT_OPTIONS = {
+  "0x0000000000000000000000000000000000000000": "ETH",
+  "0xf14944780a969EF109199eE0df7277DAC1ac10B0": "NTF",
+};
+
+export const ERC_20_ABI = [
+  {
+    constant: true,
+    inputs: [],
+    name: "name",
+    outputs: [
+      {
+        name: "",
+        type: "string",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_spender",
+        type: "address",
+      },
+      {
+        name: "_value",
+        type: "uint256",
+      },
+    ],
+    name: "approve",
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+      },
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "totalSupply",
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_from",
+        type: "address",
+      },
+      {
+        name: "_to",
+        type: "address",
+      },
+      {
+        name: "_value",
+        type: "uint256",
+      },
+    ],
+    name: "transferFrom",
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+      },
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "decimals",
+    outputs: [
+      {
+        name: "",
+        type: "uint8",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address",
+      },
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        name: "balance",
+        type: "uint256",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "symbol",
+    outputs: [
+      {
+        name: "",
+        type: "string",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_to",
+        type: "address",
+      },
+      {
+        name: "_value",
+        type: "uint256",
+      },
+    ],
+    name: "transfer",
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+      },
+    ],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address",
+      },
+      {
+        name: "_spender",
+        type: "address",
+      },
+    ],
+    name: "allowance",
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    payable: true,
+    stateMutability: "payable",
+    type: "fallback",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        name: "spender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "Approval",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "Transfer",
+    type: "event",
+  },
+];

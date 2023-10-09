@@ -183,6 +183,33 @@
 
           <el-row class="form-section">
             <el-col :span="22">
+              <el-form-item label="Payment Token">
+                <el-select
+                  v-model="requestObject.paymentTokenAddress"
+                  :disabled="isRewardDisabled"
+                  placeholder="Select payment token"
+                  size="large"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="(symbol, address) in paymentOptions"
+                    :key="address"
+                    :label="symbol"
+                    :value="address"
+                  >
+                  </el-option>
+                </el-select>
+                <span
+                  class="vuelidation-error"
+                  v-if="v$.paymentTokenAddress.$error"
+                  >{{ v$.paymentTokenAddress.$errors[0].$message }}</span
+                >
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="22">
               <el-form-item label="Reward per review">
                 <el-input
                   v-model="requestObject.rewardPerReview"
@@ -190,11 +217,6 @@
                   placeholder="Enter the rewards per review"
                   :disabled="isRewardDisabled"
                 />
-                <span
-                  class="vuelidation-error"
-                  v-if="v$.rewardPerReview.$error"
-                  >{{ v$.rewardPerReview.$errors[0].$message }}</span
-                >
               </el-form-item>
             </el-col>
           </el-row>
@@ -219,7 +241,11 @@
 <script>
 import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { CloseBold } from "@element-plus/icons";
-import { getReviewFormsTotal, handleRequest } from "@/services/ContractService";
+import {
+  getReviewFormsTotal,
+  getPaymentOptions,
+  handleRequest,
+} from "@/services/ContractService";
 import { useStore } from "vuex";
 import { reactive, computed, ref, watch, onBeforeMount } from "vue";
 import { ElNotification } from "element-plus";
@@ -243,6 +269,7 @@ export default {
     const reviewFormsTotal = ref(0);
     const contractRef = ref(contract);
     const isFormLoading = ref(false);
+    const paymentOptions = ref({});
     const hypercertOptions = ref([]);
     const hypercertsLoading = ref(false);
 
@@ -253,6 +280,7 @@ export default {
       reviewers: [],
       requestHash: "",
       rewardPerReview: "",
+      paymentTokenAddress: "",
       isPaidReview: true,
     });
 
@@ -263,6 +291,7 @@ export default {
       return {
         name: { required },
         reviewFormIndex: { required },
+        paymentTokenAddress: { required },
         targets: {
           $each: helpers.forEach({
             address: {
@@ -323,14 +352,21 @@ export default {
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
-        const rewardPerReviewToWei = web3.value.utils.toWei(
-          requestObject.rewardPerReview.toString(),
-          "ether"
+        const rewardPerReviewToWei = web3.value.utils.toBN(
+          web3.value.utils.toWei(
+            requestObject.rewardPerReview.toString(),
+            "ether"
+          )
         );
-        const totalReward =
-          rewardPerReviewToWei *
-          requestObject.reviewers.length *
-          requestObject.targets.length;
+        const reviewersLengthBN = web3.value.utils.toBN(
+          requestObject.reviewers.length
+        );
+        const targetsLengthBN = web3.value.utils.toBN(
+          requestObject.targets.length
+        );
+        const totalReward = rewardPerReviewToWei
+          .mul(reviewersLengthBN)
+          .mul(targetsLengthBN);
 
         const targetAddresses = requestObject.targets.map((target) => {
           return target.address;
@@ -352,6 +388,7 @@ export default {
           rewardPerReview: rewardPerReviewToWei,
           totalReward: totalReward,
           contractAddress: DERESY_CONTRACT_ADDRESS,
+          paymentTokenAddress: requestObject.paymentTokenAddress,
           walletAddress: walletAddress.value,
         };
 
@@ -407,6 +444,7 @@ export default {
           contractMethods: contract.value.methods,
         };
         reviewFormsTotal.value = await getReviewFormsTotal(payload);
+        paymentOptions.value = await getPaymentOptions(payload);
       }
     });
 
@@ -416,6 +454,7 @@ export default {
           contractMethods: contract.value.methods,
         };
         reviewFormsTotal.value = await getReviewFormsTotal(payload);
+        paymentOptions.value = await getPaymentOptions(payload);
       }
     });
 
@@ -432,6 +471,7 @@ export default {
       reviewFormsTotal,
       isRewardDisabled,
       isFormLoading,
+      paymentOptions,
       hypercertOptions,
       hypercertsLoading,
       remoteMethod,
