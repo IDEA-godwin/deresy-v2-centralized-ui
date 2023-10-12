@@ -92,6 +92,17 @@
           </el-row>
 
           <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Targets from last six months">
+                <el-radio-group v-model="hypercertLastSixMonths">
+                  <el-radio-button :label="true">Yes</el-radio-button>
+                  <el-radio-button :label="false">No</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
             <el-col :span="11"
               ><label class="el-form-item__label">Targets</label></el-col
             >
@@ -270,6 +281,7 @@ export default {
     const contractRef = ref(contract);
     const isFormLoading = ref(false);
     const paymentOptions = ref({});
+    const hypercertLastSixMonths = ref(true);
     const hypercertOptions = ref([]);
     const hypercertsLoading = ref(false);
 
@@ -330,12 +342,19 @@ export default {
     const remoteMethod = async (query) => {
       if (query) {
         hypercertsLoading.value = true;
+        let url =
+          process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
+          "/api/search_hypercerts?searchInput=" +
+          query;
+
+        if (hypercertLastSixMonths.value === true) {
+          url += "&lastSixMonths=true";
+        }
+
+        console.log(url);
+
         try {
-          const response = await fetch(
-            process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
-              "/api/search_hypercerts?searchInput=" +
-              query
-          );
+          const response = await fetch(url);
           const data = await response.json();
           hypercertOptions.value = data;
         } catch (error) {
@@ -472,6 +491,7 @@ export default {
       isRewardDisabled,
       isFormLoading,
       paymentOptions,
+      hypercertLastSixMonths,
       hypercertOptions,
       hypercertsLoading,
       remoteMethod,
