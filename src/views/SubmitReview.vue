@@ -1,133 +1,168 @@
 <template>
   <div class="submit-review-page" v-loading="loading">
-    <div
-      v-if="requestObject && reviewObject && reviewForm"
-      v-loading="isFormLoading"
-      class="form-container"
-    >
+    <div v-if="reviewRequests" v-loading="isFormLoading" class="form-container">
       <el-row>
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
           <el-form label-position="top">
             <h1>Submit Review</h1>
-            <el-row>
-              <el-col :span="18">
-                <el-col :span="24" class="targetHashDiv">
-                  <strong>Review Request Name:</strong>
-                  {{ requestObject.requestName }}
-                </el-col>
+            <el-row :gutter="20" v-if="reviewRequests">
+              <el-col :span="24" class="targetHashDiv">
+                <div class="selection-container">
+                  <el-button
+                    @click="updateSubmitForm()"
+                    class="getForm"
+                    type="primary"
+                    size="large"
+                  >
+                    Get Form
+                  </el-button>
+
+                  <el-select
+                    v-model="selectedReviewRequest"
+                    placeholder="Select a review request"
+                    size="large"
+                    class="review-select"
+                  >
+                    <el-option
+                      v-for="item in reviewRequests"
+                      :key="item.requestName"
+                      :label="item.requestName"
+                      :value="item.requestName"
+                    >
+                    </el-option>
+                  </el-select>
+                </div>
               </el-col>
-              <el-col :span="6"> </el-col>
-            </el-row>
-            <el-row :gutter="20" v-if="requestObject && reviewForm">
-              <div
-                v-if="
-                  !requestObject.isClosed &&
-                  requestObject.reviewers.includes(walletAddressRef) &&
-                  !grantReviews.some((r) => r.reviewer == walletAddressRef)
-                "
-                class="submitReviewFormContainer"
-              >
-                <el-col :span="24" class="targetHashDiv">
-                  <strong>Hypercert:</strong>
-                  {{ hypercertName }}
-                </el-col>
-
-                <el-col
-                  :span="24"
-                  v-if="
-                    requestObject.targetsIPFSHashes[reviewObject.targetIndex]
-                  "
-                  class="targetHashDiv"
-                >
-                  <strong>Hypercert:</strong>
-                  <a
-                    :href="`https://ipfs.io/ipfs/${
-                      requestObject.targetsIPFSHashes[reviewObject.targetIndex]
-                    }`"
-                    style="text-decoration: none; margin-wtop: 5px"
-                    target="_blank"
+              <el-col :span="24">
+                <div v-if="selectedReviewRequest && requestObjectReady">
+                  <div
+                    v-if="
+                      !requestObject.isClosed &&
+                      requestObject.reviewers.includes(walletAddressRef) &&
+                      !grantReviews?.some((r) => r.reviewer == walletAddressRef)
+                    "
+                    class="submit-review-form"
                   >
-                    {{
-                      requestObject.targetsIPFSHashes[reviewObject.targetIndex]
-                    }}
-                  </a>
-                  <br /><br />
-                </el-col>
-                <el-row
-                  v-if="reviewObject.reviews && reviewObject.reviews.length > 0"
-                >
-                  <el-col
-                    :span="24"
-                    v-for="(question, index) in reviewForm.questions"
-                    :key="index"
-                  >
-                    <el-form-item
-                      :label="question"
-                      :style="{ display: 'block' }"
+                    <el-col
+                      :span="24"
+                      class="targetHashDiv"
+                      style="padding-left: 0px"
                     >
-                      <textarea
-                        v-if="reviewForm.types[index] == '0'"
-                        :id="'simplemde-' + index"
-                        class="textarea-markdown"
-                      ></textarea>
+                      <strong>Hypercert:</strong>
+                      {{ hypercertName }}
+                    </el-col>
 
-                      <el-radio-group
-                        v-if="reviewForm.types[index] == '1'"
-                        v-model="reviewObject.reviews[index].answer"
-                        size="large"
+                    <el-col
+                      :span="24"
+                      v-if="
+                        requestObject.targetsIPFSHashes[
+                          reviewObject.targetIndex
+                        ]
+                      "
+                      class="targetHashDiv"
+                    >
+                      <strong>Hypercert:</strong>
+                      <a
+                        :href="`https://ipfs.io/ipfs/${
+                          requestObject.targetsIPFSHashes[
+                            reviewObject.targetIndex
+                          ]
+                        }`"
+                        style="text-decoration: none; margin-wtop: 5px"
+                        target="_blank"
                       >
-                        <el-radio-button label="Yes" />
-                        <el-radio-button label="No" />
-                      </el-radio-group>
-                      <el-radio-group
-                        v-if="reviewForm.types[index] == '2'"
-                        v-model="reviewObject.reviews[index].answer"
-                        size="large"
-                      >
-                        <el-radio-button
-                          v-for="(questionChoices, choiceIndex) in reviewForm
-                            .choices[index].choices"
-                          :key="choiceIndex"
-                          :label="questionChoices"
-                        />
-                      </el-radio-group>
-                    </el-form-item>
+                        {{
+                          requestObject.targetsIPFSHashes[
+                            reviewObject.targetIndex
+                          ]
+                        }}
+                      </a>
+                      <br /><br />
+                    </el-col>
                     <el-row
-                      v-if="v$.reviews.$error"
-                      style="margin: 0% 0% 2% 0%"
+                      v-if="
+                        reviewObject.reviews && reviewObject.reviews.length > 0
+                      "
+                      class="review-row"
                     >
-                      <el-col class="vuelidation-error">
-                        {{ v$.reviews.$errors[0].$message[index][0] }}
+                      <el-col
+                        :span="24"
+                        v-for="(question, index) in reviewForm.questions"
+                        :key="index"
+                        class="targetHashDiv"
+                      >
+                        <el-form-item
+                          :label="question"
+                          :style="{ display: 'block' }"
+                        >
+                          <textarea
+                            v-if="reviewForm.types[index] == '0'"
+                            :id="'simplemde-' + index"
+                            class="textarea-markdown"
+                          ></textarea>
+
+                          <el-radio-group
+                            v-if="reviewForm.types[index] == '1'"
+                            v-model="reviewObject.reviews[index].answer"
+                            size="large"
+                          >
+                            <el-radio-button label="Yes" />
+                            <el-radio-button label="No" />
+                          </el-radio-group>
+                          <el-radio-group
+                            v-if="reviewForm.types[index] == '2'"
+                            v-model="reviewObject.reviews[index].answer"
+                            size="large"
+                          >
+                            <el-radio-button
+                              v-for="(
+                                questionChoices, choiceIndex
+                              ) in reviewForm.choices[index].choices"
+                              :key="choiceIndex"
+                              :label="questionChoices"
+                            />
+                          </el-radio-group>
+                        </el-form-item>
+                        <el-row
+                          v-if="v$.reviews.$error"
+                          style="margin: 0% 0% 2% 0%"
+                        >
+                          <el-col class="vuelidation-error">
+                            {{ v$.reviews.$errors[0].$message[index][0] }}
+                          </el-col>
+                        </el-row>
                       </el-col>
                     </el-row>
-                  </el-col>
-                </el-row>
-                <el-row v-if="reviewObject.requestName">
-                  <el-col :span="24">
-                    <el-button
-                      @click="sendBtn()"
-                      class="send-btn"
-                      type="success"
-                      size="large"
-                      :disabled="isFormLoading"
-                    >
-                      Send
-                    </el-button>
-                  </el-col>
-                </el-row>
-              </div>
-              <div v-else>
-                <el-card class="error-card">
-                  <template #header>
-                    <div class="card-header">
-                      <span class="error-card-title">Can't submit review</span>
-                    </div>
-                  </template>
-                  <div class="warning custom-block">
-                    {{ forbiddenMessage() }}
+                    <el-row v-if="reviewObject.requestName" class="action-row">
+                      <el-col :span="24">
+                        <el-button
+                          @click="sendBtn()"
+                          class="send-btn"
+                          type="success"
+                          size="large"
+                          :disabled="isFormLoading"
+                        >
+                          Send
+                        </el-button>
+                      </el-col>
+                    </el-row>
                   </div>
-                </el-card>
-              </div>
+                  <div v-else class="error-section">
+                    <el-card class="error-card">
+                      <template #header>
+                        <div class="card-header">
+                          <span class="error-card-title"
+                            >Can't submit review</span
+                          >
+                        </div>
+                      </template>
+                      <div class="warning custom-block">
+                        {{ forbiddenMessage() }}
+                      </div>
+                    </el-card>
+                  </div>
+                </div>
+              </el-col>
             </el-row>
           </el-form>
         </el-col>
@@ -155,6 +190,7 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
 import { optimismWeb3 } from "@/web3";
+import { getReviewRequests } from "../services/ReviewRequestService";
 
 export default {
   name: "SubmitReview",
@@ -173,6 +209,9 @@ export default {
     const route = useRoute();
     const grantID = route.params.grant_id;
 
+    const reviewRequests = ref([]);
+    const selectedReviewRequest = ref(null);
+    const requestObjectReady = ref(false);
     const requestNames = ref();
     const contractRef = ref(contract);
     const walletAddressRef = ref(walletAddress);
@@ -236,7 +275,6 @@ export default {
       } else if (
         !requestObject.value.reviewers.includes(walletAddressRef.value)
       ) {
-        console.log(requestObject.value.reviewers, walletAddressRef.value);
         return `Your address (${walletAddressRef.value}) is not authorized to submit a review for this request.`;
       } else if (
         grantReviews.value.some((r) => r.reviewer == walletAddressRef.value)
@@ -350,12 +388,24 @@ export default {
       reviewForm.value = null;
 
       grantObj.value = (await getGrant(grantID)).response;
-      requestObject.value = (
-        await getReviewRequest(grantObj.value.request_name)
+      reviewRequests.value = (
+        await getReviewRequests(grantObj.value.request_names)
       ).response;
-      reviewObject.requestName = grantObj.value.request_name;
+
+      loading.value = false;
+    });
+
+    const updateSubmitForm = async () => {
+      requestObjectReady.value = false;
+      loading.value = true;
+
+      requestObject.value = (
+        await getReviewRequest(selectedReviewRequest.value)
+      ).response;
+
+      console.log(requestObject.value);
+      reviewObject.requestName = selectedReviewRequest.value;
       reviewObject.hypercertID = grantObj.value.hypercertID;
-      console.log(reviewObject);
       reviewForm.value = (
         await getReviewForm(requestObject.value.reviewFormIndex)
       ).response;
@@ -375,9 +425,12 @@ export default {
       );
       hypercertName.value = await getHypercertName();
 
+      requestObjectReady.value = true;
+
       await simpleMDEInitializer();
+
       loading.value = false;
-    });
+    };
 
     watch([contractRef], async () => {
       if (contractRef.value) {
@@ -391,9 +444,12 @@ export default {
     return {
       walletAddressRef,
       reviewObject,
+      requestObjectReady,
       grantObj,
       grantReviews,
       requestNames,
+      reviewRequests,
+      selectedReviewRequest,
       hypercertName,
       ipfsHashes,
       loading,
@@ -404,6 +460,7 @@ export default {
       isEmptyHashes,
       forbiddenMessage,
       allowToSubmit,
+      updateSubmitForm,
       sendBtn,
       v$,
     };
@@ -412,12 +469,47 @@ export default {
 </script>
 
 <style scoped>
+.review-select {
+  width: 50%;
+}
+
+.selection-container {
+  display: flex;
+  width: 100%;
+}
+
+.getForm {
+  order: 2;
+}
+
+.review-container {
+  padding: 20px;
+}
+
+.submit-review-form {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+}
+
+.review-row {
+  margin-top: 10px;
+}
+
+.action-row {
+  margin-top: 5px;
+  display: flex;
+  justify-content: center;
+}
+.getForm {
+  margin-left: 2%;
+}
 .submit-review-page {
   height: 100%;
 }
 .form-container {
   text-align: left !important;
-  padding: 2% 5%;
+  padding: 2% 10%;
 }
 .send-btn {
   margin: 10px 0px;
@@ -456,6 +548,23 @@ export default {
 }
 @media (max-width: 768px) {
   .submitReviewFormContainer {
+    width: 100%;
+  }
+  .selection-container {
+    flex-direction: column;
+  }
+
+  .submit-review-form {
+    width: 100%;
+  }
+
+  .getForm {
+    width: 50%;
+    order: 1;
+    margin-top: 5%;
+  }
+
+  .review-select {
     width: 100%;
   }
 }

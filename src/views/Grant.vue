@@ -55,19 +55,16 @@
               </span>
             </el-row>
             <el-row style="margin-top: 20px">
-              <div v-if="reviewRequest">
-                <div v-if="reviewRequest.isClosed" class="warning custom-block">
+              <div v-if="reviewRequests.length > 0">
+                <div v-if="areAllRequestsClosed" class="warning custom-block">
                   This request is closed and does no longer accept reviews.
                 </div>
                 <div v-else style="display: inline-flex">
-                  <div
-                    v-if="reviewRequest.reviewers.includes(walletAddress)"
-                    style="display: inline-flex"
-                  >
+                  <div v-if="isReviewerForAny" style="display: inline-flex">
                     <el-button
                       type="primary"
                       class="d-round-btn"
-                      @click="goToSubmitReview()"
+                      @click="goToSubmitReview"
                       round
                     >
                       Submit Review
@@ -92,12 +89,6 @@
                 </el-button>
               </div>
               <div v-else>
-                <div
-                  v-if="reviewRequest && reviewRequest.isClosed"
-                  class="warning custom-block"
-                >
-                  This request is closed and does no longer accept reviews.
-                </div>
                 <div class="warning custom-block">
                   No reviews available for this grant.
                 </div>
@@ -380,7 +371,10 @@ import { useStore } from "vuex";
 
 import { getGrant } from "@/services/GrantService";
 import { getReviews } from "@/services/ReviewService";
-import { getReviewRequest } from "@/services/ReviewRequestService";
+import {
+  getReviewRequests,
+  getReviewRequest,
+} from "@/services/ReviewRequestService";
 import { getReviewForm } from "@/services/ReviewFormService";
 
 import { ElMessage } from "element-plus";
@@ -428,6 +422,7 @@ export default {
     const grantID = route.params.grant_id;
     const grant = ref(null);
     const reviewRequest = ref(null);
+    const reviewRequests = ref([]);
     const reviews = ref([]);
     const reviewForm = ref(null);
     const ipfsBaseUrl = ref("");
@@ -444,6 +439,16 @@ export default {
       reviewRequest: {},
       reviews: [],
       reviewForm: {},
+    });
+
+    const isReviewerForAny = computed(() => {
+      return reviewRequests.value.some((request) =>
+        request.reviewers.includes(walletAddress.value)
+      );
+    });
+
+    const areAllRequestsClosed = computed(() => {
+      return reviewRequests.value.every((request) => request.isClosed);
     });
 
     const scrollToAbout = () => {
@@ -483,6 +488,11 @@ export default {
     };
 
     const fetchReviewRequest = async () => {
+      const reviewRequestsResponse = await getReviewRequests(
+        grant.value.request_names
+      );
+      reviewRequests.value = reviewRequestsResponse.response;
+
       const reviewRequestResponse = await getReviewRequest(
         grant.value.request_name
       );
@@ -599,6 +609,7 @@ export default {
       reviews,
       reviewForm,
       reviewRequest,
+      reviewRequests,
       loading,
       walletAddress,
       grantNotFound,
@@ -609,6 +620,8 @@ export default {
       easExplorerUrl,
       hypercertLink,
       hypercertName,
+      isReviewerForAny,
+      areAllRequestsClosed,
       getSummaries,
       markdownToHtml,
       goToSubmitReview,
