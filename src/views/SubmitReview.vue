@@ -179,6 +179,11 @@ import {
   HYPERCERT_CONTRACT_ADDRESS,
   HYPERCERT_CONTRACT_ABI,
 } from "@/constants/contractConstants";
+import {
+  filterReviewRequests,
+  getMatchingReview,
+  populateAnswers,
+} from "@/helpers/ReviewsHelper";
 import { getRequestNames, submitReview } from "@/services/ContractService";
 import { getGrant } from "@/services/GrantService";
 import { getReviewRequest } from "@/services/ReviewRequestService";
@@ -317,6 +322,44 @@ export default {
       }
     };
 
+    const loadPastAnswers = async (
+      reviewFormIndex,
+      reviewRequests,
+      hypercertID,
+      requestName,
+      types
+    ) => {
+      const filteredRequests = filterReviewRequests(
+        reviewRequests,
+        hypercertID,
+        reviewFormIndex,
+        walletAddress,
+        requestName
+      );
+
+      if (filteredRequests.length == 0) {
+        return;
+      }
+
+      const review = await getMatchingReview(filteredRequests, walletAddress);
+
+      if (!review) {
+        return;
+      }
+
+      populateAnswers(review, types, reviewObject);
+
+      ElNotification({
+        title: "Notification",
+        message:
+          "The request form has been auto-filled using answers from your previous review.",
+        type: "info",
+        duration: notificationTime,
+      });
+
+      return;
+    };
+
     const sendBtn = async () => {
       isFormLoading.value = true;
 
@@ -403,7 +446,6 @@ export default {
         await getReviewRequest(selectedReviewRequest.value)
       ).response;
 
-      console.log(requestObject.value);
       reviewObject.requestName = selectedReviewRequest.value;
       reviewObject.hypercertID = grantObj.value.hypercertID;
       reviewForm.value = (
@@ -426,6 +468,14 @@ export default {
       hypercertName.value = await getHypercertName();
 
       requestObjectReady.value = true;
+
+      await loadPastAnswers(
+        requestObject.value.reviewFormIndex,
+        reviewRequests.value,
+        grantObj.value.hypercertID,
+        selectedReviewRequest.value,
+        reviewForm.value.types
+      );
 
       await simpleMDEInitializer();
 
@@ -461,6 +511,7 @@ export default {
       forbiddenMessage,
       allowToSubmit,
       updateSubmitForm,
+      loadPastAnswers,
       sendBtn,
       v$,
     };
