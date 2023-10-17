@@ -438,6 +438,10 @@ export default {
     });
 
     const updateSubmitForm = async () => {
+      if (selectedReviewRequest.value == null) {
+        return;
+      }
+
       requestObjectReady.value = false;
       loading.value = true;
 

@@ -217,75 +217,6 @@
                         </div>
                       </template>
 
-                      <div
-                        class="review-body"
-                        v-for="(revision, rIndex) in reviewGroup.revisions"
-                        :key="'rev-' + rIndex"
-                        v-show="reviewGroup.showPastRevisions"
-                      >
-                        <span style="font-weight: bolder">EAS Schema ID</span
-                        ><br />
-                        <a
-                          :href="`${easExplorerUrl}/schema/view/${
-                            getReviewForm(reviewGroup.latest.formID)
-                              ?.easSchemaID
-                          }`"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{
-                            getReviewForm(reviewGroup.latest.formID)
-                              ?.easSchemaID
-                          }}</a
-                        ><br /><br />
-
-                        <span style="font-weight: bolder">Attestation ID</span
-                        ><br />
-                        <a
-                          :href="`${easExplorerUrl}/attestation/view/${revision.attestationID}`"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{ revision.attestationID }}</a
-                        ><br /><br />
-
-                        <span style="font-weight: bolder">Hypercert</span><br />
-                        <a
-                          :href="hypercertLink"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{
-                            `${hypercertName}(ID: ${revision.hypercertID})`
-                          }}</a
-                        ><br /><br />
-
-                        <div v-if="revision.pdfIpfsHash">
-                          <span style="font-weight: bolder">PDF File</span
-                          ><br />
-                          <a
-                            :href="`${pinataGatewayUrl}/ipfs/${revision.pdfIpfsHash}`"
-                            target="_blank"
-                            style="text-decoration: none"
-                            >{{ pinataGatewayUrl }}/ipfs/{{
-                              revision.pdfIpfsHash
-                            }}</a
-                          ><br /><br />
-                        </div>
-
-                        <div
-                          v-for="(question, qIndex) in getReviewForm(
-                            revision.formID
-                          )?.questions"
-                          :key="'q-' + qIndex"
-                        >
-                          <span class="review-question">{{ question }}</span
-                          ><br /><br />
-                          <div
-                            class="answer-card"
-                            v-html="markdownToHtml(revision.answers[qIndex])"
-                          ></div>
-                          <br /><br />
-                        </div>
-                      </div>
-
                       <div class="review-body">
                         <span style="font-weight: bolder">EAS Schema ID</span
                         ><br />
@@ -302,15 +233,6 @@
                           }}</a
                         ><br /><br />
 
-                        <span style="font-weight: bolder">Attestation ID</span
-                        ><br />
-                        <a
-                          :href="`${easExplorerUrl}/attestation/view/${reviewGroup.latest.attestationID}`"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{ reviewGroup.latest.attestationID }}</a
-                        ><br /><br />
-
                         <span style="font-weight: bolder">Hypercert</span><br />
                         <a
                           :href="hypercertLink"
@@ -319,6 +241,21 @@
                           >{{
                             `${hypercertName}(ID: ${reviewGroup.latest.hypercertID})`
                           }}</a
+                        ><br /><br />
+
+                        <span style="font-weight: bolder"
+                          >Reviewed At:
+                          {{ formatDate(reviewGroup.latest.createdAt) }}</span
+                        >
+                        <br /><br />
+
+                        <span style="font-weight: bolder">Attestation ID</span
+                        ><br />
+                        <a
+                          :href="`${easExplorerUrl}/attestation/view/${reviewGroup.latest.attestationID}`"
+                          target="_blank"
+                          style="text-decoration: none"
+                          >{{ reviewGroup.latest.attestationID }}</a
                         ><br /><br />
 
                         <div v-if="reviewGroup.latest.pdfIpfsHash">
@@ -347,6 +284,64 @@
                             v-html="
                               markdownToHtml(reviewGroup.latest.answers[qIndex])
                             "
+                          ></div>
+                          <br /><br />
+                        </div>
+                      </div>
+
+                      <div
+                        class="review-header"
+                        v-show="reviewGroup.showPastRevisions"
+                      >
+                        <hr />
+                        <br />
+                        Past Revisions
+                      </div>
+
+                      <div
+                        class="review-body"
+                        v-for="(revision, rIndex) in reviewGroup.revisions"
+                        :key="'rev-' + rIndex"
+                        v-show="reviewGroup.showPastRevisions"
+                      >
+                        <span style="font-weight: bolder"
+                          >Reviewed At:
+                          {{ formatDate(revision.createdAt) }}</span
+                        >
+                        <br /><br />
+                        <span style="font-weight: bolder">Attestation ID</span
+                        ><br />
+                        <a
+                          :href="`${easExplorerUrl}/attestation/view/${revision.attestationID}`"
+                          target="_blank"
+                          style="text-decoration: none"
+                          >{{ revision.attestationID }}</a
+                        ><br /><br />
+
+                        <div v-if="revision.pdfIpfsHash">
+                          <span style="font-weight: bolder">PDF File</span
+                          ><br />
+                          <a
+                            :href="`${pinataGatewayUrl}/ipfs/${revision.pdfIpfsHash}`"
+                            target="_blank"
+                            style="text-decoration: none"
+                            >{{ pinataGatewayUrl }}/ipfs/{{
+                              revision.pdfIpfsHash
+                            }}</a
+                          ><br /><br />
+                        </div>
+
+                        <div
+                          v-for="(question, qIndex) in getReviewForm(
+                            revision.formID
+                          )?.questions"
+                          :key="'q-' + qIndex"
+                        >
+                          <span class="review-question">{{ question }}</span
+                          ><br /><br />
+                          <div
+                            class="answer-card"
+                            v-html="markdownToHtml(revision.answers[qIndex])"
                           ></div>
                           <br /><br />
                         </div>
@@ -670,6 +665,19 @@ export default {
       return marked.parse(markdown);
     };
 
+    const formatDate = (unixTimestamp) => {
+      const date = new Date(unixTimestamp * 1000);
+
+      const options = {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour12: true,
+      };
+
+      return date.toLocaleString("en-US", options);
+    };
+
     return {
       dataTable,
       grant,
@@ -688,6 +696,7 @@ export default {
       hypercertName,
       isReviewerForAny,
       areAllRequestsClosed,
+      formatDate,
       getSummaries,
       getReviewForm,
       markdownToHtml,
@@ -700,6 +709,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.review-header {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
 .show-past-revisions {
   margin-left: 3%;
 }
