@@ -178,45 +178,6 @@
               </el-col>
             </el-row>
             <hr />
-            <el-row
-              v-if="
-                reviewForm &&
-                reviewForm.questions[10] &&
-                reviewForm.questions[11]
-              "
-              class="section__review-scoring"
-            >
-              <div class="section__title">
-                <h3>Review Scoring</h3>
-              </div>
-              <el-card class="section__content" shadow="hover">
-                <el-table
-                  header-cell-class-name="header-summary"
-                  border
-                  :data="dataTable"
-                  :summary-method="getSummaries"
-                  show-summary
-                >
-                  <el-table-column
-                    align="right"
-                    prop="answer1"
-                    :label="reviewForm.questions[10]"
-                  />
-                  <el-table-column
-                    align="right"
-                    prop="answer2"
-                    :label="reviewForm.questions[11]"
-                  />
-                  <el-table-column
-                    align="right"
-                    prop="average"
-                    label="Average"
-                    width="100"
-                  />
-                </el-table>
-              </el-card>
-              <hr />
-            </el-row>
             <el-row>
               <el-col :span="24" class="reviews-col">
                 <el-col class="review-title-col">
@@ -225,93 +186,167 @@
                 <el-col class="reviews-cards-col">
                   <div v-if="reviews?.length > 0">
                     <el-card
-                      v-for="(review, index) in reviews"
+                      v-for="(reviewGroup, index) in reviews"
                       :key="index"
                       class="review-card"
                       shadow="hover"
                     >
                       <template #header>
                         <div class="card-header">
-                          <span class="review-title"
-                            >Review #{{ index + 1 }} by ({{
-                              review.reviewer
-                            }})</span
+                          <span class="review-title">
+                            Review #{{ index + 1 }} by
+                            {{ reviewGroup.latest.reviewer }}
+                          </span>
+                          <el-button
+                            v-if="
+                              reviewGroup.revisions &&
+                              reviewGroup.revisions.length > 0
+                            "
+                            size="mini"
+                            class="show-past-revisions"
+                            @click="
+                              reviewGroup.showPastRevisions =
+                                !reviewGroup.showPastRevisions
+                            "
                           >
+                            {{
+                              reviewGroup.showPastRevisions ? "Hide" : "Show"
+                            }}
+                            Past Versions
+                          </el-button>
                         </div>
                       </template>
-                      <div class="review-body">
+
+                      <div
+                        class="review-body"
+                        v-for="(revision, rIndex) in reviewGroup.revisions"
+                        :key="'rev-' + rIndex"
+                        v-show="reviewGroup.showPastRevisions"
+                      >
                         <span style="font-weight: bolder">EAS Schema ID</span
                         ><br />
                         <a
-                          :href="`${easExplorerUrl}/schema/view/${reviewForm.easSchemaID}`"
+                          :href="`${easExplorerUrl}/schema/view/${
+                            getReviewForm(reviewGroup.latest.formID)
+                              ?.easSchemaID
+                          }`"
                           target="_blank"
                           style="text-decoration: none"
-                        >
-                          {{ reviewForm.easSchemaID }} </a
+                          >{{
+                            getReviewForm(reviewGroup.latest.formID)
+                              ?.easSchemaID
+                          }}</a
                         ><br /><br />
+
                         <span style="font-weight: bolder">Attestation ID</span
                         ><br />
                         <a
-                          :href="`${easExplorerUrl}/attestation/view/${review.attestationID}`"
+                          :href="`${easExplorerUrl}/attestation/view/${revision.attestationID}`"
                           target="_blank"
                           style="text-decoration: none"
-                        >
-                          {{ review.attestationID }} </a
+                          >{{ revision.attestationID }}</a
                         ><br /><br />
+
                         <span style="font-weight: bolder">Hypercert</span><br />
                         <a
                           :href="hypercertLink"
                           target="_blank"
                           style="text-decoration: none"
-                        >
-                          {{ `${hypercertName}(ID: ${hypercertName})` }} </a
+                          >{{
+                            `${hypercertName}(ID: ${revision.hypercertID})`
+                          }}</a
                         ><br /><br />
-                        <div v-if="review.pdfIpfsHash">
+
+                        <div v-if="revision.pdfIpfsHash">
                           <span style="font-weight: bolder">PDF File</span
                           ><br />
                           <a
-                            :href="`${pinataGatewayUrl}/ipfs/${review.pdfIpfsHash}`"
+                            :href="`${pinataGatewayUrl}/ipfs/${revision.pdfIpfsHash}`"
                             target="_blank"
                             style="text-decoration: none"
-                          >
-                            {{ pinataGatewayUrl }}/ipfs/{{
-                              review.pdfIpfsHash
-                            }} </a
+                            >{{ pinataGatewayUrl }}/ipfs/{{
+                              revision.pdfIpfsHash
+                            }}</a
                           ><br /><br />
                         </div>
+
                         <div
-                          v-if="
-                            reviewRequest.targetsIPFSHashes[review.targetIndex]
-                          "
-                        >
-                          <span style="font-weight: bolder"
-                            >Target IPFS Hash</span
-                          ><br />
-                          <a
-                            :href="`https://ipfs.io/ipfs/${
-                              reviewRequest.targetsIPFSHashes[
-                                review.targetIndex
-                              ]
-                            }`"
-                            target="_blank"
-                            style="text-decoration: none"
-                          >
-                            {{
-                              reviewRequest.targetsIPFSHashes[
-                                review.targetIndex
-                              ]
-                            }}
-                          </a>
-                        </div>
-                        <div
-                          v-for="(question, index) in reviewForm.questions"
-                          :key="index"
+                          v-for="(question, qIndex) in getReviewForm(
+                            revision.formID
+                          )?.questions"
+                          :key="'q-' + qIndex"
                         >
                           <span class="review-question">{{ question }}</span
                           ><br /><br />
                           <div
                             class="answer-card"
-                            v-html="markdownToHtml(review.answers[index])"
+                            v-html="markdownToHtml(revision.answers[qIndex])"
+                          ></div>
+                          <br /><br />
+                        </div>
+                      </div>
+
+                      <div class="review-body">
+                        <span style="font-weight: bolder">EAS Schema ID</span
+                        ><br />
+                        <a
+                          :href="`${easExplorerUrl}/schema/view/${
+                            getReviewForm(reviewGroup.latest.formID)
+                              ?.easSchemaID
+                          }`"
+                          target="_blank"
+                          style="text-decoration: none"
+                          >{{
+                            getReviewForm(reviewGroup.latest.formID)
+                              ?.easSchemaID
+                          }}</a
+                        ><br /><br />
+
+                        <span style="font-weight: bolder">Attestation ID</span
+                        ><br />
+                        <a
+                          :href="`${easExplorerUrl}/attestation/view/${reviewGroup.latest.attestationID}`"
+                          target="_blank"
+                          style="text-decoration: none"
+                          >{{ reviewGroup.latest.attestationID }}</a
+                        ><br /><br />
+
+                        <span style="font-weight: bolder">Hypercert</span><br />
+                        <a
+                          :href="hypercertLink"
+                          target="_blank"
+                          style="text-decoration: none"
+                          >{{
+                            `${hypercertName}(ID: ${reviewGroup.latest.hypercertID})`
+                          }}</a
+                        ><br /><br />
+
+                        <div v-if="reviewGroup.latest.pdfIpfsHash">
+                          <span style="font-weight: bolder">PDF File</span
+                          ><br />
+                          <a
+                            :href="`${pinataGatewayUrl}/ipfs/${reviewGroup.latest.pdfIpfsHash}`"
+                            target="_blank"
+                            style="text-decoration: none"
+                            >{{ pinataGatewayUrl }}/ipfs/{{
+                              reviewGroup.latest.pdfIpfsHash
+                            }}</a
+                          ><br /><br />
+                        </div>
+
+                        <div
+                          v-for="(question, qIndex) in getReviewForm(
+                            reviewGroup.latest.formID
+                          )?.questions"
+                          :key="qIndex"
+                        >
+                          <span class="review-question">{{ question }}</span
+                          ><br /><br />
+                          <div
+                            class="answer-card"
+                            v-html="
+                              markdownToHtml(reviewGroup.latest.answers[qIndex])
+                            "
                           ></div>
                           <br /><br />
                         </div>
@@ -370,12 +405,9 @@ import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 
 import { getGrant } from "@/services/GrantService";
-import { getReviews } from "@/services/ReviewService";
-import {
-  getReviewRequests,
-  getReviewRequest,
-} from "@/services/ReviewRequestService";
-import { getReviewForm } from "@/services/ReviewFormService";
+import { getAllReviews } from "@/services/ReviewService";
+import { getReviewRequests } from "@/services/ReviewRequestService";
+import { getAllReviewForms } from "@/services/ReviewFormService";
 
 import { ElMessage } from "element-plus";
 import {
@@ -421,10 +453,9 @@ export default {
     const dataTable = ref([]);
     const grantID = route.params.grant_id;
     const grant = ref(null);
-    const reviewRequest = ref(null);
     const reviewRequests = ref([]);
     const reviews = ref([]);
-    const reviewForm = ref(null);
+    const reviewForms = ref([]);
     const ipfsBaseUrl = ref("");
     const pinataGatewayUrl = ref("");
     const easExplorerUrl = ref("");
@@ -487,45 +518,80 @@ export default {
       aboutContent.value = converter.convert();
     };
 
-    const fetchReviewRequest = async () => {
+    const fetchReviewRequests = async () => {
       const reviewRequestsResponse = await getReviewRequests(
         grant.value.request_names
       );
       reviewRequests.value = reviewRequestsResponse.response;
-
-      const reviewRequestResponse = await getReviewRequest(
-        grant.value.request_name
-      );
-      reviewRequest.value = reviewRequestResponse.response;
     };
 
     const fetchReviews = async () => {
-      const reviewsResponse = await getReviews(grant.value.request_name);
-      reviews.value = reviewsResponse.response?.reviews.filter(
-        (r) => r.hypercertID === grant.value.hypercertID
-      );
-    };
+      const allReviews = await getAllReviews();
 
-    const fetchReviewForm = async () => {
-      const reviewFormResponse = await getReviewForm(
-        reviewRequest.value?.reviewFormIndex
-      );
-      reviewForm.value = reviewFormResponse.response;
-    };
+      if (!allReviews.response) {
+        return;
+      }
 
-    const getReviewScoring = () => {
-      dataTable.value = reviews.value?.map((review, i) => {
-        const answer1Score = Number(review.answers[10]);
-        const answer2Score = Number(review.answers[11]);
-        const average = (answer1Score + answer2Score) / 2;
+      let groupedReviews = {};
 
-        return {
-          index: i + 1,
-          answer1: answer1Score.toFixed(1),
-          answer2: answer2Score.toFixed(1),
-          average,
-        };
+      allReviews.response.forEach((reviewDocument) => {
+        reviewDocument.reviews.forEach((r) => {
+          if (
+            grant.value.request_names?.includes(reviewDocument.requestName) &&
+            r.hypercertID === grant.value.hypercertID
+          ) {
+            let formID = getRequestFormID(reviewDocument.requestName);
+
+            r.formID = formID;
+            r.requestName = reviewDocument.requestName;
+
+            let key = `${r.reviewer}-${formID}`;
+
+            if (!groupedReviews[key]) {
+              groupedReviews[key] = [];
+            }
+
+            groupedReviews[key].push(r);
+          }
+        });
       });
+
+      reviews.value = Object.entries(groupedReviews)
+        .map(([key, reviewsArray]) => {
+          reviewsArray.sort((a, b) => b.createdAt - a.createdAt);
+
+          return {
+            key: key,
+            latest: reviewsArray[0],
+            revisions: reviewsArray.slice(1),
+          };
+        })
+        .reverse();
+    };
+
+    const getRequestFormID = (requestName) => {
+      const matchingRequest = reviewRequests.value.find(
+        (req) => req.requestName === requestName
+      );
+      return matchingRequest.reviewFormIndex;
+    };
+
+    const getReviewForm = (formID) => {
+      const filteredReviewForm =
+        reviewForms.value.find((form) => form.formID == formID) || [];
+      return filteredReviewForm;
+    };
+
+    const fetchReviewForms = async () => {
+      const reviewFormResponse = await getAllReviewForms();
+
+      const reviewFormIndexes = reviewRequests.value.map((request) =>
+        parseInt(request.reviewFormIndex)
+      );
+
+      reviewForms.value = reviewFormResponse.response.filter((form) =>
+        reviewFormIndexes.includes(form.formID)
+      );
     };
 
     const getSummaries = (params) => {
@@ -582,11 +648,11 @@ export default {
 
       if (grant.value) {
         grantNotFound.value = false;
-        await fetchReviewRequest();
+        await fetchReviewRequests();
         await fetchReviews();
-        await fetchReviewForm();
-        getReviewScoring();
+        await fetchReviewForms();
       }
+
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
       pinataGatewayUrl.value = process.env.VUE_APP_PINATA_GATEWAY_BASE_URL;
       easExplorerUrl.value = process.env.VUE_APP_EAS_EXPLORER_URL;
@@ -607,8 +673,7 @@ export default {
       dataTable,
       grant,
       reviews,
-      reviewForm,
-      reviewRequest,
+      reviewForms,
       reviewRequests,
       loading,
       walletAddress,
@@ -623,6 +688,7 @@ export default {
       isReviewerForAny,
       areAllRequestsClosed,
       getSummaries,
+      getReviewForm,
       markdownToHtml,
       goToSubmitReview,
       scrollToAbout,
@@ -633,6 +699,9 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.show-past-revisions {
+  margin-left: 3%;
+}
 .grant-page {
   height: 100%;
   .section {
