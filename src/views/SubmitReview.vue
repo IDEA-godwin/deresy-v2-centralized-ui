@@ -341,21 +341,17 @@ export default {
         return;
       }
 
-      const review = await getMatchingReview(filteredRequests, walletAddress);
+      const review = await getMatchingReview(
+        filteredRequests,
+        walletAddress,
+        reviewFormIndex
+      );
 
       if (!review) {
         return;
       }
 
       populateAnswers(review, types, reviewObject);
-
-      ElNotification({
-        title: "Notification",
-        message:
-          "The request form has been auto-filled using answers from your previous review.",
-        type: "info",
-        duration: notificationTime,
-      });
 
       return;
     };
@@ -432,7 +428,10 @@ export default {
 
       grantObj.value = (await getGrant(grantID)).response;
       reviewRequests.value = (
-        await getReviewRequests(grantObj.value.request_names)
+        await getReviewRequests(
+          grantObj.value.request_names,
+          grantObj.value.hypercertID
+        )
       ).response;
 
       loading.value = false;

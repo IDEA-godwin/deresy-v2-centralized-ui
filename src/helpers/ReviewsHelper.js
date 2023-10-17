@@ -17,26 +17,43 @@ export const filterReviewRequests = (
   });
 };
 
-export const getMatchingReview = async (filteredRequests, walletAddress) => {
+export const getMatchingReview = async (
+  filteredRequests,
+  walletAddress,
+  reviewFormIndex
+) => {
   const reviews = await getAllReviews();
 
   if (reviews.response.length == 0) {
     return null;
   }
 
+  let matchingReviews = [];
+
   for (const request of filteredRequests) {
     const reviewDocument = reviews.response.find(
       (review) => review.requestName === request.requestName
     );
+
     if (reviewDocument) {
-      const matchingReview = reviewDocument.reviews.find(
-        (review) => review.reviewer === walletAddress.value
+      const matchingReview = reviewDocument.reviews.filter(
+        (review) =>
+          review.reviewer === walletAddress.value &&
+          request.reviewFormIndex == reviewFormIndex
       );
+
       if (matchingReview) {
-        return matchingReview.answers;
+        matchingReviews.push(...matchingReview);
       }
     }
   }
+
+  matchingReviews.sort((a, b) => b.createdAt - a.createdAt);
+
+  if (matchingReviews.length > 0) {
+    return matchingReviews[0].answers;
+  }
+
   return null;
 };
 

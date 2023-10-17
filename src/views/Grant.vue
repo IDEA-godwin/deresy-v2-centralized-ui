@@ -520,7 +520,8 @@ export default {
 
     const fetchReviewRequests = async () => {
       const reviewRequestsResponse = await getReviewRequests(
-        grant.value.request_names
+        grant.value.request_names,
+        grant.value.hypercertID
       );
       reviewRequests.value = reviewRequestsResponse.response;
     };
@@ -578,7 +579,7 @@ export default {
 
     const getReviewForm = (formID) => {
       const filteredReviewForm =
-        reviewForms.value.find((form) => form.formID == formID) || [];
+        reviewForms.value.find((form) => form.formID == formID) || {};
       return filteredReviewForm;
     };
 

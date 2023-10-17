@@ -159,9 +159,17 @@ export default {
 
     const formattingGrands = () => {
       grantsData.value.forEach((grant) => {
-        const reviewObj = reviews.value.find(
-          (r) => r.requestName === grant.request_name
+        const reviewObjs = reviews.value.filter((r) =>
+          grant.request_names?.includes(r.requestName)
         );
+
+        const reviewCount = reviewObjs.reduce((acc, reviewObj) => {
+          return (
+            acc +
+            reviewObj.reviews.filter((r) => r.hypercertID == grant.hypercertID)
+              .length
+          );
+        }, 0);
 
         const grantObj = {
           id: grant.id,
@@ -170,11 +178,7 @@ export default {
           lastUpdated: grant.last_update_natural,
           region: grant.region.label,
           funds: parseFloat(grant.amount_received),
-          reviews: reviewObj
-            ? reviewObj.reviews.filter(
-                (r) => r.hypercertID == grant.hypercertID
-              ).length
-            : 0,
+          reviews: reviewCount,
           score: grant.score.toFixed(1),
         };
         tableData.value.push(grantObj);
