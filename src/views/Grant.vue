@@ -185,168 +185,57 @@
                 </el-col>
                 <el-col class="reviews-cards-col">
                   <div v-if="reviews?.length > 0">
-                    <el-card
-                      v-for="(reviewGroup, index) in reviews"
-                      :key="index"
-                      class="review-card"
-                      shadow="hover"
-                    >
-                      <template #header>
-                        <div class="card-header">
-                          <span class="review-title">
-                            Review #{{ index + 1 }} by
-                            {{ reviewGroup.latest.reviewer }}
-                          </span>
-                          <el-button
-                            v-if="
-                              reviewGroup.revisions &&
-                              reviewGroup.revisions.length > 0
-                            "
-                            size="mini"
-                            class="show-past-revisions"
-                            @click="
-                              reviewGroup.showPastRevisions =
-                                !reviewGroup.showPastRevisions
-                            "
-                          >
-                            {{
-                              reviewGroup.showPastRevisions ? "Hide" : "Show"
-                            }}
-                            Past Versions
-                          </el-button>
-                        </div>
-                      </template>
+                    <el-collapse>
+                      <el-collapse-item
+                        v-for="(reviewGroup, index) in reviews"
+                        :key="index"
+                        class="review-card"
+                      >
+                        <template #title>
+                          <div class="card-header">
+                            <span class="review-title">
+                              Review #{{ index + 1 }} by
+                              {{ reviewGroup.reviews[0].reviewer }}
+                            </span>
+                          </div>
+                        </template>
 
-                      <div class="review-body">
-                        <span style="font-weight: bolder">EAS Schema ID</span
-                        ><br />
-                        <a
-                          :href="`${easExplorerUrl}/schema/view/${
-                            getReviewForm(reviewGroup.latest.formID)
-                              ?.easSchemaID
-                          }`"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{
-                            getReviewForm(reviewGroup.latest.formID)
-                              ?.easSchemaID
-                          }}</a
-                        ><br /><br />
-
-                        <span style="font-weight: bolder">Hypercert</span><br />
-                        <a
-                          :href="hypercertLink"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{
-                            `${hypercertName}(ID: ${reviewGroup.latest.hypercertID})`
-                          }}</a
-                        ><br /><br />
-
-                        <span style="font-weight: bolder"
-                          >Reviewed At:
-                          {{ formatDate(reviewGroup.latest.createdAt) }}</span
-                        >
-                        <br /><br />
-
-                        <span style="font-weight: bolder">Attestation ID</span
-                        ><br />
-                        <a
-                          :href="`${easExplorerUrl}/attestation/view/${reviewGroup.latest.attestationID}`"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{ reviewGroup.latest.attestationID }}</a
-                        ><br /><br />
-
-                        <div v-if="reviewGroup.latest.pdfIpfsHash">
-                          <span style="font-weight: bolder">PDF File</span
-                          ><br />
+                        <div class="review-body">
+                          <span style="font-weight: bolder">EAS Schema ID</span>
+                          <br />
                           <a
-                            :href="`${pinataGatewayUrl}/ipfs/${reviewGroup.latest.pdfIpfsHash}`"
+                            :href="`${easExplorerUrl}/schema/view/${
+                              getReviewForm(reviewGroup.reviews[0].formID)
+                                ?.easSchemaID
+                            }`"
                             target="_blank"
                             style="text-decoration: none"
-                            >{{ pinataGatewayUrl }}/ipfs/{{
-                              reviewGroup.latest.pdfIpfsHash
+                            >{{
+                              getReviewForm(reviewGroup.reviews[0].formID)
+                                ?.easSchemaID
+                            }}</a
+                          ><br /><br />
+
+                          <span style="font-weight: bolder">Hypercert</span
+                          ><br />
+                          <a
+                            :href="hypercertLink"
+                            target="_blank"
+                            style="text-decoration: none"
+                            >{{
+                              `${hypercertName}(ID: ${reviewGroup.reviews[0].hypercertID})`
                             }}</a
                           ><br /><br />
                         </div>
 
-                        <div
-                          v-for="(question, qIndex) in getReviewForm(
-                            reviewGroup.latest.formID
-                          )?.questions"
-                          :key="qIndex"
-                        >
-                          <span class="review-question">{{ question }}</span
-                          ><br /><br />
-                          <div
-                            class="answer-card"
-                            v-html="
-                              markdownToHtml(reviewGroup.latest.answers[qIndex])
-                            "
-                          ></div>
-                          <br /><br />
-                        </div>
-                      </div>
-
-                      <div
-                        class="review-header"
-                        v-show="reviewGroup.showPastRevisions"
-                      >
-                        <hr />
-                        <br />
-                        Past Revisions
-                      </div>
-
-                      <div
-                        class="review-body"
-                        v-for="(revision, rIndex) in reviewGroup.revisions"
-                        :key="'rev-' + rIndex"
-                        v-show="reviewGroup.showPastRevisions"
-                      >
-                        <span style="font-weight: bolder"
-                          >Reviewed At:
-                          {{ formatDate(revision.createdAt) }}</span
-                        >
-                        <br /><br />
-                        <span style="font-weight: bolder">Attestation ID</span
-                        ><br />
-                        <a
-                          :href="`${easExplorerUrl}/attestation/view/${revision.attestationID}`"
-                          target="_blank"
-                          style="text-decoration: none"
-                          >{{ revision.attestationID }}</a
-                        ><br /><br />
-
-                        <div v-if="revision.pdfIpfsHash">
-                          <span style="font-weight: bolder">PDF File</span
-                          ><br />
-                          <a
-                            :href="`${pinataGatewayUrl}/ipfs/${revision.pdfIpfsHash}`"
-                            target="_blank"
-                            style="text-decoration: none"
-                            >{{ pinataGatewayUrl }}/ipfs/{{
-                              revision.pdfIpfsHash
-                            }}</a
-                          ><br /><br />
-                        </div>
-
-                        <div
-                          v-for="(question, qIndex) in getReviewForm(
-                            revision.formID
-                          )?.questions"
-                          :key="'q-' + qIndex"
-                        >
-                          <span class="review-question">{{ question }}</span
-                          ><br /><br />
-                          <div
-                            class="answer-card"
-                            v-html="markdownToHtml(revision.answers[qIndex])"
-                          ></div>
-                          <br /><br />
-                        </div>
-                      </div>
-                    </el-card>
+                        <ReviewsContentDisplay
+                          :reviewData="reviewGroup"
+                          :reviewForms="reviewForms"
+                          :easExplorerUrl="easExplorerUrl"
+                          :pinataGatewayUrl="pinataGatewayUrl"
+                        />
+                      </el-collapse-item>
+                    </el-collapse>
                   </div>
                   <div v-else>
                     <div style="margin-top: 30px">
@@ -399,6 +288,7 @@ import { onBeforeMount, reactive, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 
+import ReviewsContentDisplay from "@/components/grant/reviews-content-display";
 import { getGrant } from "@/services/GrantService";
 import { getAllReviews } from "@/services/ReviewService";
 import { getReviewRequests } from "@/services/ReviewRequestService";
@@ -435,6 +325,7 @@ export default {
     CopyDocument,
     Platform,
     ArrowDownBold,
+    ReviewsContentDisplay,
   },
   setup() {
     const store = useStore();
@@ -558,8 +449,7 @@ export default {
 
           return {
             key: key,
-            latest: reviewsArray[0],
-            revisions: reviewsArray.slice(1),
+            reviews: reviewsArray,
           };
         })
         .reverse();
@@ -665,19 +555,6 @@ export default {
       return marked.parse(markdown);
     };
 
-    const formatDate = (unixTimestamp) => {
-      const date = new Date(unixTimestamp * 1000);
-
-      const options = {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour12: true,
-      };
-
-      return date.toLocaleString("en-US", options);
-    };
-
     return {
       dataTable,
       grant,
@@ -696,7 +573,6 @@ export default {
       hypercertName,
       isReviewerForAny,
       areAllRequestsClosed,
-      formatDate,
       getSummaries,
       getReviewForm,
       markdownToHtml,
@@ -780,6 +656,16 @@ hr {
 .review-card {
   margin-top: 30px;
   text-align: left;
+  border-radius: var(--el-card-border-radius);
+  border: 1px solid var(--el-card-border-color);
+  background-color: var(--el-card-bg-color);
+  overflow: hidden;
+  color: var(--el-text-color-primary);
+  transition: var(--el-transition-duration);
+  --el-card-border-color: var(--el-border-color-light);
+  --el-card-border-radius: 4px;
+  --el-card-padding: 20px;
+  --el-card-bg-color: var(--el-fill-color-blank);
 }
 .review-title {
   font-size: 20px;
@@ -854,5 +740,18 @@ hr {
 .review-question {
   font-weight: bolder;
   font-size: 20px;
+}
+.el-collapse-item__header {
+  padding: calc(var(--el-card-padding) - 16px) var(--el-card-padding);
+  border-bottom: 1px solid var(--el-card-border-color);
+  box-sizing: border-box;
+  height: auto;
+  line-height: auto;
+}
+.el-collapse-item__header.is-active {
+  border-bottom: 1px solid var(--el-card-border-color);
+}
+.el-collapse-item__content {
+  padding: 20px;
 }
 </style>
