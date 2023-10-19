@@ -739,7 +739,6 @@ hr {
 }
 .review-question {
   font-weight: bolder;
-  font-size: 20px;
 }
 .el-collapse-item__header {
   padding: calc(var(--el-card-padding) - 16px) var(--el-card-padding);

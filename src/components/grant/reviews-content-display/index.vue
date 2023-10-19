@@ -6,7 +6,7 @@
   >
     <br />
 
-    <span class="title-text">
+    <span class="version-title-text">
       Version {{ reviewData.reviews.length - rIndex }} ({{
         formatDate(review.createdAt)
       }})
@@ -35,7 +35,7 @@
       :key="'q-' + qIndex"
     >
       <span class="review-question">{{ question }}</span
-      ><br /><br />
+      ><br />
       <div
         class="answer-card"
         v-html="markdownToHtml(review.answers[qIndex])"
@@ -88,8 +88,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.title-text {
-  font-size: 20px;
+.version-title-text {
+  font-size: 24px;
   font-weight: bold;
 }
 
