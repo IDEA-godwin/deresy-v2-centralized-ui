@@ -1,39 +1,42 @@
 <template>
-  <div class="form-container">
+  <div v-loading="isFormLoading" class="form-container">
     <el-row>
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+      <el-col :span="24">
         <el-form label-position="top">
           <h1>Create Review Form</h1>
-          <FormQuestion
-            v-for="(formQuestion, index) in formAccessibility.formQuestions"
-            v-model="formAccessibility.formQuestions[index]"
-            v-on:delete-question="deleteQuestion(index)"
-            :key="index"
-          />
+
+          <el-row class="form-section">
+            <el-col :span="22">
+              <FormQuestion
+                v-for="(formQuestion, index) in formAccessibility.formQuestions"
+                v-model="formAccessibility.formQuestions[index]"
+                v-on:delete-question="deleteQuestion(index)"
+                :key="index"
+              />
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-button @click="addQuestion()" class="add-btn" type="primary">
+                Add Question
+              </el-button>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="24">
+              <el-button
+                @click="sendBtn()"
+                class="send-btn"
+                type="success"
+                size="large"
+              >
+                Send
+              </el-button>
+            </el-col>
+          </el-row>
         </el-form>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24">
-        <el-button
-          @click="addQuestion()"
-          class="add-question-btn"
-          type="primary"
-        >
-          Add Question
-        </el-button>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24">
-        <el-button
-          @click="sendBtn()"
-          class="send-btn"
-          type="success"
-          size="large"
-        >
-          Send
-        </el-button>
       </el-col>
     </el-row>
   </div>
@@ -44,7 +47,7 @@ import FormQuestion from "@/components/create-review-form/form-question";
 import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { createReviewForm } from "@/services/ContractService";
 import { useStore } from "vuex";
-import { reactive, onBeforeMount, computed } from "vue";
+import { reactive, onBeforeMount, computed, ref } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 
@@ -64,6 +67,7 @@ export default {
     const contract = computed(() => contractState.contract);
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
+    const isFormLoading = ref(false);
 
     const formAccessibility = reactive({
       formQuestions: [],
@@ -84,6 +88,7 @@ export default {
     };
 
     const sendBtn = async () => {
+      isFormLoading.value = true;
       v.value.$validate();
       if (!v.value.$error) {
         dispatch("setLoading", true);
@@ -138,6 +143,7 @@ export default {
           }
         }
         dispatch("setLoading", false);
+        isFormLoading.value = false;
       }
     };
 
@@ -150,6 +156,7 @@ export default {
     });
 
     return {
+      isFormLoading,
       formAccessibility,
       addQuestion,
       deleteQuestion,
@@ -161,7 +168,8 @@ export default {
 
 <style scoped>
 .form-container {
-  padding: 2% 5%;
+  text-align: left;
+  padding: 2% 10%;
 }
 
 .add-question-btn {

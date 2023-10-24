@@ -25,6 +25,18 @@
                 >
                   Create Review Request
                 </el-menu-item>
+                <el-menu-item
+                  index="/create-review-form"
+                  @click="goToPath('/create-review-form')"
+                >
+                  Create Review Form
+                </el-menu-item>
+                <el-menu-item
+                  index="/close-review-request"
+                  @click="goToPath('/close-review-request')"
+                >
+                  Close Review Request
+                </el-menu-item>
               </el-menu>
               <div class="wallet-container">
                 <Wallet />
@@ -90,6 +102,18 @@
           @click="goToPath('/create-review-request')"
         >
           Create Review Request
+        </el-menu-item>
+        <el-menu-item
+          index="/create-review-form"
+          @click="goToPath('/create-review-form')"
+        >
+          Create Review Form
+        </el-menu-item>
+        <el-menu-item
+          index="/close-review-request"
+          @click="goToPath('/close-review-request')"
+        >
+          Close Review Request
         </el-menu-item>
       </el-menu>
     </el-drawer>
