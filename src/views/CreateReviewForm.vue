@@ -143,8 +143,8 @@ export default {
           }
         }
         dispatch("setLoading", false);
-        isFormLoading.value = false;
       }
+      isFormLoading.value = false;
     };
 
     onBeforeMount(async () => {
