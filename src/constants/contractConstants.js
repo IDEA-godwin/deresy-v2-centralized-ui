@@ -165,6 +165,19 @@ export const DERESY_CONTRACT_ABI = [
     inputs: [
       {
         indexed: false,
+        internalType: "bytes32",
+        name: "_uid",
+        type: "bytes32",
+      },
+    ],
+    name: "SubmittedAmendment",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "string",
         name: "_requestName",
         type: "string",
@@ -172,6 +185,19 @@ export const DERESY_CONTRACT_ABI = [
     ],
     name: "SubmittedReview",
     type: "event",
+  },
+  {
+    inputs: [],
+    name: "amendmentsSchemaID",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
   {
     inputs: [
@@ -454,6 +480,11 @@ export const DERESY_CONTRACT_ABI = [
             internalType: "bytes32",
             name: "attestationID",
             type: "bytes32",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "amendmentsUIDs",
+            type: "bytes32[]",
           },
         ],
         internalType: "struct DeresyResolver.Review[]",
@@ -811,6 +842,19 @@ export const DERESY_CONTRACT_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "reviewsSchemaID",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         components: [
@@ -884,12 +928,38 @@ export const DERESY_CONTRACT_ABI = [
   {
     inputs: [
       {
+        internalType: "bytes32",
+        name: "_amendmentsSchemaID",
+        type: "bytes32",
+      },
+    ],
+    name: "setAmendmentsSchemaID",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "_callbackContractAddress",
         type: "address",
       },
     ],
     name: "setCallbackContract",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "_reviewsSchemaID",
+        type: "bytes32",
+      },
+    ],
+    name: "setReviewsSchemaID",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

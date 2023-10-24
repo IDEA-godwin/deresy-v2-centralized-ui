@@ -230,6 +230,8 @@
 
                         <ReviewsContentDisplay
                           :reviewData="reviewGroup"
+                          :reviewAmendments="reviewAmendments"
+                          :grantID="grant.id"
                           :reviewForms="reviewForms"
                           :easExplorerUrl="easExplorerUrl"
                           :pinataGatewayUrl="pinataGatewayUrl"
@@ -293,6 +295,7 @@ import { getGrant } from "@/services/GrantService";
 import { getAllReviews } from "@/services/ReviewService";
 import { getReviewRequests } from "@/services/ReviewRequestService";
 import { getAllReviewForms } from "@/services/ReviewFormService";
+import { getReviewAmendments } from "@/services/AmendmentService";
 
 import { ElMessage } from "element-plus";
 import {
@@ -348,6 +351,7 @@ export default {
     const walletAddress = computed(() => user.walletAddress);
     const hypercertLink = ref("");
     const hypercertName = ref("");
+    const reviewAmendments = ref([]);
 
     const loading = ref(true);
     const grantNotFound = ref(true);
@@ -455,6 +459,14 @@ export default {
         .reverse();
     };
 
+    const fetchReviewAmendments = async () => {
+      const reviewAmendmentsResponse = await getReviewAmendments(
+        grant.value.request_names,
+        grant.value.hypercertID
+      );
+      reviewAmendments.value = reviewAmendmentsResponse.response;
+    };
+
     const getRequestFormID = (requestName) => {
       const matchingRequest = reviewRequests.value.find(
         (req) => req.requestName === requestName
@@ -537,6 +549,7 @@ export default {
         await fetchReviewRequests();
         await fetchReviews();
         await fetchReviewForms();
+        await fetchReviewAmendments();
       }
 
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
@@ -561,6 +574,7 @@ export default {
       reviews,
       reviewForms,
       reviewRequests,
+      reviewAmendments,
       loading,
       walletAddress,
       grantNotFound,

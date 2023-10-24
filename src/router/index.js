@@ -47,6 +47,10 @@ const routes = [
     path: "/grants/:grant_id/submit-review/",
     component: () => import("@/views/SubmitReview"),
   },
+  {
+    path: "/reviews/:grant_id/:review_id/create-amendment/",
+    component: () => import("@/views/CreateAmendment"),
+  },
 ];
 
 const scrollBehavior = (to, from, savedPosition) => {
