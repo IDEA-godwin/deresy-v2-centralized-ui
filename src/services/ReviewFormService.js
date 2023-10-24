@@ -18,3 +18,17 @@ export async function getReviewForm(formID) {
 
   return { response, error };
 }
+
+export async function getAllReviewForms() {
+  let response;
+  let error;
+  try {
+    const snapshot = await reviewFormsRef.get();
+
+    response = snapshot.docs.map((doc) => doc.data());
+  } catch (e) {
+    error = e;
+  }
+
+  return { response, error };
+}

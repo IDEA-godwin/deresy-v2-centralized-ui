@@ -243,14 +243,14 @@ export const submitReview = async (web3, contract, params) => {
 
   try {
     const requestReviewForm = await methods.getRequestReviewForm(name).call();
-
+    const reviewsSchemaID = await methods.reviewsSchemaID().call();
     // Fixed positions based on smart-contract
     const pdfRequestData = {
       name: name,
       accountID: walletAddress,
       hypercertID: hypercertID,
       grantID: grantID,
-      easSchemaID: requestReviewForm[3],
+      easSchemaID: reviewsSchemaID,
       questions: requestReviewForm[0],
       questionOptions: requestReviewForm[2],
       answers: answers,
@@ -284,13 +284,76 @@ export const submitReview = async (web3, contract, params) => {
 
     const data = await easContract.methods
       .attest({
-        schema: requestReviewForm[3],
+        schema: reviewsSchemaID,
         data: {
           recipient: "0x0000000000000000000000000000000000000000",
           expirationTime: 0n,
           revocable: false,
           refUID:
             "0x0000000000000000000000000000000000000000000000000000000000000000",
+          data: encodedData,
+          value: 0,
+        },
+      })
+      .encodeABI();
+
+    const transaction = {
+      from: walletAddress,
+      to: EAS_CONTRACT_ADDRESS,
+      data,
+    };
+
+    await web3.eth
+      .sendTransaction(transaction)
+      .on("transactionHash", (txHash) => {
+        sendTransactionNotification(txHash, "Transaction in progress");
+      })
+      .on("receipt", (receipt) => {
+        response = receipt;
+      });
+  } catch (e) {
+    console.error("An error ocurred while submitting the review.", e);
+    throw e;
+  }
+
+  return response;
+};
+
+export const createAmendment = async (web3, contract, params) => {
+  const { name, hypercertID, amendment, refUID, walletAddress } = params;
+
+  const { methods } = contract;
+  const { eth } = web3;
+
+  const easContract = new eth.Contract(EAS_CONTRACT_ABI, EAS_CONTRACT_ADDRESS, {
+    from: walletAddress,
+  });
+
+  let response;
+
+  try {
+    const amendmentsSchemaID = await methods.amendmentsSchemaID().call();
+
+    const abi = [
+      { type: "string", name: "requestName" },
+      { type: "uint256", name: "hypercertID" },
+      { type: "string", name: "amendment" },
+    ];
+
+    const encodedData = web3.eth.abi.encodeParameters(abi, [
+      name,
+      hypercertID,
+      amendment,
+    ]);
+
+    const data = await easContract.methods
+      .attest({
+        schema: amendmentsSchemaID,
+        data: {
+          recipient: "0x0000000000000000000000000000000000000000",
+          expirationTime: 0n,
+          revocable: false,
+          refUID: refUID,
           data: encodedData,
           value: 0,
         },

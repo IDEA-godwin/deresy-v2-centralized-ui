@@ -31,3 +31,28 @@ export async function getAllReviews() {
 
   return { response, error };
 }
+
+export async function getReviewByAttestationID(requestNames, attestationID) {
+  let response;
+  let error;
+  try {
+    const snapshot = await reviewsRef
+      .where("requestName", "in", requestNames)
+      .get();
+
+    const requestsReviews = snapshot.docs.map((doc) => doc.data());
+    const reviewObj = requestsReviews.find((requestReviews) =>
+      requestReviews.reviews.some(
+        (review) => review.attestationID === attestationID
+      )
+    );
+    const attestationReview = reviewObj.reviews.find(
+      (review) => review.attestationID === attestationID
+    );
+    response = { ...attestationReview, requestName: reviewObj.requestName };
+  } catch (e) {
+    error = e;
+  }
+
+  return { response, error };
+}

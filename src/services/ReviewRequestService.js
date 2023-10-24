@@ -19,6 +19,29 @@ export async function getReviewRequest(requestName) {
   return { response, error };
 }
 
+export async function getReviewRequests(requestNames, hypercertID) {
+  let response = [];
+  let error;
+
+  try {
+    const snapshot = await reviewRequestsRef.get();
+
+    snapshot.forEach((doc) => {
+      const requestData = doc.data();
+      if (
+        requestNames.includes(requestData.requestName) &&
+        requestData.hypercertTargetIDs.includes(hypercertID)
+      ) {
+        response.push(requestData);
+      }
+    });
+  } catch (e) {
+    error = e;
+  }
+
+  return { response, error };
+}
+
 export async function getAllReviewRequests() {
   let response;
   let error;
