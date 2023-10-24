@@ -3,6 +3,7 @@ import {
   DEFAULT_PAYMENT_ADDRESS,
   EAS_CONTRACT_ABI,
   EAS_CONTRACT_ADDRESS,
+  EAS_REVIEWS_SCHEMA_ID,
   ERC_20_ABI,
   PAYMENT_OPTIONS,
 } from "../constants/contractConstants";
@@ -30,6 +31,7 @@ export const getContract = async (web3, contractABI, contractAddress) => {
 
 export const createReviewForm = async (web3, contract, params) => {
   const { questions, types, choices, contractAddress, walletAddress } = params;
+  const easSchemaID = EAS_REVIEWS_SCHEMA_ID;
   const { methods } = contract;
 
   let response;
@@ -38,7 +40,9 @@ export const createReviewForm = async (web3, contract, params) => {
     const transaction = {
       from: walletAddress,
       to: contractAddress,
-      data: methods.createReviewForm(questions, choices, types).encodeABI(),
+      data: methods
+        .createReviewForm(easSchemaID, questions, choices, types)
+        .encodeABI(),
     };
 
     await web3.eth
