@@ -72,10 +72,10 @@
                 <a
                   :href="`${easExplorerUrl}/attestation/view/${reviewAmendment.amendmentUID}`"
                   target="_blank"
-                  style="text-decoration: none"
+                  style="text-decoration: none; margin-right: 10px"
                   >{{ reviewAmendment.amendmentUID }}</a
                 >
-                <strong> (10/19/23 05:34pm)</strong>
+                <strong>({{ formatDate(reviewAmendment.createdAt) }})</strong>
                 <br />
                 {{ reviewAmendment.amendment }} <br />
                 <hr />
@@ -128,9 +128,10 @@ export default {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
         hour12: true,
       };
-
       return date.toLocaleString("en-US", options);
     };
 

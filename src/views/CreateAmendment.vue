@@ -214,6 +214,7 @@ export default {
           name: refReviewObject.value.requestName,
           amendment: amendmentObject.amendment,
           hypercertID: refReviewObject.value.hypercertID,
+          attachmentsIpfsHashes: [], //TODO: add attachments
           refUID: refUID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           walletAddress: walletAddress.value,

@@ -229,7 +229,14 @@ export const closeRequest = async (web3, contract, params) => {
 };
 
 export const submitReview = async (web3, contract, params) => {
-  const { name, hypercertID, answers, grantID, walletAddress } = params;
+  const {
+    name,
+    hypercertID,
+    answers,
+    attachmentsIpfsHashes,
+    grantID,
+    walletAddress,
+  } = params;
 
   const { methods } = contract;
   const { eth } = web3;
@@ -243,15 +250,14 @@ export const submitReview = async (web3, contract, params) => {
   try {
     const requestReviewForm = await methods.getRequestReviewForm(name).call();
     const reviewsSchemaID = await methods.reviewsSchemaID().call();
-    // Fixed positions based on smart-contract
     const pdfRequestData = {
       name: name,
       accountID: walletAddress,
       hypercertID: hypercertID,
       grantID: grantID,
       easSchemaID: reviewsSchemaID,
-      questions: requestReviewForm[0],
-      questionOptions: requestReviewForm[2],
+      questions: requestReviewForm.questions,
+      questionOptions: requestReviewForm.choices,
       answers: answers,
     };
 
@@ -272,6 +278,7 @@ export const submitReview = async (web3, contract, params) => {
       { type: "uint256", name: "hypercertID" },
       { type: "string[]", name: "answers" },
       { type: "string", name: "pdfIpfsHash" },
+      { type: "string", name: "attachmentsIpfsHashes" },
     ];
 
     const encodedData = web3.eth.abi.encodeParameters(abi, [
@@ -279,6 +286,7 @@ export const submitReview = async (web3, contract, params) => {
       hypercertID,
       answers,
       ipfsHashID,
+      attachmentsIpfsHashes,
     ]);
 
     const data = await easContract.methods
@@ -319,7 +327,14 @@ export const submitReview = async (web3, contract, params) => {
 };
 
 export const createAmendment = async (web3, contract, params) => {
-  const { name, hypercertID, amendment, refUID, walletAddress } = params;
+  const {
+    name,
+    hypercertID,
+    amendment,
+    attachmentsIpfsHashes,
+    refUID,
+    walletAddress,
+  } = params;
 
   const { methods } = contract;
   const { eth } = web3;
@@ -337,12 +352,14 @@ export const createAmendment = async (web3, contract, params) => {
       { type: "string", name: "requestName" },
       { type: "uint256", name: "hypercertID" },
       { type: "string", name: "amendment" },
+      { type: "string", name: "attachmentsIpfsHashes" },
     ];
 
     const encodedData = web3.eth.abi.encodeParameters(abi, [
       name,
       hypercertID,
       amendment,
+      attachmentsIpfsHashes,
     ]);
 
     const data = await easContract.methods

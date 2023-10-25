@@ -268,7 +268,7 @@ export default {
         const data = await (
           await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)
         ).json();
-        return data.name;
+        return `${data.name} (ID: ${grantObj.value.hypercertID})`;
       } else {
         return "Name unavailable";
       }
@@ -373,6 +373,7 @@ export default {
           grantID: grantID,
           hypercertID: reviewObject.hypercertID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
+          attachmentsIpfsHashes: [], //TODO: add attachments
           walletAddress: walletAddress.value,
         };
 
@@ -543,7 +544,7 @@ export default {
 .submit-review-form {
   display: flex;
   flex-direction: column;
-  width: 60%;
+  width: 90%;
 }
 
 .review-row {
