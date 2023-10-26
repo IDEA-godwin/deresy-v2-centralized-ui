@@ -30,17 +30,16 @@ export const getContract = async (web3, contractABI, contractAddress) => {
 
 export const createReviewForm = async (web3, contract, params) => {
   const { questions, types, choices, contractAddress, walletAddress } = params;
-  const reviewsSchemaID = await methods.reviewsSchemaID().call();
   const { methods } = contract;
-
+  
   let response;
-
+  
   try {
     const transaction = {
       from: walletAddress,
       to: contractAddress,
       data: methods
-        .createReviewForm(reviewsSchemaID, questions, choices, types)
+        .createReviewForm(questions, choices, types)
         .encodeABI(),
     };
 
