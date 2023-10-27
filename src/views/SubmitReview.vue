@@ -133,6 +133,46 @@
                         </el-row>
                       </el-col>
                     </el-row>
+                    <el-row
+                      class="attachment-row"
+                      v-for="(filename, index) in attachedFiles"
+                      :key="index"
+                    >
+                      <el-col :span="24" class="targetHashDiv">
+                        {{ filename }}
+                        <el-button
+                          class="delete-attachment-row"
+                          type="danger"
+                          :icon="CloseBold"
+                          size="small"
+                          circle
+                          @click="removeAttachment(index)"
+                          >x</el-button
+                        >
+                      </el-col>
+                    </el-row>
+                    <el-row
+                      v-if="
+                        reviewObject.requestName && attachedFiles.length < 3
+                      "
+                    >
+                      <el-col :span="24">
+                        <el-upload
+                          ref="upload"
+                          action="#"
+                          :show-file-list="false"
+                          :before-upload="() => false"
+                          @change="handleFileChange"
+                        >
+                          <el-button
+                            class="getForm"
+                            type="primary"
+                            size="medium"
+                            >Add Attachment</el-button
+                          >
+                        </el-upload>
+                      </el-col>
+                    </el-row>
                     <el-row v-if="reviewObject.requestName" class="action-row">
                       <el-col :span="24">
                         <el-button
@@ -229,6 +269,7 @@ export default {
     const grantReviews = ref([]);
     const loading = ref(true);
     const isFormLoading = ref(false);
+    const attachedFiles = ref([]);
 
     const reviewObject = reactive({
       requestName: "",
@@ -495,7 +536,20 @@ export default {
       }
     });
 
+    const handleFileChange = (file) => {
+      if (attachedFiles.value.length < 3) {
+        attachedFiles.value.push(file.raw.name);
+      } else {
+        alert("You can attach up to 3 files only.");
+      }
+    };
+
+    const removeAttachment = (index) => {
+      attachedFiles.value.splice(index, 1);
+    };
+
     return {
+      attachedFiles,
       walletAddressRef,
       reviewObject,
       requestObjectReady,
@@ -517,6 +571,8 @@ export default {
       updateSubmitForm,
       loadPastAnswers,
       sendBtn,
+      handleFileChange,
+      removeAttachment,
       v$,
     };
   },
@@ -524,6 +580,9 @@ export default {
 </script>
 
 <style scoped>
+.delete-attachment-row {
+  margin-left: 1%;
+}
 .review-select {
   width: 50%;
 }
