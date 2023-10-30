@@ -151,6 +151,7 @@ export default {
       requestName: null,
       hypercertID: null,
       amendment: null,
+      pdfIpfsHash: null,
       refUID: null,
     });
 
@@ -214,6 +215,7 @@ export default {
           name: refReviewObject.value.requestName,
           amendment: amendmentObject.amendment,
           hypercertID: refReviewObject.value.hypercertID,
+          pdfIpfsHash: amendmentObject.pdfIpfsHash,
           attachmentsIpfsHashes: [], //TODO: add attachments
           refUID: refUID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
@@ -262,6 +264,7 @@ export default {
       amendmentObject.requestName = null;
       amendmentObject.hypercertID = null;
       amendmentObject.amendment = null;
+      amendmentObject.pdfIpfsHash = null;
       amendmentObject.refUID = null;
 
       refReviewObject.value = null;
@@ -271,6 +274,7 @@ export default {
       ).response;
       amendmentObject.requestName = refReviewObject.value.requestName;
       amendmentObject.hypercertID = refReviewObject.value.hypercertID;
+      amendmentObject.pdfIpfsHash = "";
       amendmentObject.refUID = refUID;
       await simpleMDEInitializer();
       hypercertName.value = await getHypercertName();
