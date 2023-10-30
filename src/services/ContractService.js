@@ -275,7 +275,7 @@ export const submitReview = async (web3, contract, params) => {
       { type: "uint256", name: "hypercertID" },
       { type: "string[]", name: "answers" },
       { type: "string", name: "pdfIpfsHash" },
-      { type: "string", name: "attachmentsIpfsHashes" },
+      { type: "string[]", name: "attachmentsIpfsHashes" },
     ];
 
     const encodedData = web3.eth.abi.encodeParameters(abi, [
@@ -349,7 +349,7 @@ export const createAmendment = async (web3, contract, params) => {
       { type: "string", name: "requestName" },
       { type: "uint256", name: "hypercertID" },
       { type: "string", name: "amendment" },
-      { type: "string", name: "attachmentsIpfsHashes" },
+      { type: "string[]", name: "attachmentsIpfsHashes" },
     ];
 
     const encodedData = web3.eth.abi.encodeParameters(abi, [

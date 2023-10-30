@@ -52,6 +52,18 @@
       ></div>
       <br /><br />
     </div>
+    <div v-if="review.attachmentsIpfsHashes.length > 0">
+      <span style="font-weight: bolder">Attachments</span><br />
+      <div
+        v-for="(attachmentHash, index) in review.attachmentsIpfsHashes"
+        :key="index"
+      >
+        <a :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`" target="_blank">
+          {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+        </a>
+        <br />
+      </div>
+    </div>
     <el-col class="reviews-cards-col">
       <div v-if="amendments(review.attestationID).length > 0">
         <el-collapse>
@@ -80,6 +92,24 @@
                 {{ reviewAmendment.amendment }} <br />
                 <hr />
                 <br />
+                <div v-if="reviewAmendment.attachmentsIpfsHashes.length > 0">
+                  <strong>Attachments</strong>
+                  <br />
+                  <div
+                    v-for="(
+                      attachmentHash, index
+                    ) in reviewAmendment.attachmentsIpfsHashes"
+                    :key="index"
+                  >
+                    <a
+                      :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`"
+                      target="_blank"
+                    >
+                      {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+                    </a>
+                    <br />
+                  </div>
+                </div>
               </div>
             </div>
           </el-collapse-item>

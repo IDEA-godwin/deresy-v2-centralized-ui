@@ -135,11 +135,12 @@
                     </el-row>
                     <el-row
                       class="attachment-row"
-                      v-for="(filename, index) in attachedFiles"
+                      v-for="(fileInfo, index) in attachedFiles"
                       :key="index"
                     >
                       <el-col :span="24" class="targetHashDiv">
-                        {{ filename }}
+                        {{ fileInfo.fileName }} IPFS HASH:
+                        {{ fileInfo.ipfsHash }}
                         <el-button
                           class="delete-attachment-row"
                           type="danger"
@@ -408,13 +409,17 @@ export default {
           return review.answer;
         });
 
+        const attachmentsIpfsHashes = attachedFiles.value.map(
+          (file) => file.ipfsHash
+        );
+
         const payload = {
           name: reviewObject.requestName,
           answers: reviewsAnswers,
           grantID: grantID,
           hypercertID: reviewObject.hypercertID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
-          attachmentsIpfsHashes: [], //TODO: add attachments
+          attachmentsIpfsHashes: attachmentsIpfsHashes,
           walletAddress: walletAddress.value,
         };
 
@@ -536,12 +541,38 @@ export default {
       }
     });
 
-    const handleFileChange = (file) => {
-      if (attachedFiles.value.length < 3) {
-        attachedFiles.value.push(file.raw.name);
-      } else {
-        alert("You can attach up to 3 files only.");
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    const handleFileChange = async (file) => {
+      isFormLoading.value = true;
+      try {
+        const base64File = await fileToBase64(file.raw);
+        const response = await fetch(
+          process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
+            "/api/upload-file-to-ipfs",
+          {
+            method: "POST",
+            body: JSON.stringify({ file: base64File }),
+          }
+        );
+
+        const data = await response.json();
+
+        attachedFiles.value.push({
+          fileName: file.name,
+          ipfsHash: data.ipfsHash,
+        });
+      } catch (error) {
+        console.error("Error uploading the file: ", error);
       }
+      isFormLoading.value = false;
     };
 
     const removeAttachment = (index) => {
