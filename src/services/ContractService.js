@@ -31,16 +31,14 @@ export const getContract = async (web3, contractABI, contractAddress) => {
 export const createReviewForm = async (web3, contract, params) => {
   const { questions, types, choices, contractAddress, walletAddress } = params;
   const { methods } = contract;
-  
+
   let response;
-  
+
   try {
     const transaction = {
       from: walletAddress,
       to: contractAddress,
-      data: methods
-        .createReviewForm(questions, choices, types)
-        .encodeABI(),
+      data: methods.createReviewForm(questions, choices, types).encodeABI(),
     };
 
     await web3.eth

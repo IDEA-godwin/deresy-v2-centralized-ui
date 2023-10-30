@@ -77,7 +77,9 @@
                 >
                 <div v-if="reviewAmendment.pdfIpfsHash.length > 0">
                   <strong>PDF IPFS </strong>
-                  <a :href="reviewAmendment.pdfIpfsHash">{{ reviewAmendment.pdfIpfsHash }}</a>
+                  <a :href="reviewAmendment.pdfIpfsHash">{{
+                    reviewAmendment.pdfIpfsHash
+                  }}</a>
                 </div>
                 <strong>({{ formatDate(reviewAmendment.createdAt) }})</strong>
                 <br />
