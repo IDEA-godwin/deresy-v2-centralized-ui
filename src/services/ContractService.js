@@ -350,6 +350,7 @@ export const createAmendment = async (web3, contract, params) => {
       { type: "string", name: "requestName" },
       { type: "uint256", name: "hypercertID" },
       { type: "string", name: "amendment" },
+      { type: "string", name: "pdfIpfsHash" },
       { type: "string[]", name: "attachmentsIpfsHashes" },
     ];
 
