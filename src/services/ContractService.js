@@ -328,6 +328,7 @@ export const createAmendment = async (web3, contract, params) => {
     name,
     hypercertID,
     amendment,
+    pdfIpfsHash,
     attachmentsIpfsHashes,
     refUID,
     walletAddress,
@@ -356,6 +357,7 @@ export const createAmendment = async (web3, contract, params) => {
       name,
       hypercertID,
       amendment,
+      pdfIpfsHash,
       attachmentsIpfsHashes,
     ]);
 

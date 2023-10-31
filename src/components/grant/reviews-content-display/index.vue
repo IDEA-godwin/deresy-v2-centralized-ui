@@ -87,6 +87,12 @@
                   style="text-decoration: none; margin-right: 10px"
                   >{{ reviewAmendment.amendmentUID }}</a
                 >
+                <div v-if="reviewAmendment.pdfIpfsHash.length > 0">
+                  <strong>PDF IPFS </strong>
+                  <a :href="reviewAmendment.pdfIpfsHash">{{
+                    reviewAmendment.pdfIpfsHash
+                  }}</a>
+                </div>
                 <strong>({{ formatDate(reviewAmendment.createdAt) }})</strong>
                 <br />
                 {{ reviewAmendment.amendment }} <br />
