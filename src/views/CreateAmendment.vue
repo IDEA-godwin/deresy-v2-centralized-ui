@@ -258,6 +258,7 @@ export default {
           refUID: refUID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           walletAddress: walletAddress.value,
+          pdfIpfsHash: '', // TODO: Remove this and add pdf generation functionality
         };
 
         try {
