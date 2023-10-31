@@ -29,6 +29,7 @@
         >{{ pinataGatewayUrl }}/ipfs/{{ review.pdfIpfsHash }}</a
       >
     </div>
+    <br />
     <el-button
       type="primary"
       class="d-round-btn"
@@ -76,14 +77,20 @@
                   >{{ reviewAmendment.amendmentUID }}</a
                 >
                 <div v-if="reviewAmendment.pdfIpfsHash.length > 0">
-                  <strong>PDF IPFS </strong>
-                  <a :href="reviewAmendment.pdfIpfsHash">{{
-                    reviewAmendment.pdfIpfsHash
-                  }}</a>
+                  <strong>PDF File </strong>
+                  <a
+                    :href="`${pinataGatewayUrl}/ipfs/${reviewAmendment.pdfIpfsHash}`"
+                    target="_blank"
+                    >{{ reviewAmendment.pdfIpfsHash }}</a
+                  >
                 </div>
                 <strong>({{ formatDate(reviewAmendment.createdAt) }})</strong>
+                <br /><br />
+                <div
+                  class="answer-card"
+                  v-html="markdownToHtml(reviewAmendment.amendment)"
+                ></div>
                 <br />
-                {{ reviewAmendment.amendment }} <br />
                 <hr />
                 <br />
               </div>
@@ -122,9 +129,9 @@ export default {
     };
 
     const amendments = (refUID) => {
-      return props.reviewAmendments.filter(
-        (amendment) => amendment.refUID == refUID
-      );
+      return props.reviewAmendments
+        .filter((amendment) => amendment.refUID == refUID)
+        .sort((a, b) => b.createdAt - a.createdAt);
     };
 
     const formatDate = (unixTimestamp) => {

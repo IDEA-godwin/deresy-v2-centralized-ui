@@ -18,3 +18,16 @@ export async function getReviewAmendments(requestNames, hypercertID) {
 
   return { response, error };
 }
+
+export async function getAmendmentsByRefUID(refUID) {
+  let response;
+  let error;
+  try {
+    const snapshot = await amendmentsRef.where("refUID", "==", refUID).get();
+    response = snapshot.docs.map((doc) => doc.data());
+  } catch (e) {
+    error = e;
+  }
+
+  return { response, error };
+}

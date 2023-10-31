@@ -1,4 +1,6 @@
 import { ElNotification } from "element-plus";
+import { getAmendmentsByRefUID } from "@/services/AmendmentService";
+import { getReviewByAttestationID } from "@/services/ReviewService";
 import {
   DEFAULT_PAYMENT_ADDRESS,
   EAS_CONTRACT_ABI,
@@ -256,6 +258,8 @@ export const submitReview = async (web3, contract, params) => {
       questions: requestReviewForm.questions,
       questionOptions: requestReviewForm.choices,
       answers: answers,
+      reviewCreatedAt: Math.floor(Date.now() / 1000),
+      attachmentsIpfsHashes: attachmentsIpfsHashes,
     };
 
     const pdfResponse = await fetch(
@@ -327,8 +331,8 @@ export const createAmendment = async (web3, contract, params) => {
   const {
     name,
     hypercertID,
+    grantID,
     amendment,
-    pdfIpfsHash,
     attachmentsIpfsHashes,
     refUID,
     walletAddress,
@@ -345,6 +349,41 @@ export const createAmendment = async (web3, contract, params) => {
 
   try {
     const amendmentsSchemaID = await methods.amendmentsSchemaID().call();
+    const reviewAmendments = (await getAmendmentsByRefUID(refUID)).response;
+    reviewAmendments.push({
+      amendment: amendment,
+      attachmentsIpfsHashes: attachmentsIpfsHashes,
+      createdAt: Math.floor(Date.now() / 1000),
+    });
+    const amendmentReview = (await getReviewByAttestationID([name], refUID))
+      .response;
+    const requestReviewForm = await methods.getRequestReviewForm(name).call();
+    const reviewsSchemaID = await methods.reviewsSchemaID().call();
+    const pdfRequestData = {
+      name: name,
+      accountID: walletAddress,
+      hypercertID: hypercertID,
+      grantID: grantID,
+      easSchemaID: reviewsSchemaID,
+      questions: requestReviewForm.questions,
+      questionOptions: requestReviewForm.choices,
+      answers: amendmentReview.answers,
+      reviewCreatedAt: Math.floor(Date.now() / 1000),
+      attachmentsIpfsHashes: attachmentsIpfsHashes,
+      amendments: reviewAmendments,
+    };
+
+    const pdfResponse = await fetch(
+      process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + "/api/generate_pdf",
+      {
+        method: "POST",
+        body: JSON.stringify(pdfRequestData),
+      }
+    );
+
+    const pdfData = await pdfResponse?.json();
+
+    const pdfIpfsHash = pdfData?.IpfsHash;
 
     const abi = [
       { type: "string", name: "requestName" },
