@@ -67,6 +67,39 @@
                       </el-row>
                     </el-col>
                   </el-row>
+                  <el-row
+                    class="attachment-row"
+                    v-for="(fileInfo, index) in attachedFiles"
+                    :key="index"
+                  >
+                    <el-col :span="24" class="targetHashDiv">
+                      {{ fileInfo.fileName }} IPFS HASH: {{ fileInfo.ipfsHash }}
+                      <el-button
+                        class="delete-attachment-row"
+                        type="danger"
+                        :icon="CloseBold"
+                        size="small"
+                        circle
+                        @click="removeAttachment(index)"
+                        >x</el-button
+                      >
+                    </el-col>
+                  </el-row>
+                  <el-row v-if="attachedFiles.length < 3">
+                    <el-col :span="24">
+                      <el-upload
+                        ref="upload"
+                        action="#"
+                        :show-file-list="false"
+                        :before-upload="() => false"
+                        @change="handleFileChange"
+                      >
+                        <el-button class="getForm" type="primary" size="medium"
+                          >Add Attachment</el-button
+                        >
+                      </el-upload>
+                    </el-col>
+                  </el-row>
                   <el-row class="action-row">
                     <el-col :span="24">
                       <el-button
@@ -110,7 +143,7 @@ import {
   HYPERCERT_CONTRACT_ADDRESS,
   HYPERCERT_CONTRACT_ABI,
 } from "@/constants/contractConstants";
-import { nextTick } from "vue";
+import { nextTick, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { computed, ref, onBeforeMount, reactive } from "vue";
@@ -146,6 +179,7 @@ export default {
     const refReviewObject = ref({});
     const grantObj = ref({});
     const easExplorerUrl = ref("");
+    const attachedFiles = ref([]);
 
     const amendmentObject = reactive({
       requestName: null,
@@ -189,7 +223,7 @@ export default {
     };
 
     const forbiddenMessage = () => {
-      if (!refReviewObject?.value?.reviewer == walletAddressRef.value) {
+      if (!refReviewObject?.value?.reviewer != walletAddressRef.value) {
         return `Your address (${walletAddressRef.value}) is not authorized to create an amendment for this review.`;
       }
     };
@@ -200,7 +234,7 @@ export default {
       const textArea = document.getElementById("simplemde-amendment");
       const SimpleMDE = window.SimpleMDE;
       const simplemde = new SimpleMDE({ element: textArea, forceSync: true });
-      simplemde.codemirror.on("change", function () {
+      simplemde?.codemirror?.on("change", function () {
         amendmentObject.amendment = simplemde.value();
       });
     };
@@ -210,12 +244,17 @@ export default {
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
+
+        const attachmentsIpfsHashes = attachedFiles.value.map(
+          (file) => file.ipfsHash
+        );
+
         const payload = {
           name: refReviewObject.value.requestName,
           amendment: amendmentObject.amendment,
           hypercertID: refReviewObject.value.hypercertID,
           grantID: grantID,
-          attachmentsIpfsHashes: [], //TODO: add attachments
+          attachmentsIpfsHashes: attachmentsIpfsHashes,
           refUID: refUID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           walletAddress: walletAddress.value,
@@ -259,6 +298,44 @@ export default {
       isFormLoading.value = false;
     };
 
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    const handleFileChange = async (file) => {
+      isFormLoading.value = true;
+      try {
+        const base64File = await fileToBase64(file.raw);
+        const response = await fetch(
+          process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
+            "/api/upload-file-to-ipfs",
+          {
+            method: "POST",
+            body: JSON.stringify({ file: base64File }),
+          }
+        );
+
+        const data = await response.json();
+
+        attachedFiles.value.push({
+          fileName: file.name,
+          ipfsHash: data.ipfsHash,
+        });
+      } catch (error) {
+        console.error("Error uploading the file: ", error);
+      }
+      isFormLoading.value = false;
+    };
+
+    const removeAttachment = (index) => {
+      attachedFiles.value.splice(index, 1);
+    };
+
     onBeforeMount(async () => {
       amendmentObject.requestName = null;
       amendmentObject.hypercertID = null;
@@ -278,7 +355,13 @@ export default {
       loading.value = false;
     });
 
+    watch(walletAddress, async () => {
+      walletAddressRef.value = walletAddress.value;
+      await simpleMDEInitializer();
+    });
+
     return {
+      attachedFiles,
       hypercertName,
       loading,
       isFormLoading,
@@ -286,6 +369,8 @@ export default {
       walletAddressRef,
       easExplorerUrl,
       forbiddenMessage,
+      removeAttachment,
+      handleFileChange,
       sendBtn,
       v$,
     };

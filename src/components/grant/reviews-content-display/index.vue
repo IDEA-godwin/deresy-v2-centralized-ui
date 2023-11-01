@@ -21,12 +21,27 @@
     ><br /><br />
 
     <div v-if="review.pdfIpfsHash">
-      <span style="font-weight: bolder">PDF File</span><br />
+      <div v-if="getLatestAmendmentPDFHash(review.attestationID)">
+        <span style="font-weight: bolder">PDF File (Original)</span><br />
+      </div>
+      <div v-else>
+        <span style="font-weight: bolder">PDF File</span><br />
+      </div>
       <a
         :href="`${pinataGatewayUrl}/ipfs/${review.pdfIpfsHash}`"
         target="_blank"
         style="text-decoration: none"
-        >{{ pinataGatewayUrl }}/ipfs/{{ review.pdfIpfsHash }}</a
+        >{{ review.pdfIpfsHash }}</a
+      >
+    </div>
+    <div v-if="getLatestAmendmentPDFHash(review.attestationID)">
+      <br />
+      <span style="font-weight: bolder">PDF File (Latest Amendment)</span><br />
+      <a
+        :href="`${pinataGatewayUrl}/ipfs/${getLatestAmendmentPDFHash(review.attestationID)}`"
+        target="_blank"
+        style="text-decoration: none"
+        >{{ getLatestAmendmentPDFHash(review.attestationID) }}</a
       >
     </div>
     <br />
@@ -53,7 +68,19 @@
       ></div>
       <br /><br />
     </div>
-    <el-col class="reviews-cards-col">
+    <div v-if="review.attachmentsIpfsHashes.length > 0">
+      <span style="font-weight: bolder">Attachments</span><br />
+      <div
+        v-for="(attachmentHash, index) in review.attachmentsIpfsHashes"
+        :key="index"
+      >
+        <a :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`" target="_blank">
+          {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+        </a>
+        <br />
+      </div>
+    </div>
+    <el-col class="amendments-col">
       <div v-if="amendments(review.attestationID).length > 0">
         <el-collapse>
           <el-collapse-item>
@@ -93,6 +120,24 @@
                 <br />
                 <hr />
                 <br />
+                <div v-if="reviewAmendment.attachmentsIpfsHashes.length > 0">
+                  <strong>Attachments</strong>
+                  <br />
+                  <div
+                    v-for="(
+                      attachmentHash, index
+                    ) in reviewAmendment.attachmentsIpfsHashes"
+                    :key="index"
+                  >
+                    <a
+                      :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`"
+                      target="_blank"
+                    >
+                      {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+                    </a>
+                    <br />
+                  </div>
+                </div>
               </div>
             </div>
           </el-collapse-item>
@@ -158,12 +203,27 @@ export default {
       });
     };
 
+    const getLatestAmendmentPDFHash = (refUID) => {
+      const sortedAmendments = props.reviewAmendments
+        .filter((amendment) => amendment.refUID == refUID)
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+      for (const amendment of sortedAmendments) {
+        if (amendment.pdfIpfsHash && amendment.pdfIpfsHash.length > 0) {
+          console.log(amendment.pdfIpfsHash);
+          return amendment.pdfIpfsHash;
+        }
+      }
+      return null;
+    };
+
     return {
       walletAddress,
       amendments,
       getReviewForm,
       formatDate,
       markdownToHtml,
+      getLatestAmendmentPDFHash,
       goToCreateAmendment,
     };
   },
@@ -182,6 +242,9 @@ export default {
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 20px;
+}
+.amendments-col{
+  margin: 20px 0;
 }
 .el-collapse-item__header {
   padding: calc(var(--el-card-padding) - 16px) var(--el-card-padding);
