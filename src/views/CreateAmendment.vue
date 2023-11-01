@@ -109,7 +109,7 @@
                         size="large"
                         :disabled="isFormLoading"
                       >
-                        Send
+                        Submit
                       </el-button>
                     </el-col>
                   </el-row>
@@ -144,7 +144,7 @@ import {
   HYPERCERT_CONTRACT_ABI,
 } from "@/constants/contractConstants";
 import { nextTick, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { computed, ref, onBeforeMount, reactive } from "vue";
 import { createAmendment } from "@/services/ContractService";
@@ -157,6 +157,7 @@ import { optimismWeb3 } from "@/web3";
 export default {
   name: "Create Amendment",
   setup() {
+    const router = useRouter();
     const route = useRoute();
     const store = useStore();
     const {
@@ -261,6 +262,13 @@ export default {
         };
 
         try {
+          ElNotification({
+            title: "Info",
+            message: "Submitting data you will be asked to sign in a moment.",
+            type: "info",
+            duration: 8000,
+          });
+
           await createAmendment(web3.value, contract.value, payload);
 
           ElNotification({
@@ -268,6 +276,10 @@ export default {
             message: "Successful transaction.",
             type: "success",
             duration: notificationTime,
+          });
+
+          router.push({
+            path: `/grants/${grantID}`,
           });
         } catch (e) {
           if (e.code === 4001) {
@@ -327,6 +339,12 @@ export default {
           ipfsHash: data.ipfsHash,
         });
       } catch (error) {
+        ElNotification({
+          title: "Error",
+          message: "Attachment not processed. The file size limit is 50mb.",
+          type: "error",
+          duration: notificationTime,
+        });
         console.error("Error uploading the file: ", error);
       }
       isFormLoading.value = false;

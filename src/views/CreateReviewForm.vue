@@ -32,7 +32,7 @@
                 type="success"
                 size="large"
               >
-                Send
+                Submit
               </el-button>
             </el-col>
           </el-row>
@@ -50,6 +50,8 @@ import { useStore } from "vuex";
 import { reactive, onBeforeMount, computed, ref } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
+import { useRouter } from "vue-router";
+import { HOME_ROUTE } from "@/constants/routes";
 
 export default {
   name: "CreateReviewForm",
@@ -68,6 +70,7 @@ export default {
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const isFormLoading = ref(false);
+    const router = useRouter();
 
     const formAccessibility = reactive({
       formQuestions: [],
@@ -117,6 +120,10 @@ export default {
             message: "Successful transaction.",
             type: "success",
             duration: notificationTime,
+          });
+          router.push({
+            path: HOME_ROUTE,
+            query: { formSuccess: "true" },
           });
         } catch (e) {
           if (e.code === 4001) {

@@ -35,7 +35,7 @@
           size="large"
           :disabled="!requestName"
         >
-          Send
+          Submit
         </el-button>
       </el-col>
     </el-row>
@@ -48,6 +48,9 @@ import { closeRequest, getRequestNames } from "@/services/ContractService";
 import { useStore } from "vuex";
 import { watch, computed, ref, onBeforeMount } from "vue";
 import { ElNotification } from "element-plus";
+import { useRouter } from "vue-router";
+import { HOME_ROUTE } from "@/constants/routes";
+
 export default {
   name: "CreateReviewRequest",
   setup() {
@@ -61,6 +64,7 @@ export default {
     const walletAddress = computed(() => user.walletAddress);
     const contract = computed(() => contractState.contract);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
+    const router = useRouter();
 
     const requestName = ref("");
     const requestNames = ref();
@@ -84,6 +88,11 @@ export default {
           message: "Successful transaction.",
           type: "success",
           duration: notificationTime,
+        });
+
+        router.push({
+          path: HOME_ROUTE,
+          query: { formSuccess: "true" },
         });
       } catch (e) {
         if (e.code === 4001) {

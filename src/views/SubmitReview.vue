@@ -183,7 +183,7 @@
                           size="large"
                           :disabled="isFormLoading"
                         >
-                          Send
+                          Submit
                         </el-button>
                       </el-col>
                     </el-row>
@@ -214,7 +214,7 @@
 
 <script>
 import { nextTick } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   DERESY_CONTRACT_ADDRESS,
   HYPERCERT_CONTRACT_ADDRESS,
@@ -252,6 +252,7 @@ export default {
     const contract = computed(() => contractState.contract);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
+    const router = useRouter();
     const route = useRoute();
     const grantID = route.params.grant_id;
 
@@ -424,6 +425,12 @@ export default {
         };
 
         try {
+          ElNotification({
+            title: "Info",
+            message: "Submitting data you will be asked to sign in a moment.",
+            type: "info",
+            duration: 8000,
+          });
           await submitReview(web3.value, contract.value, payload);
 
           ElNotification({
@@ -431,6 +438,10 @@ export default {
             message: "Successful transaction.",
             type: "success",
             duration: notificationTime,
+          });
+
+          router.push({
+            path: `/grants/${grantID}`,
           });
         } catch (e) {
           if (e.code === 4001) {
@@ -570,6 +581,12 @@ export default {
           ipfsHash: data.ipfsHash,
         });
       } catch (error) {
+        ElNotification({
+          title: "Error",
+          message: "Attachment not processed. The file size limit is 50mb.",
+          type: "error",
+          duration: notificationTime,
+        });
         console.error("Error uploading the file: ", error);
       }
       isFormLoading.value = false;
