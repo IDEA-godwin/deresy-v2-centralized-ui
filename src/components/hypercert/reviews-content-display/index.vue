@@ -160,7 +160,7 @@ export default {
     reviewAmendments: Array,
     easExplorerUrl: String,
     pinataGatewayUrl: String,
-    grantID: String,
+    tokenID: String,
   },
   setup(props) {
     const store = useStore();
@@ -199,7 +199,7 @@ export default {
 
     const goToCreateAmendment = (review) => {
       router.push({
-        path: `/reviews/${props.grantID}/${review.attestationID}/create-amendment/`,
+        path: `/reviews/${props.tokenID}/${review.attestationID}/create-amendment/`,
       });
     };
 

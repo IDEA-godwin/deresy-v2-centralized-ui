@@ -51,6 +51,10 @@ const routes = [
     path: "/reviews/:grant_id/:review_id/create-amendment/",
     component: () => import("@/views/CreateAmendment"),
   },
+  {
+    path: "/hypercerts/:token_id",
+    component: () => import("@/views/Hypercert"),
+  },
 ];
 
 const scrollBehavior = (to, from, savedPosition) => {
