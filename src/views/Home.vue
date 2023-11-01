@@ -114,7 +114,7 @@
 
 <script>
 import { onBeforeMount, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 import { getAllGrants } from "@/services/GrantService";
 import { getAllReviews } from "@/services/ReviewService";
@@ -129,6 +129,7 @@ export default {
   components: {},
   setup() {
     const router = useRouter();
+    const route = useRoute();
 
     const grantsData = ref([]);
     const inputSearch = ref("");
@@ -204,7 +205,9 @@ export default {
       const store = useStore();
       const { dispatch } = store;
 
-      dispatch("showVersionNotification");
+      if (route.query.formSuccess !== "true") {
+        dispatch("showVersionNotification");
+      }
 
       await fetchData();
 

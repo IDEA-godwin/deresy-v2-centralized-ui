@@ -93,7 +93,7 @@
 
           <el-row class="form-section">
             <el-col :span="24">
-              <el-form-item label="Targets from last six months">
+              <el-form-item label="Hypercerts from last six months">
                 <el-radio-group v-model="hypercertLastSixMonths">
                   <el-radio-button :label="true">Yes</el-radio-button>
                   <el-radio-button :label="false">No</el-radio-button>
@@ -104,11 +104,11 @@
 
           <el-row class="form-section">
             <el-col :span="11"
-              ><label class="el-form-item__label">Targets</label></el-col
+              ><label class="el-form-item__label">Hypercerts</label></el-col
             >
             <el-col :span="11" style="padding-left: 10px"
               ><label class="el-form-item__label"
-                >Target IPFS Hashes</label
+                >Hypercert IPFS Hashes</label
               ></el-col
             >
             <el-col :span="24">
@@ -127,6 +127,7 @@
                       placeholder="Please enter a keyword"
                       :remote-method="remoteMethod"
                       :loading="hypercertsLoading"
+                      loading-text="Loading… this may take a moment"
                       style="width: 100%"
                     >
                       <el-option
@@ -239,7 +240,7 @@
                 class="send-btn"
                 type="success"
                 size="large"
-                >Send</el-button
+                >Submit</el-button
               >
             </el-col>
           </el-row>
@@ -262,6 +263,8 @@ import { reactive, computed, ref, watch, onBeforeMount } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
+import { useRouter } from "vue-router";
+import { HOME_ROUTE } from "@/constants/routes";
 
 export default {
   name: "CreateReviewRequest",
@@ -276,6 +279,7 @@ export default {
     const contract = computed(() => contractState.contract);
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
+    const router = useRouter();
 
     const reviewFormsTotal = ref(0);
     const contractRef = ref(contract);
@@ -425,6 +429,11 @@ export default {
             type: "success",
             duration: notificationTime,
           });
+
+          router.push({
+            path: HOME_ROUTE,
+            query: { formSuccess: "true" },
+          });
         } catch (e) {
           if (e.code === 4001) {
             ElNotification({
@@ -480,7 +489,13 @@ export default {
     watch(
       () => requestObject.isPaidReview,
       (newVal) => {
-        requestObject.rewardPerReview = newVal ? "" : "0";
+        if (newVal) {
+          requestObject.rewardPerReview = "";
+        } else {
+          requestObject.rewardPerReview = "0";
+          requestObject.paymentTokenAddress =
+            "0x0000000000000000000000000000000000000000";
+        }
       }
     );
 
