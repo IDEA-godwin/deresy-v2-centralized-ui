@@ -10,4 +10,9 @@ export default {
   SET_CONTRACT(state, payload) {
     state.contract = payload;
   },
+
+  SET_EAS_SCHEMA_IDS(state, payload) {
+    state.easSchemaIDs.reviewsSchemaID = payload.reviewsSchemaID;
+    state.easSchemaIDs.amendmentsSchemaID = payload.amendmentsSchemaID;
+  },
 };

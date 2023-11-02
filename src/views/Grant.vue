@@ -204,17 +204,13 @@
                           <span style="font-weight: bolder">EAS Schema ID</span>
                           <br />
                           <a
-                            :href="`${easExplorerUrl}/schema/view/${
-                              getReviewForm(reviewGroup.reviews[0].formID)
-                                ?.easSchemaID
-                            }`"
+                            :href="`${easExplorerUrl}/schema/view/${easSchemaIDs.reviewsSchemaID}`"
                             target="_blank"
                             style="text-decoration: none"
-                            >{{
-                              getReviewForm(reviewGroup.reviews[0].formID)
-                                ?.easSchemaID
-                            }}</a
-                          ><br /><br />
+                          >
+                            {{ easSchemaIDs.reviewsSchemaID }}
+                          </a>
+                          <br /><br />
 
                           <span style="font-weight: bolder">Hypercert</span
                           ><br />
@@ -333,7 +329,7 @@ export default {
   setup() {
     const store = useStore();
     const {
-      state: { user },
+      state: { contractState, user },
     } = store;
     const route = useRoute();
     const router = useRouter();
@@ -349,6 +345,8 @@ export default {
     const pinataGatewayUrl = ref("");
     const easExplorerUrl = ref("");
     const walletAddress = computed(() => user.walletAddress);
+    const easSchemaIDs = computed(() => contractState.easSchemaIDs);
+
     const hypercertLink = ref("");
     const hypercertName = ref("");
     const reviewAmendments = ref([]);
@@ -569,6 +567,7 @@ export default {
     };
 
     return {
+      easSchemaIDs,
       dataTable,
       grant,
       reviews,
