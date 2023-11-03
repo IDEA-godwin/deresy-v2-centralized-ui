@@ -2,8 +2,15 @@
   <div class="hypercert-page" v-loading="loading">
     <div v-if="!loading">
       <div v-if="!hypercertNotFound">
-        <el-row>
-          <el-col :style="'background-color:black; height:290px'">
+        <el-row style="padding: 50px 0">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="6"
+            :lg="6"
+            :xl="6"
+            style="padding: 5% 0 3% 0"
+          >
             <el-image
               :src="hypercert.metadata.image"
               class="image hypercert-image"
@@ -27,21 +34,19 @@
               </template>
             </el-image>
           </el-col>
-        </el-row>
-        <el-row>
-          <el-col class="title-col">
-            <el-row>
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="18"
+            :lg="18"
+            :xl="18"
+            class="title-col"
+          >
+            <hr />
+            <el-row style="margin-top: 20px">
               <span class="title-text">
                 {{ hypercert.metadata.name }}
               </span>
-            </el-row>
-            <el-row v-if="hypercert.metadata.description">
-              <div class="section__title">
-                <h3>Description</h3>
-              </div>
-              <el-card class="section__content" shadow="hover">
-                {{ hypercert.metadata.description }}
-              </el-card>
             </el-row>
             <el-row style="margin-top: 20px">
               <div v-if="reviewRequests.length > 0">
@@ -70,9 +75,9 @@
                   class="d-round-btn"
                   round
                   type="primary"
-                  @click="scrollToAbout()"
+                  @click="scrollToReviews()"
                 >
-                  See Project
+                  See Reviews
                   <el-icon class="el-icon--right">
                     <ArrowDownBold />
                   </el-icon>
@@ -90,110 +95,57 @@
               </a>
             </el-row>
             <hr />
-            <el-row class="hypercert-stats-row">
-              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                <div
-                  class="hypercert-stat"
-                  v-if="hypercert.metadata.hypercert.contributors.display_value"
-                >
-                  <el-icon
-                    :size="small"
-                    color="#6610f2"
-                    class="hypercert-icon-sm"
-                  >
-                    <Pointer />
-                  </el-icon>
-                  <strong>Contributors:</strong>
-                  {{
-                    formatAddress(
-                      hypercert.metadata.hypercert.contributors.display_value
-                    )
-                  }}
-                </div>
-                <div
-                  class="hypercert-stat"
-                  v-if="
-                    hypercert.metadata.hypercert.impact_timeframe.display_value
-                  "
-                >
-                  <el-icon
-                    :size="small"
-                    color="#6610f2"
-                    class="hypercert-icon-sm"
-                  >
-                    <Connection />
-                  </el-icon>
-                  <strong>Impact Timeframe:</strong>
-                  {{
-                    hypercert.metadata.hypercert.impact_timeframe.display_value
-                  }}
-                </div>
-                <div
-                  class="hypercert-stat"
-                  v-if="hypercert.metadata.hypercert.rights.display_value"
-                >
-                  <el-icon
-                    :size="small"
-                    color="#6610f2"
-                    class="hypercert-icon-sm"
-                  >
-                    <Watch />
-                  </el-icon>
-                  <strong>Rights:</strong>
-                  {{ hypercert.metadata.hypercert.rights.display_value }}
-                </div>
-              </el-col>
-              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                <div
-                  class="hypercert-stat"
-                  v-if="hypercert.metadata.hypercert.work_scope.display_value"
-                >
-                  <el-icon
-                    size="small"
-                    color="#6610f2"
-                    class="hypercert-icon-sm"
-                  >
-                    <Promotion />
-                  </el-icon>
-                  <strong>Work Scope:</strong>
-                  {{ hypercert.metadata.hypercert.work_scope.display_value }}
-                </div>
-                <div
-                  class="hypercert-stat"
-                  v-if="
-                    hypercert.metadata.hypercert.work_timeframe.display_value
-                  "
-                >
-                  <el-icon
-                    :size="small"
-                    color="#6610f2"
-                    class="hypercert-icon-sm"
-                  >
-                    <LocationFilled />
-                  </el-icon>
-                  <strong>Work Timeframe:</strong>
-                  {{
-                    hypercert.metadata.hypercert.work_timeframe.display_value
-                  }}
-                </div>
-                <div
-                  class="hypercert-stat"
-                  v-if="hypercert.metadata.hypercert.impact_scope.display_value"
-                >
-                  <el-icon
-                    :size="small"
-                    color="#6610f2"
-                    class="hypercert-icon-sm"
-                  >
-                    <Platform />
-                  </el-icon>
-                  <strong>Impact Scope:</strong>
-                  {{ hypercert.metadata.hypercert.impact_scope.display_value }}
-                </div>
-              </el-col>
+            <el-row v-if="hypercert.metadata.hypercert.rights.display_value"
+              >.
+              <div class="section__title">
+                <h3>Usage rights</h3>
+              </div>
+              {{ hypercert.metadata.hypercert.rights.display_value }}
             </el-row>
             <hr />
-            <el-row>
+            <el-row v-if="hypercert.metadata.description">
+              <div class="section__title">
+                <h3>Description</h3>
+              </div>
+              {{ hypercert.metadata.description }}
+            </el-row>
+            <hr />
+            <el-row v-if="hypercert.metadata.hypercert.work_scope">
+              <div class="section__title">
+                <h3>Work Scope</h3>
+              </div>
+              {{ hypercert.metadata.hypercert.work_scope.display_value }}
+            </el-row>
+            <hr />
+            <el-row v-if="hypercert.metadata.hypercert.work_timeframe">
+              <div class="section__title">
+                <h3>Work Timeframe</h3>
+              </div>
+              {{ hypercert.metadata.hypercert.work_timeframe.display_value }}
+            </el-row>
+            <hr />
+            <el-row v-if="hypercert.metadata.hypercert.impact_scope">
+              <div class="section__title">
+                <h3>Impact Scope</h3>
+              </div>
+              {{ hypercert.metadata.hypercert.impact_scope.display_value }}
+            </el-row>
+            <hr />
+            <el-row v-if="hypercert.metadata.hypercert.impact_timeframe">
+              <div class="section__title">
+                <h3>Impact Timeframe</h3>
+              </div>
+              {{ hypercert.metadata.hypercert.impact_timeframe.display_value }}
+            </el-row>
+            <hr />
+            <el-row v-if="hypercert.metadata.hypercert.contributors">
+              <div class="section__title">
+                <h3>Contributors</h3>
+              </div>
+              {{ hypercert.metadata.hypercert.contributors.display_value }}
+            </el-row>
+            <hr />
+            <el-row id="reviews-row">
               <el-col :span="24" class="reviews-col">
                 <el-col class="review-title-col">
                   <span>Reviews</span>
@@ -266,18 +218,6 @@
             </el-row>
           </el-col>
         </el-row>
-        <hr />
-        <el-row>
-          <el-col class="hypercert-about-col" :span="24" id="about-row">
-            <el-row>
-              <el-col class="hypercert-about-title">
-                <span>About</span>
-              </el-col>
-              <el-col class="hypercert-about-text" :span="24"> </el-col>
-            </el-row>
-            <hr />
-          </el-col>
-        </el-row>
       </div>
       <div v-else>
         <el-result
@@ -312,27 +252,11 @@ import { getAllReviewForms } from "@/services/ReviewFormService";
 import { getReviewAmendments } from "@/services/AmendmentService";
 
 import { ElMessage } from "element-plus";
-import {
-  FullScreen,
-  Pointer,
-  Connection,
-  Watch,
-  Promotion,
-  LocationFilled,
-  Platform,
-  ArrowDownBold,
-} from "@element-plus/icons";
+import { ArrowDownBold } from "@element-plus/icons";
 
 export default {
   name: "Hypercert",
   components: {
-    FullScreen,
-    Pointer,
-    Connection,
-    Watch,
-    Promotion,
-    LocationFilled,
-    Platform,
     ArrowDownBold,
     ReviewsContentDisplay,
   },
@@ -376,8 +300,8 @@ export default {
       return reviewRequests.value.every((request) => request.isClosed);
     });
 
-    const scrollToAbout = () => {
-      document.querySelector("#about-row").scrollIntoView({
+    const scrollToReviews = () => {
+      document.querySelector("#reviews-row").scrollIntoView({
         behavior: "smooth",
       });
     };
@@ -403,10 +327,6 @@ export default {
         length - 5,
         length - 1
       )}`;
-    };
-
-    const fetchHypercert = async () => {
-      hypercert.value = (await getHypercert(tokenID)).response;
     };
 
     const fetchReviewRequests = async () => {
@@ -455,14 +375,6 @@ export default {
         .reverse();
     };
 
-    const fetchReviewAmendments = async () => {
-      const reviewAmendmentsResponse = await getReviewAmendments(
-        hypercert.value.request_names,
-        hypercert.value.hypercertID
-      );
-      reviewAmendments.value = reviewAmendmentsResponse.response;
-    };
-
     const getRequestFormID = (requestName) => {
       const matchingRequest = reviewRequests.value.find(
         (req) => req.requestName === requestName
@@ -477,26 +389,24 @@ export default {
     };
 
     const fetchReviewForms = async () => {
-      const reviewFormResponse = await getAllReviewForms();
-
       const reviewFormIndexes = reviewRequests.value.map((request) =>
         parseInt(request.reviewFormIndex)
       );
 
-      reviewForms.value = reviewFormResponse.response.filter((form) =>
-        reviewFormIndexes.includes(form.formID)
+      reviewForms.value = (await await getAllReviewForms()).response.filter(
+        (form) => reviewFormIndexes.includes(form.formID)
       );
     };
 
     onBeforeMount(async () => {
-      await fetchHypercert();
+      hypercert.value = (await getHypercert(tokenID)).response;
+      reviewAmendments.value = (await getReviewAmendments(tokenID)).response;
 
       if (hypercert.value) {
         hypercertNotFound.value = false;
         await fetchReviewRequests();
         await fetchReviews();
         await fetchReviewForms();
-        await fetchReviewAmendments();
       }
 
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
@@ -532,7 +442,7 @@ export default {
       getReviewForm,
       markdownToHtml,
       goToSubmitReview,
-      scrollToAbout,
+      scrollToReviews,
       copyToClipboard,
       formatAddress,
     };
@@ -561,7 +471,7 @@ export default {
 .title-col {
   width: 100%;
   text-align: left;
-  padding: 3% 10%;
+  padding: 3% 3%;
 }
 
 .hypercert-stats-row {
@@ -677,7 +587,7 @@ hr {
 }
 .hypercert-image {
   width: 100%;
-  height: 290px;
+  height: 350px;
 }
 .review-question {
   font-weight: bolder;

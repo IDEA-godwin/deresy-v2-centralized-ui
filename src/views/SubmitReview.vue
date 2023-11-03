@@ -39,7 +39,9 @@
                     v-if="
                       !requestObject.isClosed &&
                       requestObject.reviewers.includes(walletAddressRef) &&
-                      !grantReviews?.some((r) => r.reviewer == walletAddressRef)
+                      !hypercertReviews?.some(
+                        (r) => r.reviewer == walletAddressRef
+                      )
                     "
                     class="submit-review-form"
                   >
@@ -226,8 +228,11 @@ import {
   populateAnswers,
 } from "@/helpers/ReviewsHelper";
 import { getRequestNames, submitReview } from "@/services/ContractService";
-import { getGrant } from "@/services/GrantService";
-import { getReviewRequest } from "@/services/ReviewRequestService";
+import { getHypercert } from "@/services/HypercertService";
+import {
+  getReviewRequest,
+  getReviewRequestsByHypercert,
+} from "@/services/ReviewRequestService";
 import { getReviewForm } from "@/services/ReviewFormService";
 import { getReviews } from "@/services/ReviewService";
 import { useStore } from "vuex";
@@ -236,7 +241,6 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
 import { optimismWeb3 } from "@/web3";
-import { getReviewRequests } from "../services/ReviewRequestService";
 
 export default {
   name: "SubmitReview",
@@ -254,7 +258,7 @@ export default {
 
     const router = useRouter();
     const route = useRoute();
-    const grantID = route.params.grant_id;
+    const tokenID = route.params.token_id;
 
     const reviewRequests = ref([]);
     const selectedReviewRequest = ref(null);
@@ -264,11 +268,11 @@ export default {
     const walletAddressRef = ref(walletAddress);
     const requestObject = ref();
     const reviewForm = ref({});
-    const grantObj = ref({});
+    const hypercertObj = ref({});
     const ipfsHashes = ref([]);
     const simpleMDEInstances = ref([]);
     const hypercertName = ref("");
-    const grantReviews = ref([]);
+    const hypercertReviews = ref([]);
     const loading = ref(true);
     const isFormLoading = ref(false);
     const attachedFiles = ref([]);
@@ -303,15 +307,13 @@ export default {
           from: walletAddress.value,
         }
       );
-      const uri = await hypercertContract.methods
-        .uri(grantObj.value.hypercertID.toString())
-        .call();
+      const uri = await hypercertContract.methods.uri(tokenID).call();
       if (uri) {
         const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
         const data = await (
           await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)
         ).json();
-        return `${data.name} (ID: ${grantObj.value.hypercertID})`;
+        return `${data.name} (ID: ${tokenID})`;
       } else {
         return "Name unavailable";
       }
@@ -325,9 +327,9 @@ export default {
       ) {
         return `Your address (${walletAddressRef.value}) is not authorized to submit a review for this request.`;
       } else if (
-        grantReviews.value.some((r) => r.reviewer == walletAddressRef.value)
+        hypercertReviews.value.some((r) => r.reviewer == walletAddressRef.value)
       ) {
-        return `This address (${walletAddressRef.value}) has already submitted a review for the Hypercert ID of this grant.`;
+        return `This address (${walletAddressRef.value}) has already submitted a review for this Request and Hypercert.`;
       }
     };
 
@@ -417,7 +419,7 @@ export default {
         const payload = {
           name: reviewObject.requestName,
           answers: reviewsAnswers,
-          grantID: grantID,
+          tokenID: tokenID,
           hypercertID: reviewObject.hypercertID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           attachmentsIpfsHashes: attachmentsIpfsHashes,
@@ -441,7 +443,7 @@ export default {
           });
 
           router.push({
-            path: `/grants/${grantID}`,
+            path: `/hypercerts/${tokenID}`,
           });
         } catch (e) {
           if (e.code === 4001) {
@@ -484,12 +486,9 @@ export default {
       requestObject.value = null;
       reviewForm.value = null;
 
-      grantObj.value = (await getGrant(grantID)).response;
+      hypercertObj.value = (await getHypercert(tokenID)).response;
       reviewRequests.value = (
-        await getReviewRequests(
-          grantObj.value.request_names,
-          grantObj.value.hypercertID
-        )
+        await getReviewRequestsByHypercert(tokenID)
       ).response;
 
       loading.value = false;
@@ -508,7 +507,7 @@ export default {
       ).response;
 
       reviewObject.requestName = selectedReviewRequest.value;
-      reviewObject.hypercertID = grantObj.value.hypercertID;
+      reviewObject.hypercertID = tokenID;
       reviewForm.value = (
         await getReviewForm(requestObject.value.reviewFormIndex)
       ).response;
@@ -521,11 +520,9 @@ export default {
       for (let i = 0; i < reviewForm.value.questions.length; i++) {
         reviewObject.reviews.push({ answer: "" });
       }
-      grantReviews.value = (
+      hypercertReviews.value = (
         await getReviews(requestObject.value.requestName)
-      ).response?.reviews.filter(
-        (r) => r.hypercertID == grantObj.value.hypercertID
-      );
+      ).response?.reviews.filter((r) => r.hypercertID == tokenID);
       hypercertName.value = await getHypercertName();
 
       requestObjectReady.value = true;
@@ -533,7 +530,7 @@ export default {
       await loadPastAnswers(
         requestObject.value.reviewFormIndex,
         reviewRequests.value,
-        grantObj.value.hypercertID,
+        tokenID,
         selectedReviewRequest.value,
         reviewForm.value.types
       );
@@ -601,8 +598,6 @@ export default {
       walletAddressRef,
       reviewObject,
       requestObjectReady,
-      grantObj,
-      grantReviews,
       requestNames,
       reviewRequests,
       selectedReviewRequest,

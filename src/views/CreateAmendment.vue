@@ -148,7 +148,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { computed, ref, onBeforeMount, reactive } from "vue";
 import { createAmendment } from "@/services/ContractService";
-import { getGrant } from "@/services/GrantService";
 import { getReviewByAttestationID } from "@/services/ReviewService";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
@@ -169,7 +168,7 @@ export default {
     const walletAddress = computed(() => user.walletAddress);
     const contract = computed(() => contractState.contract);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
-    const grantID = route.params.grant_id;
+    const tokenID = route.params.token_id;
     const refUID = route.params.review_id;
 
     const walletAddressRef = ref(walletAddress);
@@ -178,7 +177,6 @@ export default {
     const hypercertName = ref("");
 
     const refReviewObject = ref({});
-    const grantObj = ref({});
     const easExplorerUrl = ref("");
     const attachedFiles = ref([]);
 
@@ -254,7 +252,7 @@ export default {
           name: refReviewObject.value.requestName,
           amendment: amendmentObject.amendment,
           hypercertID: refReviewObject.value.hypercertID,
-          grantID: grantID,
+          tokenID: tokenID,
           attachmentsIpfsHashes: attachmentsIpfsHashes,
           refUID: refUID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
@@ -279,7 +277,7 @@ export default {
           });
 
           router.push({
-            path: `/grants/${grantID}`,
+            path: `/hypercerts/${tokenID}`,
           });
         } catch (e) {
           if (e.code === 4001) {
@@ -361,9 +359,8 @@ export default {
       amendmentObject.refUID = null;
 
       refReviewObject.value = null;
-      grantObj.value = (await getGrant(grantID)).response;
       refReviewObject.value = (
-        await getReviewByAttestationID(grantObj.value.request_names, refUID)
+        await getReviewByAttestationID(tokenID, refUID)
       ).response;
       amendmentObject.requestName = refReviewObject.value.requestName;
       amendmentObject.hypercertID = refReviewObject.value.hypercertID;

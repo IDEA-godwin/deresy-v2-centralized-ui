@@ -42,7 +42,7 @@ export async function getReviewRequests(requestNames, hypercertID) {
   return { response, error };
 }
 
-export async function getReviewRequestsByHypercert(hypercertID) {
+export async function getReviewRequestsByHypercert(tokenID) {
   let response = [];
   let error;
 
@@ -51,7 +51,7 @@ export async function getReviewRequestsByHypercert(hypercertID) {
 
     snapshot.forEach((doc) => {
       const requestData = doc.data();
-      if (requestData.hypercertTargetIDs.includes(hypercertID)) {
+      if (requestData.hypercertTargetIDs.includes(tokenID)) {
         response.push(requestData);
       }
     });

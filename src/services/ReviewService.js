@@ -32,24 +32,29 @@ export async function getAllReviews() {
   return { response, error };
 }
 
-export async function getReviewByAttestationID(requestNames, attestationID) {
+export async function getReviewByAttestationID(hypercertID, attestationID) {
   let response;
   let error;
   try {
-    const snapshot = await reviewsRef
-      .where("requestName", "in", requestNames)
-      .get();
+    const snapshot = await reviewsRef.get();
 
-    const requestsReviews = snapshot.docs.map((doc) => doc.data());
-    const reviewObj = requestsReviews.find((requestReviews) =>
-      requestReviews.reviews.some(
-        (review) => review.attestationID === attestationID
-      )
-    );
-    const attestationReview = reviewObj.reviews.find(
-      (review) => review.attestationID === attestationID
-    );
-    response = { ...attestationReview, requestName: reviewObj.requestName };
+    if (snapshot.empty) {
+      return { response, error };
+    } else {
+      const allReviews = snapshot.docs.map((doc) => doc.data());
+      for (const review of allReviews) {
+        const matchingReview = review.reviews.find((reviewItem) => {
+          return (
+            reviewItem.hypercertID === hypercertID &&
+            reviewItem.attestationID === attestationID
+          );
+        });
+
+        if (matchingReview) {
+          response = { ...matchingReview, requestName: review.requestName };
+        }
+      }
+    }
   } catch (e) {
     error = e;
   }

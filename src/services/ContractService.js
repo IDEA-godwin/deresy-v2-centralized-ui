@@ -233,7 +233,7 @@ export const submitReview = async (web3, contract, params) => {
     hypercertID,
     answers,
     attachmentsIpfsHashes,
-    grantID,
+    tokenID,
     walletAddress,
   } = params;
 
@@ -253,7 +253,7 @@ export const submitReview = async (web3, contract, params) => {
       name: name,
       accountID: walletAddress,
       hypercertID: hypercertID,
-      grantID: grantID,
+      tokenID: tokenID,
       easSchemaID: reviewsSchemaID,
       questions: requestReviewForm.questions,
       questionOptions: requestReviewForm.choices,
@@ -331,7 +331,7 @@ export const createAmendment = async (web3, contract, params) => {
   const {
     name,
     hypercertID,
-    grantID,
+    tokenID,
     amendment,
     attachmentsIpfsHashes,
     refUID,
@@ -355,7 +355,7 @@ export const createAmendment = async (web3, contract, params) => {
       attachmentsIpfsHashes: attachmentsIpfsHashes,
       createdAt: Math.floor(Date.now() / 1000),
     });
-    const amendmentReview = (await getReviewByAttestationID([name], refUID))
+    const amendmentReview = (await getReviewByAttestationID(tokenID, refUID))
       .response;
     const requestReviewForm = await methods.getRequestReviewForm(name).call();
     const reviewsSchemaID = await methods.reviewsSchemaID().call();
@@ -363,7 +363,7 @@ export const createAmendment = async (web3, contract, params) => {
       name: name,
       accountID: walletAddress,
       hypercertID: hypercertID,
-      grantID: grantID,
+      tokenID: tokenID,
       easSchemaID: reviewsSchemaID,
       questions: requestReviewForm.questions,
       questionOptions: requestReviewForm.choices,
@@ -371,6 +371,7 @@ export const createAmendment = async (web3, contract, params) => {
       reviewCreatedAt: Math.floor(Date.now() / 1000),
       attachmentsIpfsHashes: amendmentReview.attachmentsIpfsHashes,
       amendments: reviewAmendments,
+      attestationID: refUID,
     };
 
     const pdfResponse = await fetch(

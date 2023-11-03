@@ -118,8 +118,6 @@
                   v-html="markdownToHtml(reviewAmendment.amendment)"
                 ></div>
                 <br />
-                <hr />
-                <br />
                 <div v-if="reviewAmendment.attachmentsIpfsHashes.length > 0">
                   <strong>Attachments</strong>
                   <br />
@@ -138,6 +136,9 @@
                     <br />
                   </div>
                 </div>
+                <br />
+                <hr />
+                <br />
               </div>
             </div>
           </el-collapse-item>
@@ -174,9 +175,10 @@ export default {
     };
 
     const amendments = (refUID) => {
+      if (!props.reviewAmendments) return [];
       return props.reviewAmendments
         .filter((amendment) => amendment.refUID == refUID)
-        .sort((a, b) => b.createdAt - a.createdAt);
+        .sort((a, b) => a.createdAt - b.createdAt);
     };
 
     const formatDate = (unixTimestamp) => {
@@ -199,18 +201,18 @@ export default {
 
     const goToCreateAmendment = (review) => {
       router.push({
-        path: `/reviews/${props.tokenID}/${review.attestationID}/create-amendment/`,
+        path: `/hypercerts/${props.tokenID}/reviews/${review.attestationID}/create-amendment/`,
       });
     };
 
     const getLatestAmendmentPDFHash = (refUID) => {
+      if (!props.reviewAmendments) return null;
       const sortedAmendments = props.reviewAmendments
         .filter((amendment) => amendment.refUID == refUID)
         .sort((a, b) => b.createdAt - a.createdAt);
 
       for (const amendment of sortedAmendments) {
         if (amendment.pdfIpfsHash && amendment.pdfIpfsHash.length > 0) {
-          console.log(amendment.pdfIpfsHash);
           return amendment.pdfIpfsHash;
         }
       }

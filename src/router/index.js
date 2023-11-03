@@ -44,11 +44,11 @@ const routes = [
     component: () => import("@/views/Grant"),
   },
   {
-    path: "/grants/:grant_id/submit-review/",
+    path: "/hypercerts/:token_id/submit-review/",
     component: () => import("@/views/SubmitReview"),
   },
   {
-    path: "/reviews/:grant_id/:review_id/create-amendment/",
+    path: "/hypercerts/:token_id/reviews/:review_id/create-amendment/",
     component: () => import("@/views/CreateAmendment"),
   },
   {

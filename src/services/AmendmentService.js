@@ -3,14 +3,14 @@ import { AMENDMENTS_COLLECTION } from "@/constants/collections";
 
 const amendmentsRef = db.collection(AMENDMENTS_COLLECTION);
 
-export async function getReviewAmendments(requestNames, hypercertID) {
+export async function getReviewAmendments(tokenID) {
   let response;
   let error;
   try {
     const snapshot = await amendmentsRef
-      .where("requestName", "in", requestNames)
-      .where("hypercertID", "==", hypercertID)
+      .where("hypercertID", "==", tokenID)
       .get();
+
     response = snapshot.docs.map((doc) => doc.data());
   } catch (e) {
     error = e;
