@@ -122,6 +122,7 @@ export default {
         dispatch("setProvider", provider);
         dispatch("setWeb3", web3);
         dispatch("setContract", contract);
+        dispatch("setEasSchemaIDs");
         showPopup.value = false;
       } catch (error) {
         console.error(error);
