@@ -16,8 +16,11 @@
                 @close="handleClose"
                 @select="handleSelect"
               >
-                <el-menu-item index="/grants" @click="goToPath('/grants')">
-                  Grants
+                <el-menu-item
+                  index="/hypercerts"
+                  @click="goToPath('/hypercerts')"
+                >
+                  Hypercerts
                 </el-menu-item>
                 <el-menu-item
                   index="/create-review-form"

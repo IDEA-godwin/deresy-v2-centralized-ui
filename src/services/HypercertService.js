@@ -16,3 +16,17 @@ export async function getHypercert(tokenID) {
 
   return { response, error };
 }
+
+export async function getProcessedHypercerts() {
+  let response;
+  let error;
+  try {
+    const snapshot = await hypercertsRef.where("processed", "==", 3).get();
+
+    response = snapshot.docs.map((doc) => doc.data());
+  } catch (e) {
+    error = e;
+  }
+
+  return { response, error };
+}

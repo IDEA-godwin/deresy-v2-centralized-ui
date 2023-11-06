@@ -9,8 +9,8 @@
         clearable
         v-model="inputSearch"
         :trigger-on-focus="false"
-        placeholder="Search Grant"
-        :fetch-suggestions="handleSearchGrants"
+        placeholder="Search Hypercerts"
+        :fetch-suggestions="handleSearchHypercerts"
         @select="handleSelectSuggestion"
       />
     </el-col>
@@ -36,7 +36,7 @@
       <p>
         Powered by Deresy, a <strong>DEcentralized REview SYstem</strong> on
         Optimism, gitcoinreviews aims to bring users full transparency on how
-        gitcoin grants are performing and using their funds.
+        hypercerts are performing and using their funds.
       </p>
     </el-col>
     <el-col
@@ -52,21 +52,21 @@
   </el-row>
   <hr />
   <el-row style="padding: 5% 0">
-    <div class="table-grant">
-      <h1>Available Grants</h1>
+    <div class="table-hypercert">
+      <h1>Available Hypercerts</h1>
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column prop="name" sortable label="Grant" min-width="200">
+        <el-table-column prop="name" sortable label="Hypercert" min-width="200">
           <template #default="scope">
             <a
-              :href="`/grants/${scope.row.id}`"
+              :href="`/hypercerts/${scope.row.id}`"
               target="_blank"
-              class="grant-link"
+              class="hypercert-link"
             >
-              <div class="grant-name-table-item">
-                <div class="table-grant-icon">
+              <div class="hypercert-name-table-item">
+                <div class="table-hypercert-icon">
                   <el-avatar :src="scope.row.image" :size="40" :round="true" />
                 </div>
-                <div class="table-grant-name">
+                <div class="table-hypercert-name">
                   {{ scope.row.name }}
                 </div>
               </div>
@@ -74,35 +74,15 @@
           </template>
         </el-table-column>
         <el-table-column
-          prop="funds"
-          sortable
-          label="Funds raised"
-          :formatter="amountFormatter"
-          min-width="130"
-        />
-        <el-table-column
           prop="reviews"
           sortable
           label="Total reviews"
           min-width="100"
         />
         <el-table-column
-          v-if="false"
-          prop="score"
+          prop="createdAt"
           sortable
-          label="Score"
-          min-width="100"
-        />
-        <el-table-column
-          prop="region"
-          sortable
-          label="Region"
-          min-width="100"
-        />
-        <el-table-column
-          prop="lastUpdated"
-          sortable
-          label="Last updated"
+          label="Created at"
           min-width="100"
         >
         </el-table-column>
@@ -116,7 +96,7 @@
 import { onBeforeMount, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
-import { getAllGrants } from "@/services/GrantService";
+import { getProcessedHypercerts } from "@/services/HypercertService";
 import { getAllReviews } from "@/services/ReviewService";
 import { getAllReviewRequests } from "@/services/ReviewRequestService";
 
@@ -131,65 +111,58 @@ export default {
     const router = useRouter();
     const route = useRoute();
 
-    const grantsData = ref([]);
+    const hypercertsData = ref([]);
     const inputSearch = ref("");
     const loading = ref(true);
     const reviews = ref([]);
     const reviewRequests = ref([]);
     const tableData = ref([]);
 
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    });
-
     const fetchData = async () => {
-      const grantsResponse = await getAllGrants();
-      grantsData.value = grantsResponse.response;
-
-      const reviewsResponse = await getAllReviews();
-      reviews.value = reviewsResponse.response;
-
-      const reviewRequestsResponse = await getAllReviewRequests();
-      reviewRequests.value = reviewRequestsResponse.response;
+      hypercertsData.value = (await getProcessedHypercerts()).response;
+      reviews.value = (await getAllReviews()).response;
+      reviewRequests.value = (await getAllReviewRequests()).response;
     };
 
-    const amountFormatter = (grant) => {
-      return formatter.format(grant.funds);
-    };
-
-    const formattingGrands = () => {
-      grantsData.value.forEach((grant) => {
-        const reviewObjs = reviews.value.filter((r) =>
-          grant.request_names?.includes(r.requestName)
-        );
-
-        const reviewCount = reviewObjs.reduce((acc, reviewObj) => {
-          return (
-            acc +
-            reviewObj.reviews.filter((r) => r.hypercertID == grant.hypercertID)
-              .length
-          );
-        }, 0);
-
-        const grantObj = {
-          id: grant.id,
-          image: grant.logo_url,
-          name: grant.title,
-          lastUpdated: grant.last_update_natural,
-          region: grant.region.label,
-          funds: parseFloat(grant.amount_received),
-          reviews: reviewCount,
-          score: grant.score.toFixed(1),
+    const formattingHypercerts = () => {
+      hypercertsData.value.forEach((hypercert) => {
+        const matchingReviews = [];
+        for (const review of reviews.value) {
+          review.reviews.find((reviewItem) => {
+            if (reviewItem.hypercertID == hypercert.tokenID) {
+              matchingReviews.push(reviewItem);
+            }
+          });
+        }
+        const hypercertObj = {
+          id: hypercert.tokenID,
+          image: hypercert.metadata.image,
+          name: hypercert.name,
+          createdAt: formatDate(hypercert.creation),
+          reviews: matchingReviews.length,
         };
-        tableData.value.push(grantObj);
+        tableData.value.push(hypercertObj);
       });
     };
 
-    const handleSearchGrants = debounce((text, callback) => {
-      const reduced = grantsData.value.reduce((filtered, grant) => {
-        if (grant.title.toLowerCase().includes(text.toLowerCase())) {
-          filtered.push({ id: grant.id, value: grant.title });
+    const formatDate = (unixTimestamp) => {
+      const date = new Date(unixTimestamp * 1000);
+
+      const options = {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      };
+      return date.toLocaleString("en-US", options);
+    };
+
+    const handleSearchHypercerts = debounce((text, callback) => {
+      const reduced = hypercertsData.value.reduce((filtered, hypercert) => {
+        if (hypercert.name.toLowerCase().includes(text.toLowerCase())) {
+          filtered.push({ id: hypercert.tokenID, value: hypercert.name });
         }
         return filtered;
       }, []);
@@ -197,8 +170,8 @@ export default {
       callback(reduced);
     }, 500);
 
-    const handleSelectSuggestion = (grant) => {
-      router.push(`/grants/${grant.id}`);
+    const handleSelectSuggestion = (hypercert) => {
+      router.push(`/hypercert/${hypercert.tokenID}`);
     };
 
     onBeforeMount(async () => {
@@ -210,24 +183,21 @@ export default {
       }
 
       await fetchData();
+      hypercertsData.value.sort((a, b) => b.creation - a.creation);
 
-      grantsData.value.sort((a, b) =>
-        parseFloat(a.amount_received) < parseFloat(b.amount_received) ? 1 : -1
-      );
-
-      formattingGrands();
+      formattingHypercerts();
+      tableData.value.sort((a, b) => b.reviews - a.reviews);
 
       loading.value = false;
     });
 
     return {
       loading,
-      grantsData,
+      hypercertsData,
       inputSearch,
       tableData,
-      handleSearchGrants,
+      handleSearchHypercerts,
       handleSelectSuggestion,
-      amountFormatter,
     };
   },
 };
@@ -257,17 +227,17 @@ export default {
   left: 0px;
   opacity: 0.15;
 }
-.grant-card {
+.hypercert-card {
   margin: 5%;
   width: 100% !important;
   height: 97% !important;
 }
-.grant-link {
+.hypercert-link {
   width: 100% !important;
   text-decoration: none;
   height: 97% !important;
 }
-.grant-img {
+.hypercert-img {
   width: 100%;
   height: auto;
   aspect-ratio: 1;
@@ -297,28 +267,28 @@ hr {
   margin: 0px 0px 0px 0px !important;
 }
 
-.table-grant {
+.table-hypercert {
   width: 100%;
   padding: 0 10px;
 }
-.grant-name-table-item {
+.hypercert-name-table-item {
   display: flex;
   align-items: center;
 }
-.table-grant-name {
+.table-hypercert-name {
   margin: 10px;
   color: #545454;
 }
 
 @media screen and (max-width: 768px) {
-  .grant-name-table-item {
+  .hypercert-name-table-item {
     display: block;
   }
-  .table-grant-icon {
+  .table-hypercert-icon {
     display: flex;
     justify-content: center;
   }
-  .table-grant-name {
+  .table-hypercert-name {
     display: flex;
     text-align: center;
     justify-content: center;

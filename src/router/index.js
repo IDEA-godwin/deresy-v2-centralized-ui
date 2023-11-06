@@ -36,7 +36,7 @@ const routes = [
     component: () => import("@/views/SubmitReview"),
   },
   {
-    path: "/grants",
+    path: "/grants-only-admin-auth",
     component: () => import("@/views/Grants"),
   },
   {
@@ -54,6 +54,10 @@ const routes = [
   {
     path: "/hypercerts/:token_id",
     component: () => import("@/views/Hypercert"),
+  },
+  {
+    path: "/hypercerts",
+    component: () => import("@/views/Hypercerts"),
   },
 ];
 
