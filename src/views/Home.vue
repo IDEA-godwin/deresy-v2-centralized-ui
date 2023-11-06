@@ -98,7 +98,6 @@ import { useRouter, useRoute } from "vue-router";
 
 import { getProcessedHypercerts } from "@/services/HypercertService";
 import { getAllReviews } from "@/services/ReviewService";
-import { getAllReviewRequests } from "@/services/ReviewRequestService";
 
 import { debounce } from "lodash";
 
@@ -115,35 +114,7 @@ export default {
     const inputSearch = ref("");
     const loading = ref(true);
     const reviews = ref([]);
-    const reviewRequests = ref([]);
     const tableData = ref([]);
-
-    const fetchData = async () => {
-      hypercertsData.value = (await getProcessedHypercerts()).response;
-      reviews.value = (await getAllReviews()).response;
-      reviewRequests.value = (await getAllReviewRequests()).response;
-    };
-
-    const formattingHypercerts = () => {
-      hypercertsData.value.forEach((hypercert) => {
-        const matchingReviews = [];
-        for (const review of reviews.value) {
-          review.reviews.find((reviewItem) => {
-            if (reviewItem.hypercertID == hypercert.tokenID) {
-              matchingReviews.push(reviewItem);
-            }
-          });
-        }
-        const hypercertObj = {
-          id: hypercert.tokenID,
-          image: hypercert.metadata.image,
-          name: hypercert.name,
-          createdAt: formatDate(hypercert.creation),
-          reviews: matchingReviews.length,
-        };
-        tableData.value.push(hypercertObj);
-      });
-    };
 
     const formatDate = (unixTimestamp) => {
       const date = new Date(unixTimestamp * 1000);
@@ -182,10 +153,30 @@ export default {
         dispatch("showVersionNotification");
       }
 
-      await fetchData();
+      hypercertsData.value = (await getProcessedHypercerts()).response;
+      reviews.value = (await getAllReviews()).response;
       hypercertsData.value.sort((a, b) => b.creation - a.creation);
 
-      formattingHypercerts();
+      hypercertsData.value.forEach((hypercert) => {
+        const matchingReviews = [];
+        for (const review of reviews.value) {
+          review.reviews.find((reviewItem) => {
+            if (reviewItem.hypercertID == hypercert.tokenID) {
+              matchingReviews.push(reviewItem);
+            }
+          });
+        }
+        const hypercertObj = {
+          id: hypercert.tokenID,
+          image: hypercert.metadata.image,
+          name: hypercert.name,
+          createdAt: formatDate(hypercert.creation),
+          reviews: matchingReviews.length,
+        };
+        tableData.value.push(hypercertObj);
+      });
+
+      tableData.value = tableData.value.slice(0, 10);
       tableData.value.sort((a, b) => b.reviews - a.reviews);
 
       loading.value = false;

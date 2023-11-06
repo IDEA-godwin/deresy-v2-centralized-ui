@@ -26,12 +26,20 @@
           shadow="hover"
         >
           <el-image
-            :src="hypercert.metadata.image"
+            :src="hypercert.image"
             class="image hypercert-img"
             fit="contain"
           />
           <div style="padding: 14px">
-            <span>{{ hypercert.name }}</span>
+            <span style="font-size: 18px; font-weight: bolder">{{
+              hypercert.name
+            }}</span>
+          </div>
+          <div style="padding: 0 0 14px 0">
+            <span
+              >{{ hypercert.reviews
+              }}{{ hypercert.reviews == 1 ? " review" : " reviews" }}</span
+            >
           </div>
         </el-card>
       </router-link>
@@ -40,21 +48,44 @@
 </template>
 
 <script>
-import { getProcessedHypercerts } from "@/services/HypercertService";
 import { onBeforeMount, reactive, ref } from "vue";
+import { getProcessedHypercerts } from "@/services/HypercertService";
+import { getAllReviews } from "@/services/ReviewService";
 export default {
   name: "Home",
   components: {},
   setup() {
+    const hypercertsData = ref([]);
+    const reviews = ref([]);
     const loading = ref(true);
     const state = reactive({
-      hypercertsData: {},
+      hypercertsData: [],
     });
 
     onBeforeMount(async () => {
-      state.hypercertsData = (await getProcessedHypercerts()).response.sort(
-        (a, b) => b.creation - a.creation
-      );
+      hypercertsData.value = (await getProcessedHypercerts()).response;
+      reviews.value = (await getAllReviews()).response;
+      hypercertsData.value.sort((a, b) => b.creation - a.creation);
+
+      hypercertsData.value.forEach((hypercert) => {
+        const matchingReviews = [];
+        for (const review of reviews.value) {
+          review.reviews.find((reviewItem) => {
+            if (reviewItem.hypercertID == hypercert.tokenID) {
+              matchingReviews.push(reviewItem);
+            }
+          });
+        }
+        const hypercertObj = {
+          id: hypercert.tokenID,
+          image: hypercert.metadata?.image || "",
+          name: hypercert.name,
+          reviews: matchingReviews.length,
+        };
+        state.hypercertsData.push(hypercertObj);
+      });
+
+      state.hypercertsData.sort((a, b) => b.reviews - a.reviews);
       loading.value = false;
     });
 
