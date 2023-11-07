@@ -96,7 +96,7 @@
             </el-row>
             <hr />
             <el-row v-if="hypercert.metadata.hypercert.rights.display_value"
-              >.
+              >
               <div class="section__title">
                 <h3>Usage rights</h3>
               </div>
