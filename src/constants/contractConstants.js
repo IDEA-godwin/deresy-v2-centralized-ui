@@ -1,1053 +1,1039 @@
 // ABI for the Deresy contract (always replace for current version)
 export const DERESY_CONTRACT_ABI = [
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "contract IEAS",
-        name: "eas",
-        type: "address",
-      },
+        "internalType": "contract IEAS",
+        "name": "eas",
+        "type": "address"
+      }
     ],
-    stateMutability: "nonpayable",
-    type: "constructor",
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
-    inputs: [],
-    name: "AccessDenied",
-    type: "error",
+    "inputs": [],
+    "name": "AccessDenied",
+    "type": "error"
   },
   {
-    inputs: [],
-    name: "InsufficientValue",
-    type: "error",
+    "inputs": [],
+    "name": "InsufficientValue",
+    "type": "error"
   },
   {
-    inputs: [],
-    name: "InvalidEAS",
-    type: "error",
+    "inputs": [],
+    "name": "InvalidEAS",
+    "type": "error"
   },
   {
-    inputs: [],
-    name: "NotPayable",
-    type: "error",
+    "inputs": [],
+    "name": "NotPayable",
+    "type": "error"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "string",
-        name: "_requestName",
-        type: "string",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "_requestName",
+        "type": "string"
+      }
     ],
-    name: "ClosedReviewRequest",
-    type: "event",
+    "name": "ClosedReviewRequest",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "uint256",
-        name: "_formId",
-        type: "uint256",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "_formName",
+        "type": "string"
+      }
     ],
-    name: "CreatedReviewForm",
-    type: "event",
+    "name": "CreatedReviewForm",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "string",
-        name: "_requestName",
-        type: "string",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "_requestName",
+        "type": "string"
+      }
     ],
-    name: "CreatedReviewRequest",
-    type: "event",
+    "name": "CreatedReviewRequest",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "uid",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "schema",
+            "type": "bytes32"
           },
           {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "time",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "expirationTime",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "revocationTime",
+            "type": "uint64"
           },
           {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "refUID",
+            "type": "bytes32"
           },
           {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            internalType: "address",
-            name: "attester",
-            type: "address",
+            "internalType": "address",
+            "name": "attester",
+            "type": "address"
           },
           {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
+            "internalType": "bool",
+            "name": "revocable",
+            "type": "bool"
           },
           {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
         ],
-        indexed: false,
-        internalType: "struct Attestation",
-        name: "_attestation",
-        type: "tuple",
+        "indexed": false,
+        "internalType": "struct Attestation",
+        "name": "_attestation",
+        "type": "tuple"
       },
       {
-        indexed: false,
-        internalType: "string",
-        name: "_requestName",
-        type: "string",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "_requestName",
+        "type": "string"
+      }
     ],
-    name: "OnReviewCallback",
-    type: "event",
+    "name": "OnReviewCallback",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
       },
       {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
-    name: "OwnershipTransferred",
-    type: "event",
+    "name": "OwnershipTransferred",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "bytes32",
-        name: "_uid",
-        type: "bytes32",
-      },
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "_uid",
+        "type": "bytes32"
+      }
     ],
-    name: "SubmittedAmendment",
-    type: "event",
+    "name": "SubmittedAmendment",
+    "type": "event"
   },
   {
-    anonymous: false,
-    inputs: [
+    "anonymous": false,
+    "inputs": [
       {
-        indexed: false,
-        internalType: "string",
-        name: "_requestName",
-        type: "string",
-      },
+        "indexed": false,
+        "internalType": "string",
+        "name": "_requestName",
+        "type": "string"
+      }
     ],
-    name: "SubmittedReview",
-    type: "event",
+    "name": "SubmittedReview",
+    "type": "event"
   },
   {
-    inputs: [],
-    name: "amendmentsSchemaID",
-    outputs: [
+    "inputs": [],
+    "name": "amendmentsSchemaID",
+    "outputs": [
       {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "uid",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "schema",
+            "type": "bytes32"
           },
           {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "time",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "expirationTime",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "revocationTime",
+            "type": "uint64"
           },
           {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "refUID",
+            "type": "bytes32"
           },
           {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            internalType: "address",
-            name: "attester",
-            type: "address",
+            "internalType": "address",
+            "name": "attester",
+            "type": "address"
           },
           {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
+            "internalType": "bool",
+            "name": "revocable",
+            "type": "bool"
           },
           {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
         ],
-        internalType: "struct Attestation",
-        name: "attestation",
-        type: "tuple",
-      },
+        "internalType": "struct Attestation",
+        "name": "attestation",
+        "type": "tuple"
+      }
     ],
-    name: "attest",
-    outputs: [
+    "name": "attest",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "payable",
-    type: "function",
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "callbackContract",
-    outputs: [
+    "inputs": [],
+    "name": "callbackContract",
+    "outputs": [
       {
-        internalType: "contract IOnReviewable",
-        name: "",
-        type: "address",
-      },
+        "internalType": "contract IOnReviewable",
+        "name": "",
+        "type": "address"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      }
     ],
-    name: "closeReviewRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "closeReviewRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "contractVersion",
-    outputs: [
+    "inputs": [],
+    "name": "contractVersion",
+    "outputs": [
       {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "_name",
-        type: "string",
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
       },
       {
-        internalType: "address[]",
-        name: "reviewers",
-        type: "address[]",
+        "internalType": "address[]",
+        "name": "reviewers",
+        "type": "address[]"
       },
       {
-        internalType: "uint256[]",
-        name: "hypercertIDs",
-        type: "uint256[]",
+        "internalType": "uint256[]",
+        "name": "hypercertIDs",
+        "type": "uint256[]"
       },
       {
-        internalType: "string[]",
-        name: "hypercertIPFSHashes",
-        type: "string[]",
+        "internalType": "string[]",
+        "name": "hypercertIPFSHashes",
+        "type": "string[]"
       },
       {
-        internalType: "string",
-        name: "formIpfsHash",
-        type: "string",
+        "internalType": "string",
+        "name": "formIpfsHash",
+        "type": "string"
       },
       {
-        internalType: "uint256",
-        name: "reviewFormIndex",
-        type: "uint256",
-      },
+        "internalType": "string",
+        "name": "reviewFormName",
+        "type": "string"
+      }
     ],
-    name: "createNonPayableRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "createNonPayableRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "_name",
-        type: "string",
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
       },
       {
-        internalType: "address[]",
-        name: "reviewers",
-        type: "address[]",
+        "internalType": "address[]",
+        "name": "reviewers",
+        "type": "address[]"
       },
       {
-        internalType: "uint256[]",
-        name: "hypercertIDs",
-        type: "uint256[]",
+        "internalType": "uint256[]",
+        "name": "hypercertIDs",
+        "type": "uint256[]"
       },
       {
-        internalType: "string[]",
-        name: "hypercertIPFSHashes",
-        type: "string[]",
+        "internalType": "string[]",
+        "name": "hypercertIPFSHashes",
+        "type": "string[]"
       },
       {
-        internalType: "string",
-        name: "formIpfsHash",
-        type: "string",
+        "internalType": "string",
+        "name": "formIpfsHash",
+        "type": "string"
       },
       {
-        internalType: "uint256",
-        name: "rewardPerReview",
-        type: "uint256",
+        "internalType": "uint256",
+        "name": "rewardPerReview",
+        "type": "uint256"
       },
       {
-        internalType: "address",
-        name: "paymentTokenAddress",
-        type: "address",
+        "internalType": "address",
+        "name": "paymentTokenAddress",
+        "type": "address"
       },
       {
-        internalType: "uint256",
-        name: "reviewFormIndex",
-        type: "uint256",
-      },
+        "internalType": "string",
+        "name": "reviewFormIndex",
+        "type": "string"
+      }
     ],
-    name: "createRequest",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
+    "name": "createRequest",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string[]",
-        name: "questions",
-        type: "string[]",
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
       },
       {
-        internalType: "string[][]",
-        name: "choices",
-        type: "string[][]",
+        "internalType": "string[]",
+        "name": "questions",
+        "type": "string[]"
       },
       {
-        internalType: "enum DeresyResolver.QuestionType[]",
-        name: "questionTypes",
-        type: "uint8[]",
+        "internalType": "string[][]",
+        "name": "choices",
+        "type": "string[][]"
       },
+      {
+        "internalType": "enum DeresyResolver.QuestionType[]",
+        "name": "questionTypes",
+        "type": "uint8[]"
+      }
     ],
-    name: "createReviewForm",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "createReviewForm",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      }
     ],
-    name: "getRequest",
-    outputs: [
+    "name": "getRequest",
+    "outputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "address",
-            name: "sponsor",
-            type: "address",
+            "internalType": "address",
+            "name": "sponsor",
+            "type": "address"
           },
           {
-            internalType: "address[]",
-            name: "reviewers",
-            type: "address[]",
+            "internalType": "address[]",
+            "name": "reviewers",
+            "type": "address[]"
           },
           {
-            internalType: "uint256[]",
-            name: "hypercertIDs",
-            type: "uint256[]",
+            "internalType": "uint256[]",
+            "name": "hypercertIDs",
+            "type": "uint256[]"
           },
           {
-            internalType: "string[]",
-            name: "hypercertIPFSHashes",
-            type: "string[]",
+            "internalType": "string[]",
+            "name": "hypercertIPFSHashes",
+            "type": "string[]"
           },
           {
-            internalType: "string",
-            name: "formIpfsHash",
-            type: "string",
+            "internalType": "string",
+            "name": "formIpfsHash",
+            "type": "string"
           },
           {
-            internalType: "uint256",
-            name: "rewardPerReview",
-            type: "uint256",
+            "internalType": "uint256",
+            "name": "rewardPerReview",
+            "type": "uint256"
           },
           {
-            components: [
+            "components": [
               {
-                internalType: "address",
-                name: "reviewer",
-                type: "address",
+                "internalType": "address",
+                "name": "reviewer",
+                "type": "address"
               },
               {
-                internalType: "uint256",
-                name: "hypercertID",
-                type: "uint256",
+                "internalType": "uint256",
+                "name": "hypercertID",
+                "type": "uint256"
               },
               {
-                internalType: "bytes32",
-                name: "attestationID",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "attestationID",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes32[]",
-                name: "amendmentsUIDs",
-                type: "bytes32[]",
-              },
+                "internalType": "bytes32[]",
+                "name": "amendmentsUIDs",
+                "type": "bytes32[]"
+              }
             ],
-            internalType: "struct DeresyResolver.Review[]",
-            name: "reviews",
-            type: "tuple[]",
+            "internalType": "struct DeresyResolver.Review[]",
+            "name": "reviews",
+            "type": "tuple[]"
           },
           {
-            internalType: "bool",
-            name: "isClosed",
-            type: "bool",
+            "internalType": "bool",
+            "name": "isClosed",
+            "type": "bool"
           },
           {
-            internalType: "address",
-            name: "paymentTokenAddress",
-            type: "address",
+            "internalType": "address",
+            "name": "paymentTokenAddress",
+            "type": "address"
           },
           {
-            internalType: "uint256",
-            name: "fundsLeft",
-            type: "uint256",
+            "internalType": "uint256",
+            "name": "fundsLeft",
+            "type": "uint256"
           },
           {
-            internalType: "uint256",
-            name: "reviewFormIndex",
-            type: "uint256",
+            "internalType": "string",
+            "name": "reviewFormName",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "name",
-            type: "string",
-          },
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          }
         ],
-        internalType: "struct DeresyResolver.ReviewRequest",
-        name: "reviewRequest",
-        type: "tuple",
-      },
+        "internalType": "struct DeresyResolver.ReviewRequest",
+        "name": "reviewRequest",
+        "type": "tuple"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      }
     ],
-    name: "getRequestReviewForm",
-    outputs: [
+    "name": "getRequestReviewForm",
+    "outputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "string[]",
-            name: "questions",
-            type: "string[]",
+            "internalType": "string[]",
+            "name": "questions",
+            "type": "string[]"
           },
           {
-            internalType: "enum DeresyResolver.QuestionType[]",
-            name: "questionTypes",
-            type: "uint8[]",
+            "internalType": "enum DeresyResolver.QuestionType[]",
+            "name": "questionTypes",
+            "type": "uint8[]"
           },
           {
-            internalType: "string[][]",
-            name: "choices",
-            type: "string[][]",
-          },
+            "internalType": "string[][]",
+            "name": "choices",
+            "type": "string[][]"
+          }
         ],
-        internalType: "struct DeresyResolver.ReviewForm",
-        name: "requestReviewForm",
-        type: "tuple",
-      },
+        "internalType": "struct DeresyResolver.ReviewForm",
+        "name": "requestReviewForm",
+        "type": "tuple"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "uint256",
-        name: "_reviewFormIndex",
-        type: "uint256",
-      },
+        "internalType": "string",
+        "name": "_reviewFormName",
+        "type": "string"
+      }
     ],
-    name: "getReviewForm",
-    outputs: [
+    "name": "getReviewForm",
+    "outputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "string[]",
-            name: "questions",
-            type: "string[]",
+            "internalType": "string[]",
+            "name": "questions",
+            "type": "string[]"
           },
           {
-            internalType: "enum DeresyResolver.QuestionType[]",
-            name: "questionTypes",
-            type: "uint8[]",
+            "internalType": "enum DeresyResolver.QuestionType[]",
+            "name": "questionTypes",
+            "type": "uint8[]"
           },
           {
-            internalType: "string[][]",
-            name: "choices",
-            type: "string[][]",
-          },
+            "internalType": "string[][]",
+            "name": "choices",
+            "type": "string[][]"
+          }
         ],
-        internalType: "struct DeresyResolver.ReviewForm",
-        name: "reviewForm",
-        type: "tuple",
-      },
+        "internalType": "struct DeresyResolver.ReviewForm",
+        "name": "reviewForm",
+        "type": "tuple"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "getReviewRequestsNames",
-    outputs: [
+    "inputs": [],
+    "name": "getReviewRequestsNames",
+    "outputs": [
       {
-        internalType: "string[]",
-        name: "",
-        type: "string[]",
-      },
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "getWhitelistedTokens",
-    outputs: [
+    "inputs": [],
+    "name": "getWhitelistedTokens",
+    "outputs": [
       {
-        internalType: "address[]",
-        name: "",
-        type: "address[]",
-      },
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "isPayable",
-    outputs: [
+    "inputs": [],
+    "name": "isPayable",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "pure",
-    type: "function",
+    "stateMutability": "pure",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
     ],
-    name: "isTokenWhitelisted",
-    outputs: [
+    "name": "isTokenWhitelisted",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "uid",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "schema",
+            "type": "bytes32"
           },
           {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "time",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "expirationTime",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "revocationTime",
+            "type": "uint64"
           },
           {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "refUID",
+            "type": "bytes32"
           },
           {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            internalType: "address",
-            name: "attester",
-            type: "address",
+            "internalType": "address",
+            "name": "attester",
+            "type": "address"
           },
           {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
+            "internalType": "bool",
+            "name": "revocable",
+            "type": "bool"
           },
           {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
         ],
-        internalType: "struct Attestation[]",
-        name: "attestations",
-        type: "tuple[]",
+        "internalType": "struct Attestation[]",
+        "name": "attestations",
+        "type": "tuple[]"
       },
       {
-        internalType: "uint256[]",
-        name: "values",
-        type: "uint256[]",
-      },
+        "internalType": "uint256[]",
+        "name": "values",
+        "type": "uint256[]"
+      }
     ],
-    name: "multiAttest",
-    outputs: [
+    "name": "multiAttest",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "payable",
-    type: "function",
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "uid",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "schema",
+            "type": "bytes32"
           },
           {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "time",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "expirationTime",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "revocationTime",
+            "type": "uint64"
           },
           {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "refUID",
+            "type": "bytes32"
           },
           {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            internalType: "address",
-            name: "attester",
-            type: "address",
+            "internalType": "address",
+            "name": "attester",
+            "type": "address"
           },
           {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
+            "internalType": "bool",
+            "name": "revocable",
+            "type": "bool"
           },
           {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
         ],
-        internalType: "struct Attestation[]",
-        name: "attestations",
-        type: "tuple[]",
+        "internalType": "struct Attestation[]",
+        "name": "attestations",
+        "type": "tuple[]"
       },
       {
-        internalType: "uint256[]",
-        name: "values",
-        type: "uint256[]",
-      },
+        "internalType": "uint256[]",
+        "name": "values",
+        "type": "uint256[]"
+      }
     ],
-    name: "multiRevoke",
-    outputs: [
+    "name": "multiRevoke",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "payable",
-    type: "function",
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "owner",
-    outputs: [
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "pause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "inputs": [],
+    "name": "pause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "paused",
-    outputs: [
+    "inputs": [],
+    "name": "paused",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "reviewFormsTotal",
-    outputs: [
+    "inputs": [],
+    "name": "reviewsSchemaID",
+    "outputs": [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "reviewsSchemaID",
-    outputs: [
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
+        "components": [
           {
-            internalType: "bytes32",
-            name: "uid",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "uid",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "schema",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "schema",
+            "type": "bytes32"
           },
           {
-            internalType: "uint64",
-            name: "time",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "time",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "expirationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "expirationTime",
+            "type": "uint64"
           },
           {
-            internalType: "uint64",
-            name: "revocationTime",
-            type: "uint64",
+            "internalType": "uint64",
+            "name": "revocationTime",
+            "type": "uint64"
           },
           {
-            internalType: "bytes32",
-            name: "refUID",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "refUID",
+            "type": "bytes32"
           },
           {
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            internalType: "address",
-            name: "attester",
-            type: "address",
+            "internalType": "address",
+            "name": "attester",
+            "type": "address"
           },
           {
-            internalType: "bool",
-            name: "revocable",
-            type: "bool",
+            "internalType": "bool",
+            "name": "revocable",
+            "type": "bool"
           },
           {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
         ],
-        internalType: "struct Attestation",
-        name: "attestation",
-        type: "tuple",
-      },
+        "internalType": "struct Attestation",
+        "name": "attestation",
+        "type": "tuple"
+      }
     ],
-    name: "revoke",
-    outputs: [
+    "name": "revoke",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    stateMutability: "payable",
-    type: "function",
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "_amendmentsSchemaID",
-        type: "bytes32",
-      },
+        "internalType": "bytes32",
+        "name": "_amendmentsSchemaID",
+        "type": "bytes32"
+      }
     ],
-    name: "setAmendmentsSchemaID",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "setAmendmentsSchemaID",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "_callbackContractAddress",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "_callbackContractAddress",
+        "type": "address"
+      }
     ],
-    name: "setCallbackContract",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "setCallbackContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "bytes32",
-        name: "_reviewsSchemaID",
-        type: "bytes32",
-      },
+        "internalType": "bytes32",
+        "name": "_reviewsSchemaID",
+        "type": "bytes32"
+      }
     ],
-    name: "setReviewsSchemaID",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "setReviewsSchemaID",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "unpause",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "inputs": [],
+    "name": "unpause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
     ],
-    name: "unwhitelistToken",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "unwhitelistToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    inputs: [],
-    name: "version",
-    outputs: [
+    "inputs": [],
+    "name": "version",
+    "outputs": [
       {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
     ],
-    name: "whitelistToken",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "whitelistToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    stateMutability: "payable",
-    type: "receive",
-  },
+    "stateMutability": "payable",
+    "type": "receive"
+  }
 ];
 
 // Address for deployed contract within blockchain
