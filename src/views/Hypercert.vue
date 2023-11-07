@@ -171,17 +171,13 @@
                           <span style="font-weight: bolder">EAS Schema ID</span>
                           <br />
                           <a
-                            :href="`${easExplorerUrl}/schema/view/${
-                              getReviewForm(reviewGroup.reviews[0].formID)
-                                ?.easSchemaID
-                            }`"
+                            :href="`${easExplorerUrl}/schema/view/${easSchemaIDs.reviewsSchemaID}`"
                             target="_blank"
                             style="text-decoration: none"
-                            >{{
-                              getReviewForm(reviewGroup.reviews[0].formID)
-                                ?.easSchemaID
-                            }}</a
-                          ><br /><br />
+                          >
+                            {{ easSchemaIDs.reviewsSchemaID }}
+                          </a>
+                          <br /><br />
 
                           <span style="font-weight: bolder">Hypercert</span
                           ><br />
@@ -265,7 +261,7 @@ export default {
   setup() {
     const store = useStore();
     const {
-      state: { user },
+      state: { contractState, user },
     } = store;
     const route = useRoute();
     const router = useRouter();
@@ -283,6 +279,7 @@ export default {
     const hypercertLink = ref("");
     const reviewAmendments = ref([]);
     const attestattionsIDs = ref([]);
+    const easSchemaIDs = computed(() => contractState.easSchemaIDs);
 
     const loading = ref(true);
     const hypercertNotFound = ref(true);
@@ -427,6 +424,7 @@ export default {
     };
 
     return {
+      easSchemaIDs,
       attestattionsIDs,
       dataTable,
       hypercert,
