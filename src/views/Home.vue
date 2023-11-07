@@ -53,7 +53,7 @@
   <hr />
   <el-row style="padding: 5% 0">
     <div class="table-hypercert">
-      <h1>Available Hypercerts</h1>
+      <h1>Top Reviewed Hypercerts</h1>
       <el-table :data="tableData" style="width: 100%">
         <el-table-column prop="name" sortable label="Hypercert" min-width="200">
           <template #default="scope">
@@ -133,7 +133,7 @@ export default {
     const handleSearchHypercerts = debounce((text, callback) => {
       const reduced = hypercertsData.value.reduce((filtered, hypercert) => {
         if (hypercert.name.toLowerCase().includes(text.toLowerCase())) {
-          filtered.push({ id: hypercert.tokenID, value: hypercert.name });
+          filtered.push({ tokenID: hypercert.tokenID, value: hypercert.name });
         }
         return filtered;
       }, []);
@@ -142,7 +142,7 @@ export default {
     }, 500);
 
     const handleSelectSuggestion = (hypercert) => {
-      router.push(`/hypercert/${hypercert.tokenID}`);
+      router.push(`/hypercerts/${hypercert.tokenID}`);
     };
 
     onBeforeMount(async () => {
