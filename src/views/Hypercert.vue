@@ -196,6 +196,7 @@
                         </div>
 
                         <ReviewsContentDisplay
+                          :attestattionsIDs="attestattionsIDs"
                           :reviewData="reviewGroup"
                           :reviewAmendments="reviewAmendments"
                           :tokenID="hypercert.tokenID"
@@ -250,6 +251,7 @@ import { getAllReviews } from "@/services/ReviewService";
 import { getReviewRequestsByHypercert } from "@/services/ReviewRequestService";
 import { getAllReviewForms } from "@/services/ReviewFormService";
 import { getReviewAmendments } from "@/services/AmendmentService";
+import { getAttestationsIDs } from "@/services/AttestationsService";
 
 import { ElMessage } from "element-plus";
 import { ArrowDownBold } from "@element-plus/icons";
@@ -280,6 +282,7 @@ export default {
     const walletAddress = computed(() => user.walletAddress);
     const hypercertLink = ref("");
     const reviewAmendments = ref([]);
+    const attestattionsIDs = ref([]);
 
     const loading = ref(true);
     const hypercertNotFound = ref(true);
@@ -401,6 +404,7 @@ export default {
     onBeforeMount(async () => {
       hypercert.value = (await getHypercert(tokenID)).response;
       reviewAmendments.value = (await getReviewAmendments(tokenID)).response;
+      attestattionsIDs.value = (await getAttestationsIDs()).response;
 
       if (hypercert.value) {
         hypercertNotFound.value = false;
@@ -423,6 +427,7 @@ export default {
     };
 
     return {
+      attestattionsIDs,
       dataTable,
       hypercert,
       reviews,

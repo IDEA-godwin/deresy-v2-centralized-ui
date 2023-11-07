@@ -8,6 +8,7 @@ import {
   ERC_20_ABI,
   PAYMENT_OPTIONS,
 } from "../constants/contractConstants";
+import { saveAttestationIdToDB } from "./AttestationsService";
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -246,6 +247,8 @@ export const submitReview = async (web3, contract, params) => {
 
   let response;
 
+  let attestationID;
+
   try {
     const requestReviewForm = await methods.getRequestReviewForm(name).call();
     const reviewsSchemaID = await methods.reviewsSchemaID().call();
@@ -318,11 +321,15 @@ export const submitReview = async (web3, contract, params) => {
       })
       .on("receipt", (receipt) => {
         response = receipt;
+
+        attestationID = receipt.logs[0].data;
       });
   } catch (e) {
     console.error("An error ocurred while submitting the review.", e);
     throw e;
   }
+
+  await saveAttestationIdToDB(attestationID);
 
   return response;
 };
@@ -346,6 +353,8 @@ export const createAmendment = async (web3, contract, params) => {
   });
 
   let response;
+
+  let attestationID;
 
   try {
     const amendmentsSchemaID = await methods.amendmentsSchemaID().call();
@@ -429,11 +438,15 @@ export const createAmendment = async (web3, contract, params) => {
       })
       .on("receipt", (receipt) => {
         response = receipt;
+
+        attestationID = receipt.logs[0].data;
       });
   } catch (e) {
     console.error("An error ocurred while submitting the review.", e);
     throw e;
   }
+
+  await saveAttestationIdToDB(attestationID);
 
   return response;
 };

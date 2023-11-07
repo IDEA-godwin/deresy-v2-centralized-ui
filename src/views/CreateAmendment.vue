@@ -39,7 +39,7 @@
                     class="targetHashDiv"
                     style="padding-left: 0px"
                   >
-                    <strong>Referenced Attestation:</strong>
+                    <strong>Referenced Attestation: </strong>
                     <a
                       :href="`${easExplorerUrl}/attestation/view/${refReviewObject.attestationID}`"
                       target="_blank"

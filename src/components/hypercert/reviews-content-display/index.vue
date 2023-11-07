@@ -26,7 +26,7 @@
       </div>
       <div v-else><span style="font-weight: bolder">PDF File</span><br /></div>
       <a
-        :href="`${pinataGatewayUrl}/ipfs/${review.pdfIpfsHash}`"
+        :href="getIpfsLink(review.attestationID, review.pdfIpfsHash)"
         target="_blank"
         style="text-decoration: none"
         >{{ review.pdfIpfsHash }}</a
@@ -74,8 +74,11 @@
         v-for="(attachmentHash, index) in review.attachmentsIpfsHashes"
         :key="index"
       >
-        <a :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`" target="_blank">
-          {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+        <a
+          :href="getIpfsLink(review.attestationID, attachmentHash)"
+          target="_blank"
+        >
+          {{ attachmentHash }}
         </a>
         <br />
       </div>
@@ -106,7 +109,12 @@
                 <div v-if="reviewAmendment.pdfIpfsHash.length > 0">
                   <strong>PDF File </strong>
                   <a
-                    :href="`${pinataGatewayUrl}/ipfs/${reviewAmendment.pdfIpfsHash}`"
+                    :href="
+                      getIpfsLink(
+                        reviewAmendment.amendmentUID,
+                        reviewAmendment.pdfIpfsHash
+                      )
+                    "
                     target="_blank"
                     >{{ reviewAmendment.pdfIpfsHash }}</a
                   >
@@ -128,10 +136,15 @@
                     :key="index"
                   >
                     <a
-                      :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`"
+                      :href="
+                        getIpfsLink(
+                          reviewAmendment.amendmentUID,
+                          attachmentHash
+                        )
+                      "
                       target="_blank"
                     >
-                      {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+                      {{ attachmentHash }}
                     </a>
                     <br />
                   </div>
@@ -156,6 +169,7 @@ import { computed } from "vue";
 export default {
   name: "ReviewsContentDisplay",
   props: {
+    attestattionsIDs: Array,
     reviewData: Object,
     reviewForms: Array,
     reviewAmendments: Array,
@@ -179,6 +193,14 @@ export default {
       return props.reviewAmendments
         .filter((amendment) => amendment.refUID == refUID)
         .sort((a, b) => a.createdAt - b.createdAt);
+    };
+
+    const getIpfsLink = (attestationID, ipfsHash) => {
+      if (props.attestattionsIDs.includes(attestationID)) {
+        return `${props.pinataGatewayUrl}/ipfs/${ipfsHash}`;
+      } else {
+        return `https://ipfs.io/ipfs/${ipfsHash}`;
+      }
     };
 
     const formatDate = (unixTimestamp) => {
@@ -222,6 +244,7 @@ export default {
     return {
       walletAddress,
       amendments,
+      getIpfsLink,
       getReviewForm,
       formatDate,
       markdownToHtml,
