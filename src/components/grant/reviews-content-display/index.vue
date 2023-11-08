@@ -57,7 +57,7 @@
     <br /><br />
     <br />
     <div
-      v-for="(question, qIndex) in getReviewForm(review.formID)?.questions"
+      v-for="(question, qIndex) in getReviewForm(review.formName)?.questions"
       :key="'q-' + qIndex"
     >
       <span class="review-question">{{ question }}</span
@@ -169,8 +169,8 @@ export default {
     } = store;
     const router = useRouter();
     const walletAddress = computed(() => user.walletAddress);
-    const getReviewForm = (formID) => {
-      return props.reviewForms.find((form) => form.formID == formID) || {};
+    const getReviewForm = (formName) => {
+      return props.reviewForms.find((form) => form.formName == formName) || {};
     };
 
     const amendments = (refUID) => {

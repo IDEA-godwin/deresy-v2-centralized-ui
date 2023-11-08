@@ -346,12 +346,12 @@ export default {
       allReviews.response.forEach((reviewDocument) => {
         reviewDocument.reviews.forEach((r) => {
           if (r.hypercertID === tokenID) {
-            let formID = getRequestFormID(reviewDocument.requestName);
+            let formName = getRequestFormName(reviewDocument.requestName);
 
-            r.formID = formID;
+            r.formName = formName;
             r.requestName = reviewDocument.requestName;
 
-            let key = `${r.reviewer}-${formID}`;
+            let key = `${r.reviewer}-${formName}`;
 
             if (!groupedReviews[key]) {
               groupedReviews[key] = [];
@@ -374,26 +374,26 @@ export default {
         .reverse();
     };
 
-    const getRequestFormID = (requestName) => {
+    const getRequestFormName = (requestName) => {
       const matchingRequest = reviewRequests.value.find(
         (req) => req.requestName === requestName
       );
-      return matchingRequest.reviewFormIndex;
+      return matchingRequest.reviewFormName;
     };
 
-    const getReviewForm = (formID) => {
+    const getReviewForm = (formName) => {
       const filteredReviewForm =
-        reviewForms.value.find((form) => form.formID == formID) || {};
+        reviewForms.value.find((form) => form.formName == formName) || {};
       return filteredReviewForm;
     };
 
     const fetchReviewForms = async () => {
-      const reviewFormIndexes = reviewRequests.value.map((request) =>
-        parseInt(request.reviewFormIndex)
+      const reviewFormNames = reviewRequests.value.map((request) =>
+        request.reviewFormName
       );
 
-      reviewForms.value = (await await getAllReviewForms()).response.filter(
-        (form) => reviewFormIndexes.includes(form.formID)
+      reviewForms.value = (await getAllReviewForms()).response.filter(
+        (form) => reviewFormNames.includes(form.formName)
       );
     };
 

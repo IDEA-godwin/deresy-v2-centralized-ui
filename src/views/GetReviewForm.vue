@@ -6,10 +6,10 @@
           <h1>Get Review Form</h1>
           <el-row>
             <el-col :span="24">
-              <el-form-item label="Review Form Index">
+              <el-form-item label="Review Form Name">
                 <el-select
                   v-model="reviewFormIndex"
-                  placeholder="Select a review form index"
+                  placeholder="Select a review form name"
                   size="large"
                   style="width: 100%"
                 >

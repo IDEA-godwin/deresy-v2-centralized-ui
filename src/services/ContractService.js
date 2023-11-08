@@ -70,10 +70,10 @@ export const createReviewForm = async (web3, contract, params) => {
 };
 
 export const getReviewForm = async (params) => {
-  const { contractMethods, reviewFormIndex } = params;
+  const { contractMethods, reviewFormName } = params;
   try {
     const response = await contractMethods
-      .getReviewForm(reviewFormIndex)
+      .getReviewForm(reviewFormName)
       .call();
 
     return response;
@@ -86,7 +86,7 @@ export const getReviewForm = async (params) => {
 export const getReviewFormsTotal = async (params) => {
   const { contractMethods } = params;
   try {
-    const response = contractMethods.reviewFormsTotal().call();
+    const response = contractMethods.reviewForms().call();
 
     return response;
   } catch (e) {
@@ -120,7 +120,7 @@ export const getPaymentOptions = async (params) => {
 export const handleRequest = async (web3, contract, params, isPaid) => {
   const {
     name,
-    reviewFormIndex,
+    reviewFormName,
     targets,
     targetHashes,
     reviewers,
@@ -144,9 +144,9 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
         requestHash,
         rewardPerReview,
         paymentTokenAddress,
-        reviewFormIndex,
+        reviewFormName,
       ]
-    : [name, reviewers, targets, targetHashes, requestHash, reviewFormIndex];
+    : [name, reviewers, targets, targetHashes, requestHash, reviewFormName];
 
   let response;
 

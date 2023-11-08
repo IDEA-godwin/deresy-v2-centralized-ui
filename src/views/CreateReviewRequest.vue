@@ -21,24 +21,24 @@
 
           <el-row class="form-section">
             <el-col :span="22">
-              <el-form-item label="Review Form Index">
+              <el-form-item label="Review Form Name">
                 <el-select
-                  v-model="requestObject.reviewFormIndex"
-                  placeholder="Select a review form index"
+                  v-model="requestObject.reviewFormName"
+                  placeholder="Select a review form name"
                   size="large"
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="(o, index) in parseInt(reviewFormsTotal)"
-                    :key="index"
-                    :label="`Index ${index}`"
-                    :value="index"
+                    v-for="(value) in reviewFormsTotal"
+                    :key="value"
+                    :label="`${value}`"
+                    :value="value"
                   ></el-option>
                 </el-select>
                 <span
                   class="vuelidation-error"
-                  v-if="v$.reviewFormIndex.$error"
-                  >{{ v$.reviewFormIndex.$errors[0].$message }}</span
+                  v-if="v$.reviewFormName.$error"
+                  >{{ v$.reviewFormName.$errors[0].$message }}</span
                 >
               </el-form-item>
             </el-col>
@@ -254,7 +254,6 @@
 import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { CloseBold } from "@element-plus/icons";
 import {
-  getReviewFormsTotal,
   getPaymentOptions,
   handleRequest,
 } from "@/services/ContractService";
@@ -264,6 +263,7 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
+import { getAllReviewFormNames } from "@/services/ReviewFormService";
 import { HOME_ROUTE } from "@/constants/routes";
 
 export default {
@@ -281,7 +281,7 @@ export default {
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const router = useRouter();
 
-    const reviewFormsTotal = ref(0);
+    const reviewFormsTotal = ref([]);
     const contractRef = ref(contract);
     const isFormLoading = ref(false);
     const paymentOptions = ref({});
@@ -291,7 +291,7 @@ export default {
 
     const requestObject = reactive({
       name: "",
-      reviewFormIndex: "",
+      reviewFormName: "",
       targets: [],
       reviewers: [],
       requestHash: "",
@@ -306,7 +306,7 @@ export default {
     const rules = computed(() => {
       return {
         name: { required },
-        reviewFormIndex: { required },
+        reviewFormName: { required },
         paymentTokenAddress: { required },
         targets: {
           $each: helpers.forEach({
@@ -403,7 +403,7 @@ export default {
 
         const payload = {
           name: requestObject.name,
-          reviewFormIndex: requestObject.reviewFormIndex,
+          reviewFormName: requestObject.reviewFormName,
           targets: targetAddresses,
           targetHashes: targetHashes,
           reviewers: reviewersAddresses,
@@ -471,7 +471,7 @@ export default {
         const payload = {
           contractMethods: contract.value.methods,
         };
-        reviewFormsTotal.value = await getReviewFormsTotal(payload);
+        reviewFormsTotal.value = await getAllReviewFormNames();
         paymentOptions.value = await getPaymentOptions(payload);
       }
     });
@@ -481,7 +481,7 @@ export default {
         const payload = {
           contractMethods: contract.value.methods,
         };
-        reviewFormsTotal.value = await getReviewFormsTotal(payload);
+        reviewFormsTotal.value = await getAllReviewFormNames();
         paymentOptions.value = await getPaymentOptions(payload);
       }
     });
