@@ -6,6 +6,17 @@
           <h1>Create Review Form</h1>
 
           <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Form Name">
+                <el-input
+                  v-model="formAccessibility.formName"
+                  placeholder="Enter form name"
+                ></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
             <el-col :span="22">
               <FormQuestion
                 v-for="(formQuestion, index) in formAccessibility.formQuestions"
@@ -74,6 +85,7 @@ export default {
 
     const formAccessibility = reactive({
       formQuestions: [],
+      formName: null,
     });
 
     const v = useVuelidate();
@@ -93,9 +105,10 @@ export default {
     const sendBtn = async () => {
       isFormLoading.value = true;
       v.value.$validate();
-      if (!v.value.$error) {
+      if (!v.value.$error && formAccessibility.formName) {
         dispatch("setLoading", true);
         const payload = {
+          formName: formAccessibility.formName,
           questions: [],
           types: [],
           choices: [],
