@@ -29,7 +29,7 @@
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="(value) in reviewFormsTotal"
+                    v-for="value in reviewFormsTotal"
                     :key="value"
                     :label="`${value}`"
                     :value="value"
@@ -253,10 +253,7 @@
 <script>
 import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { CloseBold } from "@element-plus/icons";
-import {
-  getPaymentOptions,
-  handleRequest,
-} from "@/services/ContractService";
+import { getPaymentOptions, handleRequest } from "@/services/ContractService";
 import { useStore } from "vuex";
 import { reactive, computed, ref, watch, onBeforeMount } from "vue";
 import { ElNotification } from "element-plus";

@@ -72,9 +72,7 @@ export const createReviewForm = async (web3, contract, params) => {
 export const getReviewForm = async (params) => {
   const { contractMethods, reviewFormName } = params;
   try {
-    const response = await contractMethods
-      .getReviewForm(reviewFormName)
-      .call();
+    const response = await contractMethods.getReviewForm(reviewFormName).call();
 
     return response;
   } catch (e) {

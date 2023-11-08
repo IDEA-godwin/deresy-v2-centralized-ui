@@ -513,7 +513,7 @@ export default {
         await getReviewForm(requestObject.value.reviewFormName)
       ).response;
 
-      console.log(reviewForm)
+      console.log(reviewForm);
       simpleMDEInstances.value.forEach((instance) => instance.toTextArea());
       simpleMDEInstances.value = [];
 

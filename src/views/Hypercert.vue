@@ -388,12 +388,12 @@ export default {
     };
 
     const fetchReviewForms = async () => {
-      const reviewFormNames = reviewRequests.value.map((request) =>
-        request.reviewFormName
+      const reviewFormNames = reviewRequests.value.map(
+        (request) => request.reviewFormName
       );
 
-      reviewForms.value = (await getAllReviewForms()).response.filter(
-        (form) => reviewFormNames.includes(form.formName)
+      reviewForms.value = (await getAllReviewForms()).response.filter((form) =>
+        reviewFormNames.includes(form.formName)
       );
     };
 
