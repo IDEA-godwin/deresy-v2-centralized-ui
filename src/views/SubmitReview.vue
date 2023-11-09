@@ -368,7 +368,7 @@ export default {
     };
 
     const loadPastAnswers = async (
-      reviewFormIndex,
+      reviewFormName,
       reviewRequests,
       hypercertID,
       requestName,
@@ -377,7 +377,7 @@ export default {
       const filteredRequests = filterReviewRequests(
         reviewRequests,
         hypercertID,
-        reviewFormIndex,
+        reviewFormName,
         walletAddress,
         requestName
       );
@@ -389,7 +389,7 @@ export default {
       const review = await getMatchingReview(
         filteredRequests,
         walletAddress,
-        reviewFormIndex
+        reviewFormName
       );
 
       if (!review) {
@@ -508,9 +508,12 @@ export default {
 
       reviewObject.requestName = selectedReviewRequest.value;
       reviewObject.hypercertID = tokenID;
+
       reviewForm.value = (
-        await getReviewForm(requestObject.value.reviewFormIndex)
+        await getReviewForm(requestObject.value.reviewFormName)
       ).response;
+
+      console.log(reviewForm);
       simpleMDEInstances.value.forEach((instance) => instance.toTextArea());
       simpleMDEInstances.value = [];
 
@@ -528,7 +531,7 @@ export default {
       requestObjectReady.value = true;
 
       await loadPastAnswers(
-        requestObject.value.reviewFormIndex,
+        requestObject.value.reviewFormName,
         reviewRequests.value,
         tokenID,
         selectedReviewRequest.value,

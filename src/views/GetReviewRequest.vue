@@ -143,7 +143,7 @@
               <br /><br />
               <span style="font-weight: bolder">Closed</span><br />
               {{ requestObject.isClosed ? "Yes" : "No" }} <br /><br />
-              <span style="font-weight: bolder">Review Form index</span><br />
+              <span style="font-weight: bolder">Review Form name</span><br />
               {{ requestObject.reviewFormIndex }}<br /><br />
             </div>
           </el-card>

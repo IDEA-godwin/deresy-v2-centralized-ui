@@ -3,14 +3,14 @@ import { getAllReviews } from "@/services/ReviewService";
 export const filterReviewRequests = (
   reviewRequests,
   hypercertID,
-  reviewFormIndex,
+  reviewFormName,
   walletAddress,
   requestName
 ) => {
   return reviewRequests.filter((request) => {
     return (
       request.hypercertTargetIDs.includes(hypercertID) &&
-      request.reviewFormIndex === reviewFormIndex &&
+      request.reviewFormName === reviewFormName &&
       request.reviewers.includes(walletAddress.value) &&
       request.requestName !== requestName
     );
@@ -20,7 +20,7 @@ export const filterReviewRequests = (
 export const getMatchingReview = async (
   filteredRequests,
   walletAddress,
-  reviewFormIndex
+  reviewFormName
 ) => {
   const reviews = await getAllReviews();
 
@@ -39,7 +39,7 @@ export const getMatchingReview = async (
       const matchingReview = reviewDocument.reviews.filter(
         (review) =>
           review.reviewer === walletAddress.value &&
-          request.reviewFormIndex == reviewFormIndex
+          request.reviewFormName == reviewFormName
       );
 
       if (matchingReview) {
