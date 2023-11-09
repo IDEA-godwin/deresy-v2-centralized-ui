@@ -18,7 +18,7 @@
     >
       <router-link
         class="el-link el-link--default hypercert-link"
-        :to="`/hypercerts/${hypercert.tokenID}`"
+        :to="`/hypercerts/${hypercert.id}`"
       >
         <el-card
           class="hypercert-card"
