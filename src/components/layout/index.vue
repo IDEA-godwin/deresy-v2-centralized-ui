@@ -61,14 +61,14 @@
           <el-row>
             <el-col class="s1-social-links">
               <el-link
-                href="https://gitcoin.co/discord"
+                href="https://discord.gg/6wYjxnqxbM"
                 target="_blank"
                 :underline="false"
               >
                 <img src="../../assets/icons/discord-icon.svg" />
               </el-link>
               <el-link
-                href="https://gitcoin.co/twitter"
+                href="https://twitter.com/spark_eco"
                 target="_blank"
                 :underline="false"
               >

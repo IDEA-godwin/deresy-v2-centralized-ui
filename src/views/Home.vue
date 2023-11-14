@@ -1,7 +1,7 @@
 <template>
   <el-row class="header-row">
     <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-      <span class="home-title">GITCOIN REVIEWS</span><br />
+      <span class="home-title">HYPERCERT REVIEWS</span><br />
       <span class="home-subtitle">Explore public goods projects for web3</span>
     </el-col>
     <el-col class="home-search">
@@ -32,11 +32,11 @@
       :xl="12"
       style="padding: 0% 5% 0% 10%"
     >
-      <h1>What is Gitcoinreviews.co?</h1>
+      <h1>What is DERESY?</h1>
       <p>
-        Powered by Deresy, a <strong>DEcentralized REview SYstem</strong> on
-        Optimism, gitcoinreviews aims to bring users full transparency on how
-        hypercerts are performing and using their funds.
+        A <strong>DEcentralized REview SYstem</strong> on Optimism, DERESY aims
+        to bring users full transparency on how hypercerts are performing and
+        using their funds.
       </p>
     </el-col>
     <el-col
