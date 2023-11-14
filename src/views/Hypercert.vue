@@ -88,9 +88,17 @@
                   No reviews available for this hypercert.
                 </div>
               </div>
-              <a target="_blank" :href="`${ipfsBaseUrl}/get_request.html`">
+              <a
+                target="_blank"
+                :href="`https://deresy.eth.limo/get_request.html`"
+              >
                 <el-button type="primary" class="d-round-btn" round>
                   See Review Request (IPFS)
+                </el-button>
+              </a>
+              <a target="_blank" :href="hypercertLink">
+                <el-button type="primary" class="d-round-btn" round>
+                  View Hypercert
                 </el-button>
               </a>
             </el-row>
@@ -167,17 +175,6 @@
                         </template>
 
                         <div class="review-body">
-                          <span style="font-weight: bolder">EAS Schema ID</span>
-                          <br />
-                          <a
-                            :href="`${easExplorerUrl}/schema/view/${easSchemaIDs.reviewsSchemaID}`"
-                            target="_blank"
-                            style="text-decoration: none"
-                          >
-                            {{ easSchemaIDs.reviewsSchemaID }}
-                          </a>
-                          <br /><br />
-
                           <span style="font-weight: bolder">Hypercert</span
                           ><br />
                           <a

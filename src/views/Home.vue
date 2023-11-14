@@ -57,11 +57,7 @@
       <el-table :data="tableData" style="width: 100%">
         <el-table-column prop="name" sortable label="Hypercert" min-width="200">
           <template #default="scope">
-            <a
-              :href="`/hypercerts/${scope.row.id}`"
-              target="_blank"
-              class="hypercert-link"
-            >
+            <a :href="`/hypercerts/${scope.row.id}`" class="hypercert-link">
               <div class="hypercert-name-table-item">
                 <div class="table-hypercert-icon">
                   <el-avatar :src="scope.row.image" :size="40" :round="true" />

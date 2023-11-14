@@ -104,7 +104,7 @@
 
           <el-row class="form-section">
             <el-col :span="11"
-              ><label class="el-form-item__label">Hypercerts</label></el-col
+              ><label class="el-form-item__label">Hypercert Name</label></el-col
             >
             <el-col :span="11" style="padding-left: 10px"
               ><label class="el-form-item__label"

@@ -5,7 +5,7 @@ export default {
     commit("SET_LOADING", loading);
   },
   showVersionNotification() {
-    const baseUrl = process.env.VUE_APP_DERESY_V1_BASE_URL;
+    const baseUrl = "https://v1.gitcoinreviews.co/";
 
     ElNotification({
       title: "Notification",

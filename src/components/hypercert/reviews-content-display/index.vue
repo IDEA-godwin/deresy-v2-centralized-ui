@@ -44,18 +44,19 @@
         >{{ getLatestAmendmentPDFHash(review.attestationID) }}</a
       >
     </div>
-    <br />
-    <el-button
-      type="primary"
-      class="d-round-btn"
-      v-if="review.reviewer == walletAddress"
-      @click="goToCreateAmendment(review)"
-      round
-    >
-      Create Amendment
-    </el-button>
+    <div v-if="review.reviewer == walletAddress">
+      <br />
+      <el-button
+        type="primary"
+        class="d-round-btn"
+        @click="goToCreateAmendment(review)"
+        round
+      >
+        Create Amendment
+      </el-button>
+      <br />
+    </div>
     <br /><br />
-    <br />
     <div
       v-for="(question, qIndex) in getReviewForm(review.formName)?.questions"
       :key="'q-' + qIndex"
