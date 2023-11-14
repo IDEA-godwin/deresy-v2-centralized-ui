@@ -26,7 +26,7 @@
                   index="/create-review-form"
                   @click="goToPath('/create-review-form')"
                 >
-                  Create Review Form
+                  Create Review Form Template
                 </el-menu-item>
                 <el-menu-item
                   index="/create-review-request"
@@ -104,7 +104,7 @@
           index="/create-review-form"
           @click="goToPath('/create-review-form')"
         >
-          Create Review Form
+          Create Review Form Template
         </el-menu-item>
         <el-menu-item
           index="/create-review-request"

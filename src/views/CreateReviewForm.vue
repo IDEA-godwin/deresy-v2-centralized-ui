@@ -3,7 +3,7 @@
     <el-row>
       <el-col :span="24">
         <el-form label-position="top">
-          <h1>Create Review Form</h1>
+          <h1>Create Review Form Template</h1>
 
           <el-row class="form-section">
             <el-col :span="24">
