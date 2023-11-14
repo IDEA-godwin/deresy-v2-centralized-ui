@@ -28,6 +28,11 @@ export const DERESY_CONTRACT_ABI = [
   },
   {
     inputs: [],
+    name: "InvalidLength",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "NotPayable",
     type: "error",
   },
