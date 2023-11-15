@@ -15,8 +15,8 @@ const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 export const sendTransactionNotification = (txHash, title) => {
   const txURL =
     process.env.NODE_ENV === "production"
-      ? `https://arbiscan.io/tx/${txHash}`
-      : `https://testnet.arbiscan.io//tx/${txHash}`;
+      ? `https://optimistic.etherscan.io/tx/${txHash}`
+      : `https://goerli-optimism.etherscan.io/tx/${txHash}`;
 
   ElNotification({
     title,
