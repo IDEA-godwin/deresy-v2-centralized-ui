@@ -51,6 +51,7 @@ export const createReviewForm = async (web3, contract, params) => {
       data: methods
         .createReviewForm(formName, questions, choices, types)
         .encodeABI(),
+      maxPriorityFeePerGas: web3.utils.toWei("0", "gwei"),
     };
 
     await web3.eth
@@ -164,6 +165,7 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
       to: contractAddress,
       value: isPaid ? totalReward : 0,
       data: methods[methodName](...methodArgs).encodeABI(),
+      maxPriorityFeePerGas: web3.utils.toWei("0", "gwei"),
     };
 
     await web3.eth
@@ -217,6 +219,7 @@ export const closeRequest = async (web3, contract, params) => {
       from: walletAddress,
       to: contractAddress,
       data: methods.closeReviewRequest(requestName).encodeABI(),
+      maxPriorityFeePerGas: web3.utils.toWei("0", "gwei"),
     };
 
     await web3.eth
@@ -319,6 +322,7 @@ export const submitReview = async (web3, contract, params) => {
       from: walletAddress,
       to: EAS_CONTRACT_ADDRESS,
       data,
+      maxPriorityFeePerGas: web3.utils.toWei("0", "gwei"),
     };
 
     await web3.eth
@@ -436,6 +440,7 @@ export const createAmendment = async (web3, contract, params) => {
       from: walletAddress,
       to: EAS_CONTRACT_ADDRESS,
       data,
+      maxPriorityFeePerGas: web3.utils.toWei("0", "gwei"),
     };
 
     await web3.eth
