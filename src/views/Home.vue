@@ -35,7 +35,7 @@
       <h1>What is DERESY?</h1>
       <p>
         A <strong>DEcentralized REview SYstem</strong> on Optimism, DERESY aims
-        to bring users full transparency on how hypercerts are performing and
+        to bring users full transparency on how projects are performing and
         using their funds.
       </p>
     </el-col>
