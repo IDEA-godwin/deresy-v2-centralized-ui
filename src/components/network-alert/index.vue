@@ -43,6 +43,6 @@ export default defineComponent({
 <style scoped>
 .connect-wallet-alert {
   position: absolute;
-  z-index: 3000;
+  z-index: 2000;
 }
 </style>
