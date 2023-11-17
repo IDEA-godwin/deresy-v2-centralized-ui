@@ -168,7 +168,7 @@
                           @change="handleFileChange"
                         >
                           <el-button
-                            class="getForm"
+                            class="attachment-btn"
                             type="primary"
                             size="medium"
                             >Add Attachment</el-button
@@ -177,16 +177,25 @@
                       </el-col>
                     </el-row>
                     <el-row v-if="reviewObject.requestName" class="action-row">
+                      <hr class="submit-separator" />
                       <el-col :span="24">
-                        <el-button
-                          @click="sendBtn()"
-                          class="send-btn"
-                          type="success"
-                          size="large"
-                          :disabled="isFormLoading"
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          placement="top"
+                          :content="submitMessage()"
+                          :disabled="!disableSubmit()"
                         >
-                          Submit
-                        </el-button>
+                          <el-button
+                            @click="sendBtn()"
+                            class="send-btn"
+                            type="success"
+                            size="large"
+                            :disabled="isFormLoading || disableSubmit()"
+                          >
+                            Submit
+                          </el-button>
+                        </el-tooltip>
                       </el-col>
                     </el-row>
                   </div>
@@ -241,6 +250,7 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
 import { optimismWeb3 } from "@/web3";
+import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 
 export default {
   name: "SubmitReview",
@@ -399,6 +409,24 @@ export default {
       populateAnswers(review, types, reviewObject);
 
       return;
+    };
+
+    const disableSubmit = () => {
+      return (
+        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+      );
+    };
+
+    const submitMessage = () => {
+      if (!user.networkId) {
+        return "Please connect your wallet";
+      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
+        return `Please connect your wallet to the ${
+          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
+        } network`;
+      } else {
+        return "";
+      }
     };
 
     const sendBtn = async () => {
@@ -611,6 +639,8 @@ export default {
       simpleMDEInstances,
       requestObject,
       reviewForm,
+      disableSubmit,
+      submitMessage,
       isEmptyHashes,
       forbiddenMessage,
       allowToSubmit,
@@ -727,6 +757,11 @@ export default {
   .review-select {
     width: 100%;
   }
+}
+.submit-separator {
+  margin: 30px 0px 20px 0px;
+  border-top: 1px solid rgb(235, 233, 233);
+  width: 100vw;
 }
 </style>
 <style>

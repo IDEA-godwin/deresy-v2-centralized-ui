@@ -26,17 +26,26 @@
         </el-form>
       </el-col>
     </el-row>
+    <hr class="submit-separator" />
     <el-row>
       <el-col :span="24">
-        <el-button
-          @click="sendBtn()"
-          class="send-btn"
-          type="success"
-          size="large"
-          :disabled="!requestName"
+        <el-tooltip
+          class="box-item"
+          effect="dark"
+          placement="top"
+          :content="submitMessage()"
+          :disabled="!disableSubmit()"
         >
-          Submit
-        </el-button>
+          <el-button
+            @click="sendBtn()"
+            class="send-btn"
+            type="success"
+            size="large"
+            :disabled="!requestName || disableSubmit()"
+          >
+            Submit
+          </el-button>
+        </el-tooltip>
       </el-col>
     </el-row>
   </div>
@@ -50,6 +59,7 @@ import { watch, computed, ref, onBeforeMount } from "vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { HOME_ROUTE } from "@/constants/routes";
+import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 
 export default {
   name: "CreateReviewRequest",
@@ -70,6 +80,24 @@ export default {
     const requestNames = ref();
     const contractRef = ref(contract);
     const isFormLoading = ref(false);
+
+    const disableSubmit = () => {
+      return (
+        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+      );
+    };
+
+    const submitMessage = () => {
+      if (!user.networkId) {
+        return "Please connect your wallet";
+      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
+        return `Please connect your wallet to the ${
+          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
+        } network`;
+      } else {
+        return "";
+      }
+    };
 
     const sendBtn = async () => {
       isFormLoading.value = true;
@@ -144,6 +172,8 @@ export default {
       isFormLoading,
       requestNames,
       requestName,
+      disableSubmit,
+      submitMessage,
       sendBtn,
     };
   },
@@ -158,6 +188,10 @@ export default {
 .send-btn {
   margin: 10px 0px;
   float: left;
+}
+.submit-separator {
+  margin: 30px 0px 20px 0px;
+  border-top: 1px solid rgb(235, 233, 233);
 }
 </style>
 <style>

@@ -232,16 +232,25 @@
               </el-form-item>
             </el-col>
           </el-row>
-
+          <hr class="submit-separator" />
           <el-row class="form-section">
             <el-col :span="24">
-              <el-button
-                @click="sendBtn()"
-                class="send-btn"
-                type="success"
-                size="large"
-                >Submit</el-button
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="top"
+                :content="submitMessage()"
+                :disabled="!disableSubmit()"
               >
+                <el-button
+                  @click="sendBtn()"
+                  class="send-btn"
+                  type="success"
+                  size="large"
+                  :disabled="disableSubmit()"
+                  >Submit</el-button
+                >
+              </el-tooltip>
             </el-col>
           </el-row>
         </el-form>
@@ -262,6 +271,7 @@ import { required, helpers } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
 import { getAllReviewFormNames } from "@/services/ReviewFormService";
 import { HOME_ROUTE } from "@/constants/routes";
+import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 
 export default {
   name: "CreateReviewRequest",
@@ -299,6 +309,24 @@ export default {
 
     const isRewardDisabled = computed(() => !requestObject.isPaidReview);
     const requestFunction = handleRequest;
+
+    const disableSubmit = () => {
+      return (
+        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+      );
+    };
+
+    const submitMessage = () => {
+      if (!user.networkId) {
+        return "Please connect your wallet";
+      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
+        return `Please connect your wallet to the ${
+          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
+        } network`;
+      } else {
+        return "";
+      }
+    };
 
     const rules = computed(() => {
       return {
@@ -506,6 +534,8 @@ export default {
       hypercertLastSixMonths,
       hypercertOptions,
       hypercertsLoading,
+      disableSubmit,
+      submitMessage,
       remoteMethod,
       addReviewer,
       addTarget,
@@ -552,5 +582,9 @@ export default {
 .target-row + .target-row,
 .review-row + .review-row {
   margin-top: 20px;
+}
+.submit-separator {
+  margin: 30px 0px 20px 0px;
+  border-top: 1px solid rgb(235, 233, 233);
 }
 </style>

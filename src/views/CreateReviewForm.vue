@@ -34,17 +34,26 @@
               </el-button>
             </el-col>
           </el-row>
-
+          <hr class="submit-separator" />
           <el-row class="form-section">
             <el-col :span="24">
-              <el-button
-                @click="sendBtn()"
-                class="send-btn"
-                type="success"
-                size="large"
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="top"
+                :content="submitMessage()"
+                :disabled="!disableSubmit()"
               >
-                Submit
-              </el-button>
+                <el-button
+                  @click="sendBtn()"
+                  class="send-btn"
+                  type="success"
+                  size="large"
+                  :disabled="disableSubmit()"
+                >
+                  Submit
+                </el-button>
+              </el-tooltip>
             </el-col>
           </el-row>
         </el-form>
@@ -63,6 +72,7 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { useRouter } from "vue-router";
 import { HOME_ROUTE } from "@/constants/routes";
+import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 
 export default {
   name: "CreateReviewForm",
@@ -100,6 +110,24 @@ export default {
 
     const deleteQuestion = (index) => {
       formAccessibility.formQuestions.splice(index, 1);
+    };
+
+    const disableSubmit = () => {
+      return (
+        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+      );
+    };
+
+    const submitMessage = () => {
+      if (!user.networkId) {
+        return "Please connect your wallet";
+      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
+        return `Please connect your wallet to the ${
+          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
+        } network`;
+      } else {
+        return "";
+      }
     };
 
     const sendBtn = async () => {
@@ -178,6 +206,8 @@ export default {
     return {
       isFormLoading,
       formAccessibility,
+      disableSubmit,
+      submitMessage,
       addQuestion,
       deleteQuestion,
       sendBtn,
@@ -199,5 +229,9 @@ export default {
 .send-btn {
   margin: 10px 0px;
   float: left;
+}
+.submit-separator {
+  margin: 30px 0px 20px 0px;
+  border-top: 1px solid rgb(235, 233, 233);
 }
 </style>

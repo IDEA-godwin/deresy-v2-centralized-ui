@@ -43,6 +43,7 @@
                     <a
                       :href="`${easExplorerUrl}/attestation/view/${refReviewObject.attestationID}`"
                       target="_blank"
+                      style="word-break: break-all"
                       >{{ refReviewObject.attestationID }}</a
                     >
                   </el-col>
@@ -94,23 +95,35 @@
                         :before-upload="() => false"
                         @change="handleFileChange"
                       >
-                        <el-button class="getForm" type="primary" size="medium"
+                        <el-button
+                          class="attachment-btn"
+                          type="primary"
+                          size="medium"
                           >Add Attachment</el-button
                         >
                       </el-upload>
                     </el-col>
                   </el-row>
                   <el-row class="action-row">
+                    <hr class="submit-separator" />
                     <el-col :span="24">
-                      <el-button
-                        @click="sendBtn()"
-                        class="send-btn"
-                        type="success"
-                        size="large"
-                        :disabled="isFormLoading"
+                      <el-tooltip
+                        class="box-item"
+                        effect="dark"
+                        placement="top"
+                        :content="submitMessage()"
+                        :disabled="!disableSubmit()"
                       >
-                        Submit
-                      </el-button>
+                        <el-button
+                          @click="sendBtn()"
+                          class="send-btn"
+                          type="success"
+                          size="large"
+                          :disabled="isFormLoading || disableSubmit()"
+                        >
+                          Submit
+                        </el-button>
+                      </el-tooltip>
                     </el-col>
                   </el-row>
                 </div>
@@ -153,6 +166,8 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { optimismWeb3 } from "@/web3";
+import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
+
 export default {
   name: "Create Amendment",
   setup() {
@@ -236,6 +251,24 @@ export default {
       simplemde?.codemirror?.on("change", function () {
         amendmentObject.amendment = simplemde.value();
       });
+    };
+
+    const disableSubmit = () => {
+      return (
+        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+      );
+    };
+
+    const submitMessage = () => {
+      if (!user.networkId) {
+        return "Please connect your wallet";
+      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
+        return `Please connect your wallet to the ${
+          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
+        } network`;
+      } else {
+        return "";
+      }
     };
 
     const sendBtn = async () => {
@@ -383,6 +416,8 @@ export default {
       refReviewObject,
       walletAddressRef,
       easExplorerUrl,
+      disableSubmit,
+      submitMessage,
       forbiddenMessage,
       removeAttachment,
       handleFileChange,
@@ -398,7 +433,9 @@ export default {
   display: flex;
   width: 100%;
 }
-
+.attachment-btn {
+  width: 100%;
+}
 .create-amendment-form {
   display: flex;
   flex-direction: column;
@@ -455,6 +492,11 @@ export default {
   .create-amendment-form {
     width: 100%;
   }
+}
+.submit-separator {
+  margin: 30px 0px 20px 0px;
+  border-top: 1px solid rgb(235, 233, 233);
+  width: 100vw;
 }
 </style>
 <style>
