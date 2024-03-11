@@ -280,7 +280,7 @@
 </template>
 
 <script>
-import marked from "marked";
+import {parse} from "marked";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { onBeforeMount, reactive, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -563,7 +563,7 @@ export default {
     });
 
     const markdownToHtml = (markdown) => {
-      return marked.parse(markdown);
+      return parse(markdown);
     };
 
     return {

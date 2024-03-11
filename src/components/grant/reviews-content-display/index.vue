@@ -148,7 +148,7 @@
 </template>
 
 <script>
-import marked from "marked";
+import { parse } from "marked";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { computed } from "vue";
@@ -194,7 +194,7 @@ export default {
     };
 
     const markdownToHtml = (markdown) => {
-      return marked.parse(markdown);
+      return parse(markdown);
     };
 
     const goToCreateAmendment = (review) => {

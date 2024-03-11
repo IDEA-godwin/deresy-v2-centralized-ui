@@ -232,7 +232,7 @@
 </template>
 
 <script>
-import marked from "marked";
+import {parse} from "marked";
 import { onBeforeMount, reactive, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -416,7 +416,7 @@ export default {
     });
 
     const markdownToHtml = (markdown) => {
-      return marked.parse(markdown);
+      return parse(markdown);
     };
 
     return {
