@@ -27,4 +27,8 @@ export default {
   setWeb3({ commit }, web3) {
     commit("SET_WEB3", web3);
   },
+
+  resetContractInformation({ commit }) {
+    commit("RESET_CONTRACT_INFORMATION");
+  },
 };

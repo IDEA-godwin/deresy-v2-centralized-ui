@@ -15,4 +15,14 @@ export default {
     state.easSchemaIDs.reviewsSchemaID = payload.reviewsSchemaID;
     state.easSchemaIDs.amendmentsSchemaID = payload.amendmentsSchemaID;
   },
+
+  RESET_CONTRACT_INFORMATION(state) {
+    state.provider = null;
+    state.web3 = null;
+    state.contract = null;
+    state.easSchemaIDs = {
+      reviewsSchemaID: null,
+      amendmentsSchemaID: null,
+    };
+  },
 };

@@ -280,7 +280,7 @@
 </template>
 
 <script>
-import {parse} from "marked";
+import { parse } from "marked";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { onBeforeMount, reactive, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";

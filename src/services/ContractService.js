@@ -16,7 +16,7 @@ export const sendTransactionNotification = (txHash, title) => {
   const txURL =
     process.env.NODE_ENV === "production"
       ? `https://optimistic.etherscan.io/tx/${txHash}`
-      : `https://goerli-optimism.etherscan.io/tx/${txHash}`;
+      : `https://sepolia-optimism.etherscan.io/tx/${txHash}`;
 
   ElNotification({
     title,
@@ -122,8 +122,10 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
     targets,
     targetHashes,
     reviewers,
+    reviewerContracts,
     requestHash,
     rewardPerReview,
+    reviewsPerHypercert,
     totalReward,
     contractAddress,
     paymentTokenAddress,
@@ -136,18 +138,20 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
   let methodArgs = isPaid
     ? [
         name,
-        reviewers,
+        [],
+        reviewerContracts,
         targets,
         targetHashes,
         requestHash,
         rewardPerReview,
+        reviewsPerHypercert,
         paymentTokenAddress,
         reviewFormName,
       ]
     : [name, reviewers, targets, targetHashes, requestHash, reviewFormName];
 
   let response;
-
+  console.log(methodArgs);
   try {
     if (isPaid && paymentTokenAddress !== DEFAULT_PAYMENT_ADDRESS) {
       const tokenContract = new web3.eth.Contract(

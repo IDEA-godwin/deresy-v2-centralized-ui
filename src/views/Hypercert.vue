@@ -232,7 +232,7 @@
 </template>
 
 <script>
-import {parse} from "marked";
+import { parse } from "marked";
 import { onBeforeMount, reactive, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -339,6 +339,8 @@ export default {
       }
 
       let groupedReviews = {};
+
+      console.log("ar", allReviews.response);
 
       allReviews.response.forEach((reviewDocument) => {
         reviewDocument.reviews.forEach((r) => {

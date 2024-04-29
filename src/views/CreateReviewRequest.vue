@@ -60,11 +60,6 @@
                       v-model="requestObject.reviewers[index].address"
                       placeholder="Enter a reviewer address"
                     />
-                    <div v-if="v$.reviewers.$error" style="margin-top: 10px">
-                      <span class="vuelidation-error">{{
-                        v$.reviewers.$errors[0].$message[index][0]
-                      }}</span>
-                    </div>
                   </el-col>
                   <el-col :span="2">
                     <el-button
@@ -85,6 +80,50 @@
                     class="add-btn"
                     type="primary"
                     >Add Reviewer</el-button
+                  >
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
+
+          <el-row class="form-section">
+            <el-col :span="20">
+              <label class="el-form-item__label"
+                >Reviewer ERC721 Contract Addresses</label
+              >
+            </el-col>
+            <el-col :span="24">
+              <div
+                v-for="(reviewer, index) in requestObject.reviewerContracts"
+                :key="index"
+                class="review-row"
+              >
+                <el-row :gutter="20">
+                  <el-col :span="22">
+                    <el-input
+                      v-model="requestObject.reviewerContracts[index].address"
+                      placeholder="Enter a ERC721 contract address"
+                    />
+                  </el-col>
+                  <el-col :span="2">
+                    <el-button
+                      circle
+                      type="danger"
+                      :icon="CloseBold"
+                      size="small"
+                      @click="removeReviewerContract(index)"
+                      v-if="index > 0"
+                    ></el-button>
+                  </el-col>
+                </el-row>
+              </div>
+              <el-row class="form-section">
+                <el-col :span="24">
+                  <el-button
+                    @click="addReviewerContract()"
+                    class="add-btn"
+                    type="primary"
+                    >Add ERC 721 Contract Address</el-button
                   >
                 </el-col>
               </el-row>
@@ -232,6 +271,18 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-row class="form-section">
+            <el-col :span="22">
+              <el-form-item label="Reviews per Hypercert">
+                <el-input
+                  v-model="requestObject.reviewsPerHypercert"
+                  type="number"
+                  placeholder="Enter the reviews per hypercert"
+                  :disabled="isRewardDisabled"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
           <hr class="submit-separator" />
           <el-row class="form-section">
             <el-col :span="24">
@@ -301,8 +352,10 @@ export default {
       reviewFormName: "",
       targets: [],
       reviewers: [],
+      reviewerContracts: [],
       requestHash: "",
       rewardPerReview: "",
+      reviewsPerHypercert: "",
       paymentTokenAddress: "",
       isPaidReview: true,
     });
@@ -340,14 +393,8 @@ export default {
             },
           }),
         },
-        reviewers: {
-          $each: helpers.forEach({
-            address: {
-              required,
-            },
-          }),
-        },
         rewardPerReview: { required },
+        reviewsPerHypercert: { required },
       };
     });
     const v$ = useVuelidate(rules, requestObject);
@@ -356,11 +403,19 @@ export default {
       requestObject.reviewers.push({ address: "" });
     };
 
+    const addReviewerContract = () => {
+      requestObject.reviewerContracts.push({ address: "" });
+    };
+
     const addTarget = () => {
       requestObject.targets.push({ address: "", ipfsHash: "" });
     };
 
     const removeReviewer = (index) => {
+      requestObject.reviewers.splice(index, 1);
+    };
+
+    const removeReviewerContract = (index) => {
       requestObject.reviewers.splice(index, 1);
     };
 
@@ -400,21 +455,13 @@ export default {
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
-        const rewardPerReviewToWei = web3.value.utils.toBN(
-          web3.value.utils.toWei(
-            requestObject.rewardPerReview.toString(),
-            "ether"
-          )
+        const rewardPerReviewToWei = web3.value.utils.toWei(
+          requestObject.rewardPerReview.toString(),
+          "ether"
         );
-        const reviewersLengthBN = web3.value.utils.toBN(
-          requestObject.reviewers.length
-        );
-        const targetsLengthBN = web3.value.utils.toBN(
-          requestObject.targets.length
-        );
-        const totalReward = rewardPerReviewToWei
-          .mul(reviewersLengthBN)
-          .mul(targetsLengthBN);
+
+        const totalReward =
+          rewardPerReviewToWei * requestObject.reviewsPerHypercert;
 
         const targetAddresses = requestObject.targets.map((target) => {
           return target.address;
@@ -426,14 +473,24 @@ export default {
           return reviewer.address;
         });
 
+        const reviewerContractsAddresses = requestObject.reviewerContracts.map(
+          (reviewerContract) => {
+            return reviewerContract.address;
+          }
+        );
+
+        console.log(reviewerContractsAddresses);
+
         const payload = {
           name: requestObject.name,
           reviewFormName: requestObject.reviewFormName,
           targets: targetAddresses,
           targetHashes: targetHashes,
           reviewers: reviewersAddresses,
+          reviewerContracts: reviewerContractsAddresses,
           requestHash: requestObject.requestHash,
           rewardPerReview: rewardPerReviewToWei,
+          reviewsPerHypercert: requestObject.reviewsPerHypercert,
           totalReward: totalReward,
           contractAddress: DERESY_CONTRACT_ADDRESS,
           paymentTokenAddress: requestObject.paymentTokenAddress,
@@ -490,6 +547,7 @@ export default {
 
     onBeforeMount(async () => {
       requestObject.reviewers.push({ address: "" });
+      requestObject.reviewerContracts.push({ address: "" });
       requestObject.targets.push({ address: "", ipfsHash: "" });
 
       if (contractRef.value) {
@@ -538,8 +596,10 @@ export default {
       submitMessage,
       remoteMethod,
       addReviewer,
+      addReviewerContract,
       addTarget,
       removeReviewer,
+      removeReviewerContract,
       removeTarget,
       sendBtn,
       v$,

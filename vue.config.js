@@ -1,5 +1,5 @@
-const { defineConfig } = require('@vue/cli-service')
-const webpack = require('webpack');
+const { defineConfig } = require("@vue/cli-service");
+const webpack = require("webpack");
 
 module.exports = defineConfig({
   devServer: {
@@ -21,8 +21,15 @@ module.exports = defineConfig({
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({
-        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
-      })
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: "false",
+      }),
     ],
+    resolve: {
+      fallback: {
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        vm: require.resolve("vm-browserify"),
+      },
+    },
   },
 });

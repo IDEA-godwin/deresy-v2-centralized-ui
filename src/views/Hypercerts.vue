@@ -70,7 +70,7 @@ export default {
       hypercertsData.value.forEach((hypercert) => {
         const matchingReviews = [];
         for (const review of reviews.value) {
-          review.reviews.find((reviewItem) => {
+          review.reviews?.find((reviewItem) => {
             if (reviewItem.hypercertID == hypercert.tokenID) {
               matchingReviews.push(reviewItem);
             }

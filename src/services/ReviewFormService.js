@@ -38,6 +38,7 @@ export async function getAllReviewFormNames() {
   try {
     const snapshot = await reviewFormsRef.get();
     names = snapshot.docs.map((doc) => doc.data().formName).filter(Boolean);
+    console.log("names", names);
   } catch (e) {
     console.error("Error fetching review form names: ", e);
   }

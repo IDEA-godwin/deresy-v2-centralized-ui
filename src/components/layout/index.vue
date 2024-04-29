@@ -97,10 +97,7 @@
         @close="handleClose"
         @select="handleSelect"
       >
-        <el-menu-item
-          index="/hypercerts"
-          @click="goToPath('/hypercerts')"
-        >
+        <el-menu-item index="/hypercerts" @click="goToPath('/hypercerts')">
           Hypercerts
         </el-menu-item>
         <el-menu-item

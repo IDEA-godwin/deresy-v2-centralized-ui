@@ -1,14 +1,7 @@
 <template>
   <div>
     <div v-if="walletAddressRef">
-      <el-button
-        type="primary"
-        v-if="showUnlinkButton"
-        @click="onUnlinkAccount"
-      >
-        Unlink account
-      </el-button>
-      <el-button type="primary" v-else @click="disconnectWallet">
+      <el-button type="primary" @click="disconnectWallet">
         Disconnect
       </el-button>
     </div>
@@ -27,7 +20,7 @@
         <a
           v-if="!isMetamaskApp"
           class="btn wallet__btn"
-          href="https://metamask.app.link/dapp/deresy.io/"
+          href="https://metamask.app.link/dapp/studiouno.io/"
         >
           <span class="icon-link">
             <img :src="require('../../assets/icons/metamask.png')" />
@@ -54,26 +47,11 @@
 
 <script>
 import { useStore } from "vuex";
-import { computed, ref, onMounted } from "vue";
-
+import { computed, ref } from "vue";
 import web3Modal from "@/web3Modal";
-import { web3WalletClient } from "@/web3";
-import detectEthereumProvider from "@metamask/detect-provider";
-
-import { getContract } from "@/services/ContractService";
-import {
-  DERESY_CONTRACT_ABI,
-  DERESY_CONTRACT_ADDRESS,
-} from "@/constants/contractConstants";
-
 import Popup from "../../components/popup/index.vue";
-
 import { NETWORK_NAMES } from "@/constants/walletConstants";
-import {
-  connectWallet,
-  subscribeProvider,
-  onDisconnect,
-} from "@/services/ProviderService";
+import { useDisconnect } from "@web3modal/ethers5/vue";
 
 export default {
   name: "Wallet",
@@ -90,7 +68,6 @@ export default {
 
     const owner = ref("");
     const showUnlinkButton = ref(false);
-    const providerRef = ref(null);
     const balance = computed(() => user.balance);
     const walletAddress = computed(() => user.walletAddress);
     const network = computed(() => NETWORK_NAMES[user.networkId]);
@@ -103,55 +80,19 @@ export default {
       dispatch("setLoading", true);
 
       try {
-        // Get provider from service
-        const { provider } = await connectWallet(store);
-        providerRef.value = provider;
-
-        showUnlinkButton.value = web3Modal.cachedProvider === "custom-coinbase";
-
-        await subscribeProvider(provider, store);
-
-        const web3 = web3WalletClient(provider);
-
-        const contract = await getContract(
-          web3,
-          DERESY_CONTRACT_ABI,
-          DERESY_CONTRACT_ADDRESS
-        );
-
-        dispatch("setProvider", provider);
-        dispatch("setWeb3", web3);
-        dispatch("setContract", contract);
-        dispatch("setEasSchemaIDs");
+        await web3Modal.open();
         showPopup.value = false;
       } catch (error) {
         console.error(error);
       }
-
-      dispatch("setLoading", false);
     };
 
     const disconnectWallet = async () => {
-      await onDisconnect(store);
+      const { disconnect } = useDisconnect();
+      disconnect();
+      dispatch("resetWalletInformation");
+      dispatch("resetContractInformation");
     };
-
-    const onUnlinkAccount = async () => {
-      const provider = providerRef.value;
-      if (typeof provider.close === "function") {
-        provider.close();
-        await onDisconnect(store);
-      }
-    };
-
-    onMounted(async () => {
-      const mmProvider = await detectEthereumProvider();
-      if (web3Modal.cachedProvider) {
-        await onConnect();
-      }
-      if (mmProvider) {
-        isMetamaskApp.value = true;
-      }
-    });
 
     const onTogglePopup = () => {
       showPopup.value = !showPopup.value;
@@ -163,7 +104,6 @@ export default {
       owner,
       showUnlinkButton,
       walletAddressRef,
-      onUnlinkAccount,
       onConnect,
       disconnectWallet,
       onTogglePopup,

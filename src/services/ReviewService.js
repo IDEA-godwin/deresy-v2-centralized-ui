@@ -43,7 +43,7 @@ export async function getReviewByAttestationID(hypercertID, attestationID) {
     } else {
       const allReviews = snapshot.docs.map((doc) => doc.data());
       for (const review of allReviews) {
-        const matchingReview = review.reviews.find((reviewItem) => {
+        const matchingReview = review.reviews?.find((reviewItem) => {
           return (
             reviewItem.hypercertID === hypercertID &&
             reviewItem.attestationID === attestationID

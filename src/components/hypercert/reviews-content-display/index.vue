@@ -163,7 +163,7 @@
 </template>
 
 <script>
-import {parse} from "marked";
+import { parse } from "marked";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { computed } from "vue";
