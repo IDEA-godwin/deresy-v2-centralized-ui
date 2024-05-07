@@ -26,7 +26,7 @@
       </div>
       <div v-else><span style="font-weight: bolder">PDF File</span><br /></div>
       <a
-        :href="getIpfsLink(review.attestationID, review.pdfIpfsHash)"
+        :href="getIpfsLink(review.pdfIpfsHash)"
         target="_blank"
         style="text-decoration: none"
         >{{ review.pdfIpfsHash }}</a
@@ -36,9 +36,9 @@
       <br />
       <span style="font-weight: bolder">PDF File (Latest Amendment)</span><br />
       <a
-        :href="`${pinataGatewayUrl}/ipfs/${getLatestAmendmentPDFHash(
+        :href="`${pinataGatewayUrl}${getLatestAmendmentPDFHash(
           review.attestationID
-        )}`"
+        )}?pinataGatewayToken=${pinataGatewayToken}`"
         target="_blank"
         style="text-decoration: none"
         >{{ getLatestAmendmentPDFHash(review.attestationID) }}</a
@@ -75,10 +75,7 @@
         v-for="(attachmentHash, index) in review.attachmentsIpfsHashes"
         :key="index"
       >
-        <a
-          :href="getIpfsLink(review.attestationID, attachmentHash)"
-          target="_blank"
-        >
+        <a :href="getIpfsLink(attachmentHash)" target="_blank">
           {{ attachmentHash }}
         </a>
         <br />
@@ -110,12 +107,7 @@
                 <div v-if="reviewAmendment.pdfIpfsHash.length > 0">
                   <strong>PDF File </strong>
                   <a
-                    :href="
-                      getIpfsLink(
-                        reviewAmendment.amendmentUID,
-                        reviewAmendment.pdfIpfsHash
-                      )
-                    "
+                    :href="getIpfsLink(reviewAmendment.pdfIpfsHash)"
                     target="_blank"
                     >{{ reviewAmendment.pdfIpfsHash }}</a
                   >
@@ -136,15 +128,7 @@
                     ) in reviewAmendment.attachmentsIpfsHashes"
                     :key="index"
                   >
-                    <a
-                      :href="
-                        getIpfsLink(
-                          reviewAmendment.amendmentUID,
-                          attachmentHash
-                        )
-                      "
-                      target="_blank"
-                    >
+                    <a :href="getIpfsLink(attachmentHash)" target="_blank">
                       {{ attachmentHash }}
                     </a>
                     <br />
@@ -176,6 +160,7 @@ export default {
     reviewAmendments: Array,
     easExplorerUrl: String,
     pinataGatewayUrl: String,
+    pinataGatewayToken: String,
     tokenID: String,
   },
   setup(props) {
@@ -196,12 +181,8 @@ export default {
         .sort((a, b) => a.createdAt - b.createdAt);
     };
 
-    const getIpfsLink = (attestationID, ipfsHash) => {
-      if (props.attestattionsIDs.includes(attestationID)) {
-        return `${props.pinataGatewayUrl}/ipfs/${ipfsHash}`;
-      } else {
-        return `https://ipfs.io/ipfs/${ipfsHash}`;
-      }
+    const getIpfsLink = (ipfsHash) => {
+      return `${props.pinataGatewayUrl}${ipfsHash}?pinataGatewayToken=${props.pinataGatewayToken}`;
     };
 
     const formatDate = (unixTimestamp) => {

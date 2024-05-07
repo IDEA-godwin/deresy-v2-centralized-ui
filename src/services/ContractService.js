@@ -138,7 +138,7 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
   let methodArgs = isPaid
     ? [
         name,
-        [],
+        reviewers,
         reviewerContracts,
         targets,
         targetHashes,
@@ -151,7 +151,6 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
     : [name, reviewers, targets, targetHashes, requestHash, reviewFormName];
 
   let response;
-  console.log(methodArgs);
   try {
     if (isPaid && paymentTokenAddress !== DEFAULT_PAYMENT_ADDRESS) {
       const tokenContract = new web3.eth.Contract(
@@ -210,6 +209,20 @@ export const getRequestNames = async (params) => {
   }
 };
 
+export const isReviewer = async (params) => {
+  const { contractMethods, requestName, reviewerAddress } = params;
+  try {
+    const response = contractMethods
+      .isReviewer(reviewerAddress, requestName)
+      .call();
+
+    return response;
+  } catch (e) {
+    console.error("An error ocurred while getting the requests names.", e);
+    throw e;
+  }
+};
+
 export const closeRequest = async (web3, contract, params) => {
   const { requestName, contractAddress, walletAddress } = params;
   const { methods } = contract;
@@ -244,6 +257,8 @@ export const submitReview = async (web3, contract, params) => {
     name,
     hypercertID,
     answers,
+    questions,
+    questionTypes,
     attachmentsIpfsHashes,
     tokenID,
     walletAddress,
@@ -275,7 +290,6 @@ export const submitReview = async (web3, contract, params) => {
       reviewCreatedAt: Math.floor(Date.now() / 1000),
       attachmentsIpfsHashes: attachmentsIpfsHashes,
     };
-
     const pdfResponse = await fetch(
       process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL + "/api/generate_pdf",
       {
@@ -283,7 +297,6 @@ export const submitReview = async (web3, contract, params) => {
         body: JSON.stringify(pdfRequestData),
       }
     );
-
     const pdfData = await pdfResponse?.json();
 
     const ipfsHashID = pdfData?.IpfsHash;
@@ -292,6 +305,8 @@ export const submitReview = async (web3, contract, params) => {
       { type: "string", name: "requestName" },
       { type: "uint256", name: "hypercertID" },
       { type: "string[]", name: "answers" },
+      { type: "string[]", name: "questions" },
+      { type: "string[]", name: "questionTypes" },
       { type: "string", name: "pdfIpfsHash" },
       { type: "string[]", name: "attachmentsIpfsHashes" },
     ];
@@ -300,6 +315,8 @@ export const submitReview = async (web3, contract, params) => {
       name,
       hypercertID,
       answers,
+      questions,
+      questionTypes,
       ipfsHashID,
       attachmentsIpfsHashes,
     ]);

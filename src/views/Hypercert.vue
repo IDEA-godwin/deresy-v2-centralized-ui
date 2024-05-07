@@ -195,6 +195,7 @@
                           :reviewForms="reviewForms"
                           :easExplorerUrl="easExplorerUrl"
                           :pinataGatewayUrl="pinataGatewayUrl"
+                          :pinataGatewayToken="pinataGatewayToken"
                         />
                       </el-collapse-item>
                     </el-collapse>
@@ -233,7 +234,7 @@
 
 <script>
 import { parse } from "marked";
-import { onBeforeMount, reactive, ref, computed } from "vue";
+import { onBeforeMount, reactive, ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 
@@ -244,6 +245,7 @@ import { getReviewRequestsByHypercert } from "@/services/ReviewRequestService";
 import { getAllReviewForms } from "@/services/ReviewFormService";
 import { getReviewAmendments } from "@/services/AmendmentService";
 import { getAttestationsIDs } from "@/services/AttestationsService";
+import { isReviewer } from "@/services/ContractService";
 
 import { ElMessage } from "element-plus";
 import { ArrowDownBold } from "@element-plus/icons";
@@ -262,6 +264,12 @@ export default {
     const route = useRoute();
     const router = useRouter();
 
+    const walletAddress = computed(() => user.walletAddress);
+    const easSchemaIDs = computed(() => contractState.easSchemaIDs);
+    const contract = computed(() => contractState.contract);
+
+    const walletAddressRef = ref(walletAddress);
+    const contractRef = ref(contract);
     const dataTable = ref([]);
     const tokenID = route.params.token_id;
     const hypercert = ref(null);
@@ -270,12 +278,12 @@ export default {
     const reviewForms = ref([]);
     const ipfsBaseUrl = ref("");
     const pinataGatewayUrl = ref("");
+    const pinataGatewayToken = ref("");
     const easExplorerUrl = ref("");
-    const walletAddress = computed(() => user.walletAddress);
     const hypercertLink = ref("");
     const reviewAmendments = ref([]);
     const attestattionsIDs = ref([]);
-    const easSchemaIDs = computed(() => contractState.easSchemaIDs);
+    const isReviewerForAny = ref(false);
 
     const loading = ref(true);
     const hypercertNotFound = ref(true);
@@ -284,12 +292,6 @@ export default {
       reviewRequest: {},
       reviews: [],
       reviewForm: {},
-    });
-
-    const isReviewerForAny = computed(() => {
-      return reviewRequests.value.some((request) =>
-        request.reviewers.includes(walletAddress.value)
-      );
     });
 
     const areAllRequestsClosed = computed(() => {
@@ -339,8 +341,6 @@ export default {
       }
 
       let groupedReviews = {};
-
-      console.log("ar", allReviews.response);
 
       allReviews.response.forEach((reviewDocument) => {
         reviewDocument.reviews.forEach((r) => {
@@ -397,6 +397,7 @@ export default {
     };
 
     onBeforeMount(async () => {
+      loading.value = true;
       hypercert.value = (await getHypercert(tokenID)).response;
       reviewAmendments.value = (await getReviewAmendments(tokenID)).response;
       attestattionsIDs.value = (await getAttestationsIDs()).response;
@@ -410,16 +411,50 @@ export default {
 
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
       pinataGatewayUrl.value = process.env.VUE_APP_PINATA_GATEWAY_BASE_URL;
+      pinataGatewayToken.value = process.env.VUE_APP_PINATA_GATEWAY_TOKEN;
       easExplorerUrl.value = process.env.VUE_APP_EAS_EXPLORER_URL;
       hypercertLink.value = `${
         process.env.VUE_APP_HYPERCERTS_BASE_URL
       }${process.env.VUE_APP_HYPERCERT_CONTRACT_ADDRESS.toLowerCase()}-${tokenID}`;
+      if (contractRef.value && reviewRequests.value.length > 0) {
+        for (const request of reviewRequests.value) {
+          const payload = {
+            contractMethods: contractRef.value.methods,
+            reviewerAddress: walletAddressRef.value,
+            requestName: request.requestName,
+          };
+          const isAddressReviewer = await isReviewer(payload);
+          if (isAddressReviewer) {
+            isReviewerForAny.value = true;
+            loading.value = false;
+            return;
+          }
+        }
+      }
       loading.value = false;
     });
 
     const markdownToHtml = (markdown) => {
       return parse(markdown);
     };
+
+    watch([contractRef, walletAddressRef], async () => {
+      if (contractRef.value && reviewRequests.value.length > 0) {
+        isReviewerForAny.value = false;
+        for (const request of reviewRequests.value) {
+          const payload = {
+            contractMethods: contractRef.value.methods,
+            reviewerAddress: walletAddressRef.value,
+            requestName: request.requestName,
+          };
+          const isAddressReviewer = await isReviewer(payload);
+          if (isAddressReviewer) {
+            isReviewerForAny.value = true;
+            return;
+          }
+        }
+      }
+    });
 
     return {
       easSchemaIDs,
@@ -436,6 +471,7 @@ export default {
       state,
       ipfsBaseUrl,
       pinataGatewayUrl,
+      pinataGatewayToken,
       easExplorerUrl,
       hypercertLink,
       isReviewerForAny,

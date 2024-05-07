@@ -26,7 +26,7 @@
       </div>
       <div v-else><span style="font-weight: bolder">PDF File</span><br /></div>
       <a
-        :href="`${pinataGatewayUrl}/ipfs/${review.pdfIpfsHash}`"
+        :href="`${pinataGatewayUrl}${review.pdfIpfsHash}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`"
         target="_blank"
         style="text-decoration: none"
         >{{ review.pdfIpfsHash }}</a
@@ -36,9 +36,9 @@
       <br />
       <span style="font-weight: bolder">PDF File (Latest Amendment)</span><br />
       <a
-        :href="`${pinataGatewayUrl}/ipfs/${getLatestAmendmentPDFHash(
+        :href="`${pinataGatewayUrl}${getLatestAmendmentPDFHash(
           review.attestationID
-        )}`"
+        )}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`"
         target="_blank"
         style="text-decoration: none"
         >{{ getLatestAmendmentPDFHash(review.attestationID) }}</a
@@ -74,8 +74,11 @@
         v-for="(attachmentHash, index) in review.attachmentsIpfsHashes"
         :key="index"
       >
-        <a :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`" target="_blank">
-          {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+        <a
+          :href="`${pinataGatewayUrl}${attachmentHash}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`"
+          target="_blank"
+        >
+          {{ pinataGatewayUrl }}{{ attachmentHash }}
         </a>
         <br />
       </div>
@@ -106,7 +109,7 @@
                 <div v-if="reviewAmendment.pdfIpfsHash.length > 0">
                   <strong>PDF File </strong>
                   <a
-                    :href="`${pinataGatewayUrl}/ipfs/${reviewAmendment.pdfIpfsHash}`"
+                    :href="`${pinataGatewayUrl}${reviewAmendment.pdfIpfsHash}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`"
                     target="_blank"
                     >{{ reviewAmendment.pdfIpfsHash }}</a
                   >
@@ -130,10 +133,10 @@
                     :key="index"
                   >
                     <a
-                      :href="`${pinataGatewayUrl}/ipfs/${attachmentHash}`"
+                      :href="`${pinataGatewayUrl}${attachmentHash}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`"
                       target="_blank"
                     >
-                      {{ pinataGatewayUrl }}/ipfs/{{ attachmentHash }}
+                      {{ pinataGatewayUrl }}{{ attachmentHash }}
                     </a>
                     <br />
                   </div>

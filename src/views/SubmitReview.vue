@@ -38,7 +38,7 @@
                   <div
                     v-if="
                       !requestObject.isClosed &&
-                      requestObject.reviewers.includes(walletAddressRef) &&
+                      isReviewerForAny &&
                       !hypercertReviews?.some(
                         (r) => r.reviewer == walletAddressRef
                       )
@@ -70,7 +70,7 @@
                             reviewObject.targetIndex
                           ]
                         }`"
-                        style="text-decoration: none; margin-wtop: 5px"
+                        style="text-decoration: none; margin-top: 5px"
                         target="_blank"
                       >
                         {{
@@ -236,7 +236,11 @@ import {
   getMatchingReview,
   populateAnswers,
 } from "@/helpers/ReviewsHelper";
-import { getRequestNames, submitReview } from "@/services/ContractService";
+import {
+  getRequestNames,
+  isReviewer,
+  submitReview,
+} from "@/services/ContractService";
 import { getHypercert } from "@/services/HypercertService";
 import {
   getReviewRequest,
@@ -270,12 +274,13 @@ export default {
     const route = useRoute();
     const tokenID = route.params.token_id;
 
+    const walletAddressRef = ref(walletAddress);
+    const contractRef = ref(contract);
+    const isReviewerForAny = ref(false);
     const reviewRequests = ref([]);
     const selectedReviewRequest = ref(null);
     const requestObjectReady = ref(false);
     const requestNames = ref();
-    const contractRef = ref(contract);
-    const walletAddressRef = ref(walletAddress);
     const requestObject = ref();
     const reviewForm = ref({});
     const hypercertObj = ref({});
@@ -321,7 +326,9 @@ export default {
       if (uri) {
         const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
         const data = await (
-          await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)
+          await fetch(
+            `${process.env.VUE_APP_PINATA_GATEWAY_BASE_URL}${sanitizedUri}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`
+          )
         ).json();
         return `${data.name} (ID: ${tokenID})`;
       } else {
@@ -430,6 +437,19 @@ export default {
     };
 
     const sendBtn = async () => {
+      const questionTypes = [];
+      for (let i = 0; i < reviewForm.value.questions.length; i++) {
+        let questionType =
+          reviewForm.value.types[i] == 0
+            ? "Text"
+            : reviewForm.value.types[i] == 1
+            ? "Yes/No"
+            : `SingleChoice (${reviewForm.value.choices[i].choices.join(
+                " | "
+              )})`;
+        questionTypes.push(questionType);
+      }
+
       isFormLoading.value = true;
 
       v$.value.$validate();
@@ -447,6 +467,8 @@ export default {
         const payload = {
           name: reviewObject.requestName,
           answers: reviewsAnswers,
+          questions: reviewForm.value.questions,
+          questionTypes: questionTypes,
           tokenID: tokenID,
           hypercertID: reviewObject.hypercertID,
           contractAddress: DERESY_CONTRACT_ADDRESS,
@@ -504,10 +526,10 @@ export default {
 
     onBeforeMount(async () => {
       if (contractRef.value) {
-        const payload = {
+        const requestNamesPayload = {
           contractMethods: contract.value.methods,
         };
-        requestNames.value = await getRequestNames(payload);
+        requestNames.value = await getRequestNames(requestNamesPayload);
       }
 
       reviewObject.targetIndex = null;
@@ -530,6 +552,15 @@ export default {
       requestObjectReady.value = false;
       loading.value = true;
 
+      if (contractRef.value) {
+        const isReviewerPayload = {
+          contractMethods: contractRef.value.methods,
+          reviewerAddress: walletAddressRef.value,
+          requestName: selectedReviewRequest.value,
+        };
+        isReviewerForAny.value = await isReviewer(isReviewerPayload);
+      }
+
       requestObject.value = (
         await getReviewRequest(selectedReviewRequest.value)
       ).response;
@@ -541,7 +572,6 @@ export default {
         await getReviewForm(requestObject.value.reviewFormName)
       ).response;
 
-      console.log(reviewForm);
       simpleMDEInstances.value.forEach((instance) => instance.toTextArea());
       simpleMDEInstances.value = [];
 
@@ -557,7 +587,6 @@ export default {
       hypercertName.value = await getHypercertName();
 
       requestObjectReady.value = true;
-
       await loadPastAnswers(
         requestObject.value.reviewFormName,
         reviewRequests.value,
@@ -639,6 +668,7 @@ export default {
       simpleMDEInstances,
       requestObject,
       reviewForm,
+      isReviewerForAny,
       disableSubmit,
       submitMessage,
       isEmptyHashes,

@@ -32,7 +32,7 @@ export default {
 
     const loading = ref(false);
 
-    const projectId = "ac427b8faf6815fd4b19e685294a6c7c";
+    const projectId = "4fde6394f3ee5df97de5379f838522ac";
 
     const mainnet = {
       chainId: 1,
@@ -89,7 +89,6 @@ export default {
               DERESY_CONTRACT_ABI,
               DERESY_CONTRACT_ADDRESS
             );
-            console.log("contract", contract);
             dispatch("setProvider", provider);
             dispatch("setWeb3", web3);
             dispatch("setContract", contract);

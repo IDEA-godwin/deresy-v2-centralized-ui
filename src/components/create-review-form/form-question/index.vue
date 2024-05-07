@@ -116,6 +116,10 @@ export default {
           $each: helpers.forEach({
             choiceText: {
               required,
+              noPipeCharacter: helpers.withMessage(
+                "Choices text can't include the | character",
+                (value) => !value.includes("|")
+              ),
             },
           }),
         },

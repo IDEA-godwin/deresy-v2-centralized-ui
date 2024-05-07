@@ -1,6 +1,6 @@
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/vue";
 
-const projectId = "ac427b8faf6815fd4b19e685294a6c7c";
+const projectId = "4fde6394f3ee5df97de5379f838522ac";
 
 const mainnet = {
   chainId: 1,

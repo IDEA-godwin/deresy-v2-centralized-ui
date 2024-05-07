@@ -228,7 +228,9 @@ export default {
       if (uri) {
         const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
         const data = await (
-          await fetch(`https://ipfs.io/ipfs/${sanitizedUri}`)
+          await fetch(
+            `${process.env.VUE_APP_PINATA_GATEWAY_BASE_URL}${sanitizedUri}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`
+          )
         ).json();
         return `${data.name} (ID: ${refReviewObject.value.hypercertID})`;
       } else {

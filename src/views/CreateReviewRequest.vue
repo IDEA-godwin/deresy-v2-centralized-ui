@@ -60,6 +60,11 @@
                       v-model="requestObject.reviewers[index].address"
                       placeholder="Enter a reviewer address"
                     />
+                    <div v-if="v$.reviewers.$error" style="margin: 0">
+                      <span class="vuelidation-error">
+                        {{ v$.reviewers.$errors[0].$message[index][0] }}
+                      </span>
+                    </div>
                   </el-col>
                   <el-col :span="2">
                     <el-button
@@ -104,6 +109,11 @@
                       v-model="requestObject.reviewerContracts[index].address"
                       placeholder="Enter a ERC721 contract address"
                     />
+                    <div v-if="v$.reviewerContracts.$error" style="margin: 0">
+                      <span class="vuelidation-error">
+                        {{ v$.reviewerContracts.$errors[0].$message[index][0] }}
+                      </span>
+                    </div>
                   </el-col>
                   <el-col :span="2">
                     <el-button
@@ -268,6 +278,11 @@
                   placeholder="Enter the rewards per review"
                   :disabled="isRewardDisabled"
                 />
+                <div v-if="v$.rewardPerReview.$error" style="margin-top: 10px">
+                  <span class="vuelidation-error">{{
+                    v$.rewardPerReview.$errors[0]?.$message
+                  }}</span>
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
@@ -280,6 +295,14 @@
                   placeholder="Enter the reviews per hypercert"
                   :disabled="isRewardDisabled"
                 />
+                <div
+                  v-if="v$.reviewsPerHypercert.$error"
+                  style="margin-top: 10px"
+                >
+                  <span class="vuelidation-error">{{
+                    v$.reviewsPerHypercert.$errors[0]?.$message
+                  }}</span>
+                </div>
               </el-form-item>
             </el-col>
           </el-row>
@@ -393,6 +416,29 @@ export default {
             },
           }),
         },
+        reviewers: {
+          $each: helpers.forEach({
+            address: {
+              requiredReviewer: helpers.withMessage(
+                "At least 1 Reviewer Address is required when no Reviewer ERC721 Contract Addresses contracts are defined",
+                (value) =>
+                  requestObject.reviewerContracts[0].address !== "" ||
+                  value !== ""
+              ),
+            },
+          }),
+        },
+        reviewerContracts: {
+          $each: helpers.forEach({
+            address: {
+              requiredReviewer: helpers.withMessage(
+                "At least 1 Reviewer ERC721 Contract Addresses is required when no Reviewer Addresses are defined",
+                (value) =>
+                  requestObject.reviewers[0].address !== "" || value !== ""
+              ),
+            },
+          }),
+        },
         rewardPerReview: { required },
         reviewsPerHypercert: { required },
       };
@@ -416,7 +462,7 @@ export default {
     };
 
     const removeReviewerContract = (index) => {
-      requestObject.reviewers.splice(index, 1);
+      requestObject.reviewerContracts.splice(index, 1);
     };
 
     const removeTarget = (index) => {
@@ -434,8 +480,6 @@ export default {
         if (hypercertLastSixMonths.value === true) {
           url += "&lastSixMonths=true";
         }
-
-        console.log(url);
 
         try {
           const response = await fetch(url);
@@ -466,28 +510,32 @@ export default {
         const targetAddresses = requestObject.targets.map((target) => {
           return target.address;
         });
+
         const targetHashes = requestObject.targets.map((target) => {
           return target.ipfsHash;
         });
-        const reviewersAddresses = requestObject.reviewers.map((reviewer) => {
-          return reviewer.address;
-        });
-
-        const reviewerContractsAddresses = requestObject.reviewerContracts.map(
-          (reviewerContract) => {
-            return reviewerContract.address;
-          }
-        );
-
-        console.log(reviewerContractsAddresses);
 
         const payload = {
           name: requestObject.name,
           reviewFormName: requestObject.reviewFormName,
           targets: targetAddresses,
           targetHashes: targetHashes,
-          reviewers: reviewersAddresses,
-          reviewerContracts: reviewerContractsAddresses,
+          reviewers:
+            requestObject.reviewers.length < 1 ||
+            requestObject.reviewers.every((reviewer) => reviewer.address === "")
+              ? []
+              : requestObject.reviewers.map((reviewer) => {
+                  return reviewer.address;
+                }),
+          reviewerContracts:
+            requestObject.reviewerContracts.length < 1 ||
+            requestObject.reviewerContracts.every(
+              (reviewerContract) => reviewerContract.address === ""
+            )
+              ? []
+              : requestObject.reviewerContracts.map((reviewerContract) => {
+                  return reviewerContract.address;
+                }),
           requestHash: requestObject.requestHash,
           rewardPerReview: rewardPerReviewToWei,
           reviewsPerHypercert: requestObject.reviewsPerHypercert,
