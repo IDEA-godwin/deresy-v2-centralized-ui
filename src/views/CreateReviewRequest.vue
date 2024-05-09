@@ -213,7 +213,7 @@
               <el-row class="form-section">
                 <el-col :span="24">
                   <el-button @click="addTarget()" class="add-btn" type="primary"
-                    >Add Target</el-button
+                    >Add Hypercert</el-button
                   >
                 </el-col>
               </el-row>
@@ -404,6 +404,15 @@ export default {
       }
     };
 
+    const isValidEthereumAddress = (value) => {
+      if (value) {
+        const ethereumAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
+        return ethereumAddressRegex.test(value);
+      } else {
+        return true;
+      }
+    };
+
     const rules = computed(() => {
       return {
         name: { required },
@@ -422,8 +431,28 @@ export default {
               requiredReviewer: helpers.withMessage(
                 "At least 1 Reviewer Address is required when no Reviewer ERC721 Contract Addresses contracts are defined",
                 (value) =>
-                  requestObject.reviewerContracts[0].address !== "" ||
-                  value !== ""
+                  requestObject.reviewerContracts
+                    .map((rc) => rc.address)
+                    .some((r) => r !== "") ||
+                  value !== "" ||
+                  requestObject.reviewers
+                    .map((r) => r.address)
+                    .some((reviewer) => reviewer !== "")
+              ),
+              validEthAddress: helpers.withMessage(
+                "A valid ETH address is required",
+                (value) => isValidEthereumAddress(value)
+              ),
+              emptyField: helpers.withMessage(
+                "This is a required field",
+                (value) =>
+                  requestObject.reviewerContracts
+                    .map((rc) => rc.address)
+                    .some((r) => r !== "") ||
+                  (requestObject.reviewers
+                    .map((r) => r.address)
+                    .some((reviewer) => reviewer !== "") &&
+                    value !== "")
               ),
             },
           }),
@@ -434,7 +463,28 @@ export default {
               requiredReviewer: helpers.withMessage(
                 "At least 1 Reviewer ERC721 Contract Addresses is required when no Reviewer Addresses are defined",
                 (value) =>
-                  requestObject.reviewers[0].address !== "" || value !== ""
+                  requestObject.reviewers
+                    .map((ra) => ra.address)
+                    .some((r) => r !== "") ||
+                  value !== "" ||
+                  requestObject.reviewerContracts
+                    .map((rc) => rc.address)
+                    .some((reviewerContract) => reviewerContract !== "")
+              ),
+              validEthAddress: helpers.withMessage(
+                "A valid ETH address is required",
+                (value) => isValidEthereumAddress(value)
+              ),
+              emptyField: helpers.withMessage(
+                "This is a required field",
+                (value) =>
+                  requestObject.reviewers
+                    .map((ra) => ra.address)
+                    .some((r) => r !== "") ||
+                  (requestObject.reviewerContracts
+                    .map((rc) => rc.address)
+                    .some((reviewerContract) => reviewerContract !== "") &&
+                    value !== "")
               ),
             },
           }),
@@ -443,6 +493,7 @@ export default {
         reviewsPerHypercert: { required },
       };
     });
+
     const v$ = useVuelidate(rules, requestObject);
 
     const addReviewer = () => {
@@ -622,8 +673,10 @@ export default {
       (newVal) => {
         if (newVal) {
           requestObject.rewardPerReview = "";
+          requestObject.reviewsPerHypercert = "";
         } else {
           requestObject.rewardPerReview = "0";
+          requestObject.reviewsPerHypercert = "0";
           requestObject.paymentTokenAddress =
             "0x0000000000000000000000000000000000000000";
         }

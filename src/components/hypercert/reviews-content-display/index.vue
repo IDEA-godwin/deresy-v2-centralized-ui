@@ -10,6 +10,12 @@
       Version {{ reviewData.reviews.length - rIndex }} ({{
         formatDate(review.createdAt)
       }})
+      <div
+        class="read-only-tag"
+        v-if="review.systemVersion !== parseInt(currentSystemVersion)"
+      >
+        Read only
+      </div>
     </span>
     <br /><br />
     <span style="font-weight: bolder">Attestation ID</span><br />
@@ -47,6 +53,7 @@
     <div v-if="review.reviewer == walletAddress">
       <br />
       <el-button
+        v-if="review.systemVersion === parseInt(currentSystemVersion)"
         type="primary"
         class="d-round-btn"
         @click="goToCreateAmendment(review)"
@@ -161,6 +168,7 @@ export default {
     easExplorerUrl: String,
     pinataGatewayUrl: String,
     pinataGatewayToken: String,
+    currentSystemVersion: String,
     tokenID: String,
   },
   setup(props) {
@@ -266,5 +274,18 @@ export default {
 }
 .el-collapse-item__content {
   padding: 20px;
+}
+.read-only-tag {
+  background-color: var(--el-color-primary);
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+  width: 80px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 </style>

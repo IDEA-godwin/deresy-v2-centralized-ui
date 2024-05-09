@@ -14,7 +14,8 @@
                 <div
                   v-if="
                     Object.keys(refReviewObject).length > 0 &&
-                    refReviewObject.reviewer == walletAddressRef
+                    refReviewObject.reviewer == walletAddressRef &&
+                    refReviewObject.systemVersion == currentSystemVersion
                   "
                   class="create-amendment-form"
                 >
@@ -195,6 +196,8 @@ export default {
     const easExplorerUrl = ref("");
     const attachedFiles = ref([]);
 
+    const currentSystemVersion = ref("");
+
     const amendmentObject = reactive({
       requestName: null,
       hypercertID: null,
@@ -239,7 +242,9 @@ export default {
     };
 
     const forbiddenMessage = () => {
-      if (!refReviewObject?.value?.reviewer != walletAddressRef.value) {
+      if (refReviewObject?.value?.systemVersion != currentSystemVersion.value) {
+        return "This is a review from an older contract version. Reviews from different contract versions are read-only.";
+      } else if (!refReviewObject?.value?.reviewer != walletAddressRef.value) {
         return `Your address (${walletAddressRef.value}) is not authorized to create an amendment for this review.`;
       }
     };
@@ -388,6 +393,7 @@ export default {
     };
 
     onBeforeMount(async () => {
+      currentSystemVersion.value = process.env.VUE_APP_SYSTEM_VERSION;
       amendmentObject.requestName = null;
       amendmentObject.hypercertID = null;
       amendmentObject.amendment = null;
@@ -418,6 +424,7 @@ export default {
       refReviewObject,
       walletAddressRef,
       easExplorerUrl,
+      currentSystemVersion,
       disableSubmit,
       submitMessage,
       forbiddenMessage,

@@ -244,7 +244,7 @@ import {
 import { getHypercert } from "@/services/HypercertService";
 import {
   getReviewRequest,
-  getReviewRequestsByHypercert,
+  getCurrentVersionReviewRequestsByHypercert,
 } from "@/services/ReviewRequestService";
 import { getReviewForm } from "@/services/ReviewFormService";
 import { getReviews } from "@/services/ReviewService";
@@ -538,7 +538,7 @@ export default {
 
       hypercertObj.value = (await getHypercert(tokenID)).response;
       reviewRequests.value = (
-        await getReviewRequestsByHypercert(tokenID)
+        await getCurrentVersionReviewRequestsByHypercert(tokenID)
       ).response;
 
       loading.value = false;

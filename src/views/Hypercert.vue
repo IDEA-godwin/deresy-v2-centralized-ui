@@ -66,9 +66,14 @@
                     </el-button>
                   </div>
                   <div v-else class="warning custom-block">
-                    {{
-                      `Your address (${walletAddress}) is not authorized to submit a review for this request.`
-                    }}
+                    <div v-if="currentVersionReviewRequests.length > 0">
+                      {{
+                        `Your address (${walletAddress}) is not authorized to submit a review for this request.`
+                      }}
+                    </div>
+                    <div v-else>
+                      This hypercert has no available review requests.
+                    </div>
                   </div>
                 </div>
                 <el-button
@@ -196,6 +201,7 @@
                           :easExplorerUrl="easExplorerUrl"
                           :pinataGatewayUrl="pinataGatewayUrl"
                           :pinataGatewayToken="pinataGatewayToken"
+                          :currentSystemVersion="currentSystemVersion"
                         />
                       </el-collapse-item>
                     </el-collapse>
@@ -241,7 +247,10 @@ import { useStore } from "vuex";
 import ReviewsContentDisplay from "@/components/hypercert/reviews-content-display";
 import { getHypercert } from "@/services/HypercertService";
 import { getAllReviews } from "@/services/ReviewService";
-import { getReviewRequestsByHypercert } from "@/services/ReviewRequestService";
+import {
+  getReviewRequestsByHypercert,
+  getCurrentVersionReviewRequestsByHypercert,
+} from "@/services/ReviewRequestService";
 import { getAllReviewForms } from "@/services/ReviewFormService";
 import { getReviewAmendments } from "@/services/AmendmentService";
 import { getAttestationsIDs } from "@/services/AttestationsService";
@@ -274,11 +283,13 @@ export default {
     const tokenID = route.params.token_id;
     const hypercert = ref(null);
     const reviewRequests = ref([]);
+    const currentVersionReviewRequests = ref([]);
     const reviews = ref([]);
     const reviewForms = ref([]);
     const ipfsBaseUrl = ref("");
     const pinataGatewayUrl = ref("");
     const pinataGatewayToken = ref("");
+    const currentSystemVersion = ref("");
     const easExplorerUrl = ref("");
     const hypercertLink = ref("");
     const reviewAmendments = ref([]);
@@ -333,6 +344,12 @@ export default {
       ).response;
     };
 
+    const fetchCurrenVersionReviewRequests = async () => {
+      currentVersionReviewRequests.value = (
+        await getCurrentVersionReviewRequestsByHypercert(tokenID)
+      ).response;
+    };
+
     const fetchReviews = async () => {
       const allReviews = await getAllReviews();
 
@@ -349,6 +366,7 @@ export default {
 
             r.formName = formName;
             r.requestName = reviewDocument.requestName;
+            r.systemVersion = reviewDocument.systemVersion;
 
             let key = `${r.reviewer}-${formName}`;
 
@@ -404,6 +422,7 @@ export default {
 
       if (hypercert.value) {
         hypercertNotFound.value = false;
+        await fetchCurrenVersionReviewRequests();
         await fetchReviewRequests();
         await fetchReviews();
         await fetchReviewForms();
@@ -412,12 +431,13 @@ export default {
       ipfsBaseUrl.value = process.env.VUE_APP_IPFS_BASE_URL;
       pinataGatewayUrl.value = process.env.VUE_APP_PINATA_GATEWAY_BASE_URL;
       pinataGatewayToken.value = process.env.VUE_APP_PINATA_GATEWAY_TOKEN;
+      currentSystemVersion.value = process.env.VUE_APP_SYSTEM_VERSION;
       easExplorerUrl.value = process.env.VUE_APP_EAS_EXPLORER_URL;
       hypercertLink.value = `${
         process.env.VUE_APP_HYPERCERTS_BASE_URL
       }${process.env.VUE_APP_HYPERCERT_CONTRACT_ADDRESS.toLowerCase()}-${tokenID}`;
-      if (contractRef.value && reviewRequests.value.length > 0) {
-        for (const request of reviewRequests.value) {
+      if (contractRef.value && currentVersionReviewRequests.value.length > 0) {
+        for (const request of currentVersionReviewRequests.value) {
           const payload = {
             contractMethods: contractRef.value.methods,
             reviewerAddress: walletAddressRef.value,
@@ -464,6 +484,7 @@ export default {
       reviews,
       reviewForms,
       reviewRequests,
+      currentVersionReviewRequests,
       reviewAmendments,
       loading,
       walletAddress,
@@ -472,6 +493,7 @@ export default {
       ipfsBaseUrl,
       pinataGatewayUrl,
       pinataGatewayToken,
+      currentSystemVersion,
       easExplorerUrl,
       hypercertLink,
       isReviewerForAny,

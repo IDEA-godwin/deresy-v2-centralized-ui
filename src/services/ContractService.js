@@ -45,12 +45,21 @@ export const createReviewForm = async (web3, contract, params) => {
   let response;
 
   try {
+    const transactionData = methods
+      .createReviewForm(formName, questions, choices, types)
+      .encodeABI();
+
+    const gasEstimate = await web3.eth.estimateGas({
+      from: walletAddress,
+      to: contractAddress,
+      data: transactionData,
+    });
+
     const transaction = {
       from: walletAddress,
       to: contractAddress,
-      data: methods
-        .createReviewForm(formName, questions, choices, types)
-        .encodeABI(),
+      data: transactionData,
+      gas: gasEstimate,
     };
 
     await web3.eth
@@ -148,7 +157,15 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
         paymentTokenAddress,
         reviewFormName,
       ]
-    : [name, reviewers, targets, targetHashes, requestHash, reviewFormName];
+    : [
+        name,
+        reviewers,
+        reviewerContracts,
+        targets,
+        targetHashes,
+        requestHash,
+        reviewFormName,
+      ];
 
   let response;
   try {
@@ -162,11 +179,27 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
         .send({ from: walletAddress });
     }
 
+    const gasEstimate = await web3.eth.estimateGas({
+      from: walletAddress,
+      to: contractAddress,
+      value: isPaid
+        ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
+          ? totalReward
+          : 0
+        : 0,
+      data: methods[methodName](...methodArgs).encodeABI(),
+    });
+
     const transaction = {
       from: walletAddress,
       to: contractAddress,
-      value: isPaid ? totalReward : 0,
+      value: isPaid
+        ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
+          ? totalReward
+          : 0
+        : 0,
       data: methods[methodName](...methodArgs).encodeABI(),
+      gas: gasEstimate,
     };
 
     await web3.eth
@@ -230,10 +263,19 @@ export const closeRequest = async (web3, contract, params) => {
   let response;
 
   try {
+    const transactionData = methods.closeReviewRequest(requestName).encodeABI();
+
+    const gasEstimate = await web3.eth.estimateGas({
+      from: walletAddress,
+      to: contractAddress,
+      data: transactionData,
+    });
+
     const transaction = {
       from: walletAddress,
       to: contractAddress,
-      data: methods.closeReviewRequest(requestName).encodeABI(),
+      data: transactionData,
+      gas: gasEstimate,
     };
 
     await web3.eth
@@ -266,6 +308,11 @@ export const submitReview = async (web3, contract, params) => {
 
   const { methods } = contract;
   const { eth } = web3;
+
+  const notes1Value = "";
+  const notes2Value = "";
+  const rfu1Value = [];
+  const rfu2Value = [];
 
   const easContract = new eth.Contract(EAS_CONTRACT_ABI, EAS_CONTRACT_ADDRESS, {
     from: walletAddress,
@@ -309,6 +356,10 @@ export const submitReview = async (web3, contract, params) => {
       { type: "string[]", name: "questionTypes" },
       { type: "string", name: "pdfIpfsHash" },
       { type: "string[]", name: "attachmentsIpfsHashes" },
+      { type: "string", name: "notes1" },
+      { type: "string", name: "notes2" },
+      { type: "string[]", name: "rfu1" },
+      { type: "string[]", name: "rfu2" },
     ];
 
     const encodedData = web3.eth.abi.encodeParameters(abi, [
@@ -319,6 +370,10 @@ export const submitReview = async (web3, contract, params) => {
       questionTypes,
       ipfsHashID,
       attachmentsIpfsHashes,
+      notes1Value,
+      notes2Value,
+      rfu1Value,
+      rfu2Value,
     ]);
 
     const data = await easContract.methods
@@ -336,10 +391,17 @@ export const submitReview = async (web3, contract, params) => {
       })
       .encodeABI();
 
+    const gasEstimate = await web3.eth.estimateGas({
+      from: walletAddress,
+      to: EAS_CONTRACT_ADDRESS,
+      data: data,
+    });
+
     const transaction = {
       from: walletAddress,
       to: EAS_CONTRACT_ADDRESS,
-      data,
+      data: data,
+      gas: gasEstimate,
     };
 
     await web3.eth
@@ -453,10 +515,17 @@ export const createAmendment = async (web3, contract, params) => {
       })
       .encodeABI();
 
+    const gasEstimate = await web3.eth.estimateGas({
+      from: walletAddress,
+      to: EAS_CONTRACT_ADDRESS,
+      data: data,
+    });
+
     const transaction = {
       from: walletAddress,
       to: EAS_CONTRACT_ADDRESS,
-      data,
+      data: data,
+      gas: gasEstimate,
     };
 
     await web3.eth

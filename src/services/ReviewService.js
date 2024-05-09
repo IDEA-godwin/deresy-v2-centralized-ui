@@ -51,7 +51,11 @@ export async function getReviewByAttestationID(hypercertID, attestationID) {
         });
 
         if (matchingReview) {
-          response = { ...matchingReview, requestName: review.requestName };
+          response = {
+            ...matchingReview,
+            requestName: review.requestName,
+            systemVersion: review.systemVersion,
+          };
         }
       }
     }

@@ -213,7 +213,6 @@ export default {
 
       for (const amendment of sortedAmendments) {
         if (amendment.pdfIpfsHash && amendment.pdfIpfsHash.length > 0) {
-          console.log(amendment.pdfIpfsHash);
           return amendment.pdfIpfsHash;
         }
       }

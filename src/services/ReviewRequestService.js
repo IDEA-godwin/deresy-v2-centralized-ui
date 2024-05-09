@@ -62,6 +62,30 @@ export async function getReviewRequestsByHypercert(tokenID) {
   return { response, error };
 }
 
+export async function getCurrentVersionReviewRequestsByHypercert(tokenID) {
+  let response = [];
+  let error;
+
+  try {
+    const snapshot = await reviewRequestsRef.get();
+
+    snapshot.forEach((doc) => {
+      const requestData = doc.data();
+      if (
+        requestData.hypercertTargetIDs.includes(tokenID) &&
+        requestData.systemVersion ===
+          parseInt(process.env.VUE_APP_SYSTEM_VERSION)
+      ) {
+        response.push(requestData);
+      }
+    });
+  } catch (e) {
+    error = e;
+  }
+
+  return { response, error };
+}
+
 export async function getAllReviewRequests() {
   let response;
   let error;

@@ -12,6 +12,9 @@
                   v-model="formAccessibility.formName"
                   placeholder="Enter form name"
                 ></el-input>
+                <span class="vuelidation-error" v-if="v$.formName.$error">{{
+                  v$.formName.$errors[0].$message
+                }}</span>
               </el-form-item>
             </el-col>
           </el-row>
@@ -70,6 +73,7 @@ import { useStore } from "vuex";
 import { reactive, onBeforeMount, computed, ref } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
+import { required } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
 import { HOME_ROUTE } from "@/constants/routes";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
@@ -98,7 +102,13 @@ export default {
       formName: null,
     });
 
-    const v = useVuelidate();
+    const rules = computed(() => {
+      return {
+        formName: { required },
+      };
+    });
+
+    const v$ = useVuelidate(rules, formAccessibility);
 
     const addQuestion = () => {
       formAccessibility.formQuestions.push({
@@ -132,8 +142,8 @@ export default {
 
     const sendBtn = async () => {
       isFormLoading.value = true;
-      v.value.$validate();
-      if (!v.value.$error && formAccessibility.formName) {
+      v$.value.$validate();
+      if (!v$.value.$error) {
         dispatch("setLoading", true);
         const payload = {
           formName: formAccessibility.formName,
@@ -211,6 +221,7 @@ export default {
       addQuestion,
       deleteQuestion,
       sendBtn,
+      v$,
     };
   },
 };
@@ -233,5 +244,12 @@ export default {
 .submit-separator {
   margin: 30px 0px 20px 0px;
   border-top: 1px solid rgb(235, 233, 233);
+}
+.vuelidation-error {
+  color: #dd0c0c;
+  font-size: 12px;
+  font-weight: bolder;
+  text-align: left;
+  margin-top: 5px;
 }
 </style>
