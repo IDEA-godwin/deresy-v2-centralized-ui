@@ -29,6 +29,7 @@
     "fortmatic": "^2.2.1",
     "marked": "4.3.0",
     "quill-delta-to-html": "^0.12.1",
+    "urql": "^4.2.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0",

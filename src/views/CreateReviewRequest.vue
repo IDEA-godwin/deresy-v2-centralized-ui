@@ -272,6 +272,7 @@ import { useRouter } from "vue-router";
 import { getAllReviewFormNames } from "@/services/ReviewFormService";
 import { HOME_ROUTE } from "@/constants/routes";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
+import { searchHypercert } from "../services/HypercertService";
 
 export default {
   name: "CreateReviewRequest",
@@ -370,22 +371,21 @@ export default {
 
     const remoteMethod = async (query) => {
       if (query) {
-        hypercertsLoading.value = true;
-        let url =
-          process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
-          "/api/search_hypercerts?searchInput=" +
-          query;
+        // hypercertsLoading.value = true;
+        // let url =
+        //   process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
+        //   "/api/search_hypercerts?searchInput=" +
+        //   query;
 
-        if (hypercertLastSixMonths.value === true) {
-          url += "&lastSixMonths=true";
-        }
-
-        console.log(url);
+        // if (hypercertLastSixMonths.value === true) {
+        //   url += "&lastSixMonths=true";
+        // }
+        // console.log(url);
 
         try {
-          const response = await fetch(url);
-          const data = await response.json();
-          hypercertOptions.value = data;
+          // const response = await fetch(url);
+          // const data = await response.json();
+          hypercertOptions.value = await searchHypercert(query);
         } catch (error) {
           console.error("Failed to fetch options:", error);
         }
