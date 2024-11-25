@@ -523,24 +523,9 @@ export default {
 
     const remoteMethod = async (query) => {
       if (query) {
-        // hypercertsLoading.value = true;
-        // let url =
-        //   process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
-        //   "/api/search_hypercerts?searchInput=" +
-        //   query;
-
-        // if (hypercertLastSixMonths.value === true) {
-        //   url += "&lastSixMonths=true";
-        // }
-        // console.log(url);
-
-        try {
-          // const response = await fetch(url);
-          // const data = await response.json();
-          hypercertOptions.value = await searchHypercert(query);
-        } catch (error) {
-          console.error("Failed to fetch options:", error);
-        }
+        hypercertsLoading.value = true;
+        hypercertOptions.value = await searchHypercert(query);
+        
         hypercertsLoading.value = false;
       } else {
         hypercertOptions.value = [];
