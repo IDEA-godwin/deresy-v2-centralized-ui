@@ -141,24 +141,8 @@
           </el-row>
 
           <el-row class="form-section">
-            <el-col :span="24">
-              <el-form-item label="Hypercerts from last six months">
-                <el-radio-group v-model="hypercertLastSixMonths">
-                  <el-radio-button :label="true">Yes</el-radio-button>
-                  <el-radio-button :label="false">No</el-radio-button>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row class="form-section">
             <el-col :span="11"
               ><label class="el-form-item__label">Hypercert Name</label></el-col
-            >
-            <el-col :span="11" style="padding-left: 10px"
-              ><label class="el-form-item__label"
-                >Hypercert IPFS Hashes</label
-              ></el-col
             >
             <el-col :span="24">
               <div
@@ -191,12 +175,6 @@
                         v$.targets.$errors[0]?.$message[index][0]
                       }}</span>
                     </div>
-                  </el-col>
-                  <el-col :span="11">
-                    <el-input
-                      v-model="requestObject.targets[index].ipfsHash"
-                      placeholder="Enter a target IPFS Hash"
-                    />
                   </el-col>
                   <el-col :span="2">
                     <el-button
@@ -525,7 +503,6 @@ export default {
       if (query) {
         hypercertsLoading.value = true;
         hypercertOptions.value = await searchHypercert(query);
-        
         hypercertsLoading.value = false;
       } else {
         hypercertOptions.value = [];
