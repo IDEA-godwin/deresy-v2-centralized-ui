@@ -12,12 +12,22 @@ export async function searchHypercert(name) {
       ) {
         count
         data {
-          id
-          creation_block_timestamp
+          id: hypercert_id
+          creation: creation_block_timestamp
           token_id
+          uri
           metadata {
-            uri
             name
+            description
+            impact_scope
+            impact_timeframe_from
+            impact_timeframe_to
+            work_scope
+            work_timeframe_from
+            work_timeframe_to
+            contributors
+            rights
+            image
           }
         }
       }
@@ -46,6 +56,14 @@ export async function searchHypercert(name) {
     })).sort((a, b) => a.name.localeCompare(b.name))
   }
   return []
+}
+
+export async function saveHypercert(hypercert) {
+  const processedHypercert = {
+    ...hypercert,
+    processed: 3
+  }
+  await hypercertsRef.add()
 }
 
 export async function getHypercert(tokenID) {
