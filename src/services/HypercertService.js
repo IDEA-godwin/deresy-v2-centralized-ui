@@ -1,6 +1,7 @@
 import { db } from "@/firebase";
 import { HYPERCERTS_COLLECTION } from "@/constants/collections";
 import { Client, cacheExchange, fetchExchange } from "urql/core";
+import { formatDisplayDateValue } from "../utils/utils";
 
 const hypercertsRef = db.collection(HYPERCERTS_COLLECTION);
 
@@ -14,7 +15,7 @@ export async function searchHypercert(name) {
         data {
           id: hypercert_id
           creation: creation_block_timestamp
-          token_id
+          tokenID: token_id
           uri
           metadata {
             name
@@ -47,23 +48,57 @@ export async function searchHypercert(name) {
     hypercertsFromQuery.data.hypercerts &&
     hypercertsFromQuery.data.hypercerts.count > 0
   ) {
-    return hypercertsFromQuery.data.hypercerts?.data.map(cert => ({
-      id: cert.id,
-      creation: cert.creation_block_timestamp,
-      uri: cert.metadata.uri,
-      tokenID: cert.token_id,
-      name: cert.metadata.name
-    })).sort((a, b) => a.name.localeCompare(b.name))
+    return hypercertsFromQuery.data
+      .hypercerts?.data.sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
   }
   return []
 }
 
-export async function saveHypercert(hypercert) {
-  const processedHypercert = {
-    ...hypercert,
-    processed: 3
+export async function saveHypercert(hypercerts) {
+  console.log(hypercerts)
+  for (let hypercert of hypercerts) {
+    console.log(hypercert)
+    let {id, creation, tokenID, uri} = hypercert
+    let metadata = hypercert.metadata
+    const processedHypercert = {
+      id, creation, tokenID, uri,
+      metadata: {
+        image: metadata?.image,
+        name: metadata?.name,
+        description: metadata?.description,
+        hypercert: {
+          impact_timeframe: { display_value: formatDisplayDateValue(metadata.impact_timeframe_from, metadata.impact_timeframe_to)},
+          work_timeframe: { display_value: formatDisplayDateValue(metadata.work_timeframe_from, metadata.work_timeframe_to)},
+          work_scope: { display_value: metadata.work_scope },
+          impact_scope: { display_value: metadata.impact_scope },
+          contributors: { display_value: metadata.contributors },
+          rights: { display_value: metadata.rights }
+        }},
+      name: hypercert.metadata.name,
+      processed: 3
+    }
+    console.log(processedHypercert)
+    try {
+      const snapshot = await hypercertsRef
+        .where('tokenID', '==', hypercert.tokenID)
+        .limit(1)
+        .get()
+
+      if (snapshot.empty) {
+        await hypercertsRef.add({
+          ...processedHypercert,
+        })
+      } else {
+        const document = hypercertsRef.doc(snapshot.docs[0].id)
+        await document.update({
+          ...processedHypercert,
+        })
+      }
+    } catch (e) {
+      console.log(`error saving hypercert: ${e}`)
+    }
   }
-  await hypercertsRef.add()
+
 }
 
 export async function getHypercert(tokenID) {
