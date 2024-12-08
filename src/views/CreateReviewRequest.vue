@@ -117,7 +117,7 @@
                       <el-option
                         v-for="item in hypercertOptions"
                         :key="item.tokenID"
-                        :label="item.name"
+                        :label="item.metadata.name"
                         :value="item.tokenID"
                       />
                     </el-select>
@@ -242,7 +242,7 @@ import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { CloseBold } from "@element-plus/icons";
 import { getPaymentOptions, handleRequest } from "@/services/ContractService";
 import { useStore } from "vuex";
-import { reactive, computed, ref, watch, onBeforeMount } from "vue";
+import { reactive, computed, ref, watch, onBeforeMount, toRaw } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
@@ -250,7 +250,7 @@ import { useRouter } from "vue-router";
 import { getAllReviewFormNames } from "@/services/ReviewFormService";
 import { HOME_ROUTE } from "@/constants/routes";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
-import { searchHypercert } from "../services/HypercertService";
+import { saveHypercert, searchHypercert } from "../services/HypercertService";
 
 export default {
   name: "CreateReviewRequest",
@@ -402,6 +402,7 @@ export default {
           walletAddress: walletAddress.value,
         };
 
+
         try {
           await requestFunction(
             web3.value,
@@ -409,6 +410,12 @@ export default {
             payload,
             requestObject.isPaidReview
           );
+
+          saveHypercert(hypercertOptions.value
+            .filter(h => targetAddresses
+              .includes(h.tokenID))
+              .map(v => toRaw(v)))
+            .then()
 
           ElNotification({
             title: "Success",
