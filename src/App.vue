@@ -49,6 +49,7 @@ export default {
       adapters: [new Ethers5Adapter()],
       networks: [optimism, optimismGoerli],
       metadata,
+      themeMode: 'light',
       projectId,
       features: {
         email: false, // default to true
