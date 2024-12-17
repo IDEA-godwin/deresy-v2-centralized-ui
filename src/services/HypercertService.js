@@ -55,9 +55,7 @@ export async function searchHypercert(name) {
 }
 
 export async function saveHypercert(hypercerts) {
-  console.log(hypercerts)
   for (let hypercert of hypercerts) {
-    console.log(hypercert)
     let {id, creation, tokenID, uri} = hypercert
     let metadata = hypercert.metadata
     const processedHypercert = {

@@ -7,11 +7,15 @@
 </template>
 
 <script>
-import { ref, onBeforeMount } from "vue";
+import { ref, watch, computed } from "vue";
 import Layout from "./components/layout/index.vue";
 import { useStore } from "vuex";
-import { createWeb3Modal, defaultConfig } from "@web3modal/ethers5/vue";
 import { web3WalletClient } from "@/web3";
+
+import { createAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider } from '@reown/appkit/vue'
+  import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
+import { optimism, optimismGoerli } from '@reown/appkit/networks'
+
 import { getUserInformation } from "@/services/WalletService";
 import { NETWORK_IDS } from "@/constants/walletConstants";
 import { getContract } from "@/services/ContractService";
@@ -34,14 +38,6 @@ export default {
 
     const projectId = process.env.VUE_APP_WEB3MODAL_PROJECT_ID;
 
-    const chain = {
-      chainId: process.env.VUE_APP_CHAIN_ID,
-      name: process.env.VUE_APP_NETWORK_NAME,
-      currency: process.env.VUE_APP_NETWORK_CURRENCY,
-      explorerUrl: process.env.VUE_APP_NETWORK_EXPLORER_URL,
-      rpcUrl: `${process.env.VUE_APP_INFURA_BASE_URL}/${process.env.VUE_APP_INFURA_API_KEY}`,
-    };
-
     const metadata = {
       name: "Deresy",
       description: "A DEcentralized REview SYstem on Optimism",
@@ -49,45 +45,44 @@ export default {
       icons: ["https://avatars.githubusercontent.com/u/37784886"],
     };
 
-    const ethersConfig = defaultConfig({
+    createAppKit({
+      adapters: [new Ethers5Adapter()],
+      networks: [optimism, optimismGoerli],
       metadata,
-      rpcUrl: "...",
-      defaultChainId: 1,
+      projectId,
+      features: {
+        email: false, // default to true
+        socials: [],
+        emailShowWallets: false, // default to true
+      },
     });
 
-    onBeforeMount(async () => {
-      const modal = createWeb3Modal({
-        ethersConfig,
-        chains: [chain],
-        projectId,
-        enableWalletFeatures: false,
-        enableOnramp: false,
-        themeMode: "light",
-        allWallets: "HIDE",
-      });
+    const accountInfo = useAppKitAccount().value;
 
-      modal.subscribeProvider(async ({ provider, isConnected, chainId }) => {
-        if (isConnected) {
-          if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
-            const userInformation = await getUserInformation(provider);
-            const web3 = web3WalletClient(provider);
-            const contract = await getContract(
-              web3,
-              DERESY_CONTRACT_ABI,
-              DERESY_CONTRACT_ADDRESS
-            );
-            dispatch("setProvider", provider);
-            dispatch("setWeb3", web3);
-            dispatch("setContract", contract);
-            dispatch("setWalletInformation", userInformation);
-            dispatch("setEasSchemaIDs");
-          } else {
-            dispatch("resetContractInformation");
-          }
+    const status = computed(() => accountInfo?.status)
+    watch(status, async (newStatus) => {
+      console.log(newStatus, accountInfo.isConnected)
+      if (newStatus === "connected" && accountInfo.isConnected) {
+        const { chainId } = useAppKitNetwork().value
+        const { walletProvider: provider } = useAppKitProvider('eip155')
+        if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
+          const userInformation = await getUserInformation(provider);
+          const web3 = web3WalletClient(provider);
+          const contract = await getContract(
+            web3,
+            DERESY_CONTRACT_ABI,
+            DERESY_CONTRACT_ADDRESS
+          );
+          dispatch("setProvider", provider);
+          dispatch("setWeb3", web3);
+          dispatch("setContract", contract);
+          dispatch("setWalletInformation", userInformation);
+          dispatch("setEasSchemaIDs");
+        } else {
+          dispatch("resetContractInformation");
         }
-      });
-    });
-
+      }
+    })
     return { loading };
   },
 };

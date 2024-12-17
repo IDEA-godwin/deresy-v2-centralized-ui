@@ -140,10 +140,26 @@
             </el-col>
           </el-row>
 
+          <!-- <el-row class="form-section">
+            <el-col :span="24">
+              <el-form-item label="Hypercerts from last six months">
+                <el-radio-group v-model="hypercertLastSixMonths">
+                  <el-radio-button :label="true">Yes</el-radio-button>
+                  <el-radio-button :label="false">No</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row> -->
+
           <el-row class="form-section">
             <el-col :span="11"
               ><label class="el-form-item__label">Hypercert Name</label></el-col
             >
+            <!-- <el-col :span="11" style="padding-left: 10px"
+              ><label class="el-form-item__label"
+                >Hypercert IPFS Hashes</label
+              ></el-col
+            > -->
             <el-col :span="24">
               <div
                 v-for="(target, index) in requestObject.targets"
@@ -176,6 +192,12 @@
                       }}</span>
                     </div>
                   </el-col>
+                  <!-- <el-col :span="11">
+                    <el-input
+                      v-model="requestObject.targets[index].ipfsHash"
+                      placeholder="Enter a target IPFS Hash"
+                    />
+                  </el-col> -->
                   <el-col :span="2">
                     <el-button
                       circle
@@ -198,7 +220,7 @@
             </el-col>
           </el-row>
 
-          <el-row class="form-section">
+          <!-- <el-row class="form-section">
             <el-col :span="22">
               <el-form-item label="Request IPFS Hash">
                 <el-input
@@ -207,7 +229,7 @@
                 />
               </el-form-item>
             </el-col>
-          </el-row>
+          </el-row> -->
 
           <el-row class="form-section">
             <el-col :span="24">
@@ -502,7 +524,17 @@ export default {
     const remoteMethod = async (query) => {
       if (query) {
         hypercertsLoading.value = true;
-        hypercertOptions.value = await searchHypercert(query);
+
+        // if (hypercertLastSixMonths.value === true) {
+        //   url += "&lastSixMonths=true";
+        // }
+        // console.log(url);
+
+        try {
+          hypercertOptions.value = await searchHypercert(query);
+        } catch (error) {
+          console.error("Failed to fetch options:", error);
+        }
         hypercertsLoading.value = false;
       } else {
         hypercertOptions.value = [];
@@ -560,7 +592,6 @@ export default {
           walletAddress: walletAddress.value,
         };
 
-
         try {
           await requestFunction(
             web3.value,
@@ -570,10 +601,9 @@ export default {
           );
 
           saveHypercert(hypercertOptions.value
-            .filter(h => targetAddresses
-              .includes(h.tokenID))
-              .map(v => toRaw(v)))
-            .then()
+            .filter(h => targetAddresses.includes(h.tokenID))
+            .map(v => toRaw(v))
+          ).then(() => console.log("hypercerts saved to firebase"))
 
           ElNotification({
             title: "Success",

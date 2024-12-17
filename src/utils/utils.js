@@ -56,11 +56,10 @@ export const selectNotification = async (e, notificationType = false) => {
 
 export const formatDisplayDateValue = (from, to) => {
   console.log(Number.parseInt(from))
-  let date = new Date(1733650799 * 1000)
-  console.log(`${data.getFullYear()}-${date.getMonth()}-${date.getDay()}`)
+  let fromDate = new Date(Number.parseInt(from) * 1000)
   let toDate = new Date(Number.parseInt(to) * 1000)
 
   return`${buildDateFormat(fromDate)} → ${buildDateFormat(toDate)}`
 }
 
-const buildDateFormat = (date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getUTCDate()}`
+const buildDateFormat = date => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getUTCDate()}`
