@@ -592,6 +592,7 @@ export default {
           walletAddress: walletAddress.value,
         };
 
+
         try {
           await requestFunction(
             web3.value,
