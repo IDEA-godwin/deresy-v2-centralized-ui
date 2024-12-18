@@ -1,16 +1,19 @@
 <template>
   <div>
     <div v-if="connected">
-      <el-button type="primary" @click="disconnectWallet">
+      <el-button type="primary" class="btn desktop" @click="disconnectWallet">
+        Disconnect
+      </el-button>
+      <el-button type="primary" class="btn mobile" @click="disconnectWallet">
         Disconnect
       </el-button>
     </div>
     <div v-else>
       <el-button type="primary" @click="onConnect" class="btn desktop"
-        >Connect</el-button
+        >Connect Wallet</el-button
       >
       <el-button type="primary" @click="onConnect" class="btn mobile"
-        >Connect</el-button
+        >Connect Wallet</el-button
       >
     </div>
   </div>
