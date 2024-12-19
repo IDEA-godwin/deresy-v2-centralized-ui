@@ -3,8 +3,8 @@ export default {
     state.provider = payload;
   },
 
-  SET_WEB3(state, payload) {
-    state.web3 = payload;
+  SET_SIGNER(state, payload) {
+    state.signer = payload;
   },
 
   SET_CONTRACT(state, payload) {
@@ -18,7 +18,7 @@ export default {
 
   RESET_CONTRACT_INFORMATION(state) {
     state.provider = null;
-    state.web3 = null;
+    state.signer = null;
     state.contract = null;
     state.easSchemaIDs = {
       reviewsSchemaID: null,

@@ -13,16 +13,14 @@ import { useStore } from "vuex";
 import { web3WalletClient } from "@/web3";
 
 import { createAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider } from '@reown/appkit/vue'
-  import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
+import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
+
+import * as ethers from 'ethers'
 import { optimism, optimismGoerli } from '@reown/appkit/networks'
 
 import { getUserInformation } from "@/services/WalletService";
 import { NETWORK_IDS } from "@/constants/walletConstants";
 import { getContract } from "@/services/ContractService";
-import {
-  DERESY_CONTRACT_ABI,
-  DERESY_CONTRACT_ADDRESS,
-} from "@/constants/contractConstants";
 
 export default {
   name: "App",
@@ -65,17 +63,15 @@ export default {
       console.log(newStatus, accountInfo.isConnected)
       if (newStatus === "connected" && accountInfo.isConnected) {
         const { chainId } = useAppKitNetwork().value
-        const { walletProvider: provider } = useAppKitProvider('eip155')
+        const { walletProvider } = useAppKitProvider('eip155')
         if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
-          const userInformation = await getUserInformation(provider);
-          const web3 = web3WalletClient(provider);
-          const contract = await getContract(
-            web3,
-            DERESY_CONTRACT_ABI,
-            DERESY_CONTRACT_ADDRESS
-          );
+          const provider = new ethers.providers.Web3Provider(walletProvider)
+          const signer = provider.getSigner()
+
+          const userInformation = await getUserInformation(walletProvider);
+          const contract = await getContract(signer);
           dispatch("setProvider", provider);
-          dispatch("setWeb3", web3);
+          dispatch("setSigner", signer);
           dispatch("setContract", contract);
           dispatch("setWalletInformation", userInformation);
           dispatch("setEasSchemaIDs");
