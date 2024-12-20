@@ -2,6 +2,8 @@ import { ElNotification } from "element-plus";
 import { getAmendmentsByRefUID } from "@/services/AmendmentService";
 import { getReviewByAttestationID } from "@/services/ReviewService";
 import {
+  DERESY_CONTRACT_ABI,
+  DERESY_CONTRACT_ADDRESS,
   DEFAULT_PAYMENT_ADDRESS,
   EAS_CONTRACT_ABI,
   EAS_CONTRACT_ADDRESS,
@@ -9,6 +11,8 @@ import {
   PAYMENT_OPTIONS,
 } from "../constants/contractConstants";
 import { saveAttestationIdToDB } from "./AttestationsService";
+
+import { Contract, formatUnits } from 'ethers'
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -27,8 +31,8 @@ export const sendTransactionNotification = (txHash, title) => {
   });
 };
 
-export const getContract = async (web3, contractABI, contractAddress) => {
-  return new web3.eth.Contract(contractABI, contractAddress);
+export const getContract = async (signer) => {
+  return new Contract(DERESY_CONTRACT_ADDRESS, DERESY_CONTRACT_ABI, signer);
 };
 
 export const createReviewForm = async (web3, contract, params) => {

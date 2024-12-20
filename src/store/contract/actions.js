@@ -10,10 +10,12 @@ export default {
     }
 
     try {
-      const { methods } = state.contract;
-      const reviewsSchemaID = await methods.reviewsSchemaID().call();
-      const amendmentsSchemaID = await methods.amendmentsSchemaID().call();
+      const contract = state.contract;
+      const reviewsSchemaID = await contract.reviewsSchemaID();
+      const amendmentsSchemaID = await contract.amendmentsSchemaID();
+
       console.log(reviewsSchemaID, amendmentsSchemaID)
+
       commit("SET_EAS_SCHEMA_IDS", { reviewsSchemaID, amendmentsSchemaID });
     } catch (error) {
       console.error("Error getting schema IDs from contract: ", error);
@@ -24,8 +26,8 @@ export default {
     commit("SET_PROVIDER", provider);
   },
 
-  setWeb3({ commit }, web3) {
-    commit("SET_WEB3", web3);
+  setSigner({ commit }, signer) {
+    commit("SET_S", signer);
   },
 
   resetContractInformation({ commit }) {

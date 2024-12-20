@@ -3,7 +3,7 @@ import mutations from "./mutations";
 
 const state = {
   provider: null,
-  web3: null,
+  signer: null,
   contract: null,
   easSchemaIDs: {
     reviewsSchemaID: null,
