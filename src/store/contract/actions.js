@@ -13,7 +13,7 @@ export default {
       const { methods } = state.contract;
       const reviewsSchemaID = await methods.reviewsSchemaID().call();
       const amendmentsSchemaID = await methods.amendmentsSchemaID().call();
-
+      console.log(reviewsSchemaID, amendmentsSchemaID)
       commit("SET_EAS_SCHEMA_IDS", { reviewsSchemaID, amendmentsSchemaID });
     } catch (error) {
       console.error("Error getting schema IDs from contract: ", error);

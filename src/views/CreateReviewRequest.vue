@@ -343,10 +343,10 @@ import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
-import { getAllReviewFormNames } from "@/services/ReviewFormService";
 import { HOME_ROUTE } from "@/constants/routes";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 import { saveHypercert, searchHypercert } from "../services/HypercertService";
+import { getRequestNames } from "../services/ContractService";
 
 export default {
   name: "CreateReviewRequest",
@@ -354,18 +354,19 @@ export default {
     const store = useStore();
     const {
       dispatch,
-      state: { contractState, user },
+      state: { contractState, user, root },
     } = store;
 
     const web3 = computed(() => contractState.web3);
     const contract = computed(() => contractState.contract);
+    const isLoading = computed(() => root.loading)
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const router = useRouter();
 
     const reviewFormsTotal = ref([]);
     const contractRef = ref(contract);
-    const isFormLoading = ref(false);
+    const isFormLoading = ref(isLoading);
     const paymentOptions = ref({});
     const hypercertLastSixMonths = ref(true);
     const hypercertOptions = ref([]);
@@ -655,7 +656,7 @@ export default {
         const payload = {
           contractMethods: contract.value.methods,
         };
-        reviewFormsTotal.value = await getAllReviewFormNames();
+        reviewFormsTotal.value = await getRequestNames(payload);
         paymentOptions.value = await getPaymentOptions(payload);
       }
     });
@@ -665,7 +666,7 @@ export default {
         const payload = {
           contractMethods: contract.value.methods,
         };
-        reviewFormsTotal.value = await getAllReviewFormNames();
+        reviewFormsTotal.value = await getRequestNames(payload);
         paymentOptions.value = await getPaymentOptions(payload);
       }
     });

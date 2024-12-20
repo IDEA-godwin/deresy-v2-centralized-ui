@@ -184,8 +184,7 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
       to: contractAddress,
       value: isPaid
         ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
-          ? totalReward
-          : 0
+          ? totalReward : 0
         : 0,
       data: methods[methodName](...methodArgs).encodeABI(),
     });
@@ -195,8 +194,7 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
       to: contractAddress,
       value: isPaid
         ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
-          ? totalReward
-          : 0
+          ? totalReward : 0
         : 0,
       data: methods[methodName](...methodArgs).encodeABI(),
       gas: gasEstimate,

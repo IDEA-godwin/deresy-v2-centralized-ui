@@ -14,7 +14,7 @@ import { web3WalletClient } from "@/web3";
 
 import { createAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider } from '@reown/appkit/vue'
   import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
-import { optimism, optimismGoerli } from '@reown/appkit/networks'
+import { optimism, optimismSepolia } from '@reown/appkit/networks'
 
 import { getUserInformation } from "@/services/WalletService";
 import { NETWORK_IDS } from "@/constants/walletConstants";
@@ -34,6 +34,8 @@ export default {
     const store = useStore();
     const { dispatch } = store;
 
+    dispatch("setLoading", true)
+
     const loading = ref(false);
 
     const projectId = process.env.VUE_APP_WEB3MODAL_PROJECT_ID;
@@ -47,7 +49,7 @@ export default {
 
     createAppKit({
       adapters: [new Ethers5Adapter()],
-      networks: [optimism, optimismGoerli],
+      networks: [process.env.NODE_ENV === 'development' ? optimismSepolia : optimism],
       metadata,
       themeMode: 'light',
       projectId,
@@ -62,10 +64,12 @@ export default {
 
     const status = computed(() => accountInfo?.status)
     watch(status, async (newStatus) => {
-      console.log(newStatus, accountInfo.isConnected)
+      console.log(process.env.NODE_ENV)
+      console.log(newStatus)
       if (newStatus === "connected" && accountInfo.isConnected) {
         const { chainId } = useAppKitNetwork().value
         const { walletProvider: provider } = useAppKitProvider('eip155')
+        console.log(provider)
         if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
           const userInformation = await getUserInformation(provider);
           const web3 = web3WalletClient(provider);
@@ -79,6 +83,7 @@ export default {
           dispatch("setContract", contract);
           dispatch("setWalletInformation", userInformation);
           dispatch("setEasSchemaIDs");
+          dispatch("setLoading", false)
         } else {
           dispatch("resetContractInformation");
         }
