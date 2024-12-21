@@ -31,26 +31,26 @@ const routes = [
     path: "/close-review-request",
     component: () => import("@/views/CloseReviewRequest"),
   },
-  {
-    path: "/submit-review-only-admin-auth",
-    component: () => import("@/views/SubmitReview"),
-  },
+  // {
+  //   path: "/submit-review-only-admin-auth",
+  //   component: () => import("@/views/SubmitReview"),
+  // },
   {
     path: "/grants-only-admin-auth",
     component: () => import("@/views/Grants"),
   },
-  {
-    path: "/grants/:grant_id",
-    component: () => import("@/views/Grant"),
-  },
+  // {
+  //   path: "/grants/:grant_id",
+  //   component: () => import("@/views/Grant"),
+  // },
   {
     path: "/hypercerts/:token_id/submit-review/",
     component: () => import("@/views/SubmitReview"),
   },
-  {
-    path: "/hypercerts/:token_id/reviews/:review_id/create-amendment/",
-    component: () => import("@/views/CreateAmendment"),
-  },
+  // {
+  //   path: "/hypercerts/:token_id/reviews/:review_id/create-amendment/",
+  //   component: () => import("@/views/CreateAmendment"),
+  // },
   {
     path: "/hypercerts/:token_id",
     component: () => import("@/views/Hypercert"),

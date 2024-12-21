@@ -10,19 +10,12 @@
 import { ref, watch, computed } from "vue";
 import Layout from "./components/layout/index.vue";
 import { useStore } from "vuex";
-import { web3WalletClient } from "@/web3";
 
-import { createAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider } from '@reown/appkit/vue'
-  import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
-import { optimism, optimismSepolia } from '@reown/appkit/networks'
-
-import { getUserInformation } from "@/services/WalletService";
+import { createAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/vue';
+import { useConfig } from '@wagmi/vue'
 import { NETWORK_IDS } from "@/constants/walletConstants";
-import { getContract } from "@/services/ContractService";
-import {
-  DERESY_CONTRACT_ABI,
-  DERESY_CONTRACT_ADDRESS,
-} from "@/constants/contractConstants";
+import { getEasSchemaIds } from "./services/ContractService";
+import { getWagmiAdapter, networks, projectId, metadata } from "./utils/config";
 
 export default {
   name: "App",
@@ -37,19 +30,10 @@ export default {
     dispatch("setLoading", true)
 
     const loading = ref(false);
-
-    const projectId = process.env.VUE_APP_WEB3MODAL_PROJECT_ID;
-
-    const metadata = {
-      name: "Deresy",
-      description: "A DEcentralized REview SYstem on Optimism",
-      url: "https://deresy.xyz/",
-      icons: ["https://avatars.githubusercontent.com/u/37784886"],
-    };
-
+    const wagmiAdapter = getWagmiAdapter();
     createAppKit({
-      adapters: [new Ethers5Adapter()],
-      networks: [process.env.NODE_ENV === 'development' ? optimismSepolia : optimism],
+      adapters: [wagmiAdapter],
+      networks,
       metadata,
       themeMode: 'light',
       projectId,
@@ -60,6 +44,7 @@ export default {
       },
     });
 
+    const config = useConfig();
     const accountInfo = useAppKitAccount().value;
 
     const status = computed(() => accountInfo?.status)
@@ -67,23 +52,18 @@ export default {
       console.log(process.env.NODE_ENV)
       console.log(newStatus)
       if (newStatus === "connected" && accountInfo.isConnected) {
-        const { chainId } = useAppKitNetwork().value
-        const { walletProvider: provider } = useAppKitProvider('eip155')
-        console.log(provider)
+        const { chainId } = useAppKitNetwork().value;
         if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
-          const userInformation = await getUserInformation(provider);
-          const web3 = web3WalletClient(provider);
-          const contract = await getContract(
-            web3,
-            DERESY_CONTRACT_ABI,
-            DERESY_CONTRACT_ADDRESS
-          );
-          dispatch("setProvider", provider);
-          dispatch("setWeb3", web3);
-          dispatch("setContract", contract);
-          dispatch("setWalletInformation", userInformation);
-          dispatch("setEasSchemaIDs");
-          dispatch("setLoading", false)
+          const {
+            reviewsSchemaID,
+            amendmentsSchemaID
+          } = await getEasSchemaIds(config);
+          // console.log(data.value)
+          console.log(reviewsSchemaID, amendmentsSchemaID);
+          dispatch("setWalletInformation", {walletAddress: accountInfo?.address, networkId: chainId, balance: null})
+          dispatch("setWagmiConfig", config);
+          dispatch("setEasSchemaIDs", { reviewsSchemaID, amendmentsSchemaID });
+          dispatch("setLoading", false);
         } else {
           dispatch("resetContractInformation");
         }

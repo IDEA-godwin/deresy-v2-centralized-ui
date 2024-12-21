@@ -90,8 +90,7 @@ export default {
       state: { contractState, user },
     } = store;
 
-    const web3 = computed(() => contractState.web3);
-    const contract = computed(() => contractState.contract);
+    const wagmiConfig = computed(() => contractState.wagmiConfig);
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const isFormLoading = ref(false);
@@ -164,7 +163,8 @@ export default {
         });
 
         try {
-          await createReviewForm(web3.value, contract.value, payload);
+          console.log(wagmiConfig.value)
+          await createReviewForm(wagmiConfig.value, payload);
 
           ElNotification({
             title: "Success",
