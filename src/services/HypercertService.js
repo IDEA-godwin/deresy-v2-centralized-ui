@@ -81,7 +81,7 @@ export async function saveHypercert(hypercerts) {
         .where('tokenID', '==', hypercert.tokenID)
         .limit(1)
         .get()
-
+      console.log(processedHypercert)
       if (snapshot.empty) {
         await hypercertsRef.add({
           ...processedHypercert,

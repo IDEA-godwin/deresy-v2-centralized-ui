@@ -1,5 +1,11 @@
 import { ElNotification } from "element-plus";
-import { readContract, readContracts, simulateContract, writeContract } from '@wagmi/core'
+import {
+  readContract,
+  readContracts,
+  simulateContract,
+  estimateFeesPerGas,
+  // prepareTransactionRequest,
+  writeContract } from '@wagmi/core'
 
 import { getAmendmentsByRefUID } from "@/services/AmendmentService";
 import { getReviewByAttestationID } from "@/services/ReviewService";
@@ -9,10 +15,14 @@ import {
   EAS_CONTRACT_ADDRESS,
   ERC_20_ABI,
   PAYMENT_OPTIONS,
-  DERESY_CONTRACT_ABI,
+  // DERESY_CONTRACT_ABI,
   DERESY_CONTRACT_ADDRESS
 } from "../constants/contractConstants";
 import { saveAttestationIdToDB } from "./AttestationsService";
+// import { encodeFunctionData } from "viem";
+
+import abi from '@/utils/abi.json'
+import { parseEther } from "viem";
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -32,7 +42,7 @@ export const sendTransactionNotification = (txHash, title) => {
 };
 
 const contractInfo = {
-  abi: DERESY_CONTRACT_ABI,
+  abi,
   address: DERESY_CONTRACT_ADDRESS
 }
 
@@ -123,7 +133,7 @@ export const getReviewForm = async (params) => {
 
 export const getReviewFormsTotal = async (config) => {
   try {
-    const response = readContract(config, {
+    const response = await readContract(config, {
       ...contractInfo,
       functionName: "reviewForms"
     });
@@ -186,6 +196,7 @@ export const handleRequest = async (config, params, isPaid) => {
     reviewsPerHypercert,
     totalReward,
     paymentTokenAddress,
+    walletAddress
   } = params;
 
   let functionName = isPaid ? "createRequest" : "createNonPayableRequest";
@@ -206,7 +217,7 @@ export const handleRequest = async (config, params, isPaid) => {
     : [
         name,
         reviewers,
-        // reviewerContracts,
+        reviewerContracts,
         targets,
         targetHashes,
         requestHash,
@@ -221,19 +232,26 @@ export const handleRequest = async (config, params, isPaid) => {
       };
       await writeContract(config, {
         ...tokenContractInfo,
-        functionName: "approve"
+        functionName: "approve",
+        args: [walletAddress, totalReward]
       });
     }
+
+		const {maxPriorityFeePerGas, maxFeePerGas} = await estimateFeesPerGas(config);
+
+    const value = isPaid
+      ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
+        ? parseEther(totalReward) : 0
+      : 0;
+    console.log(value)
 
     const { request} = await simulateContract(config, {
       ...contractInfo,
       functionName, args,
-      value: isPaid
-        ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
-          ? totalReward : 0
-        : 0
+      maxPriorityFeePerGas,
+      maxFeePerGas,
+      value
     });
-
     await writeContract(config, request);
   } catch (e) {
     console.error("An error occurred while processing the request.", e);
@@ -242,9 +260,13 @@ export const handleRequest = async (config, params, isPaid) => {
 };
 
 export const getRequest = async (params) => {
-  const { requestName, contractMethods } = params;
+  const { requestName, config } = params;
   try {
-    const response = contractMethods.getRequest(requestName).call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: 'getRequest',
+      args: [requestName]
+    });
 
     return response;
   } catch (e) {
@@ -254,9 +276,12 @@ export const getRequest = async (params) => {
 };
 
 export const getRequestNames = async (params) => {
-  const { contractMethods } = params;
+  const { config } = params;
   try {
-    const response = contractMethods.getReviewRequestsNames().call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "getReviewRequestsNames"
+    });
 
     return response;
   } catch (e) {
@@ -266,11 +291,13 @@ export const getRequestNames = async (params) => {
 };
 
 export const isReviewer = async (params) => {
-  const { contractMethods, requestName, reviewerAddress } = params;
+  const { config, requestName, reviewerAddress } = params;
   try {
-    const response = contractMethods
-      .isReviewer(reviewerAddress, requestName)
-      .call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "isReviewer",
+      args: [reviewerAddress, requestName]
+    })
 
     return response;
   } catch (e) {
@@ -279,42 +306,21 @@ export const isReviewer = async (params) => {
   }
 };
 
-export const closeRequest = async (web3, contract, params) => {
-  const { requestName, contractAddress, walletAddress } = params;
-  const { methods } = contract;
-
-  let response;
+export const closeRequest = async (config, params) => {
+  const { requestName } = params;
 
   try {
-    const transactionData = methods.closeReviewRequest(requestName).encodeABI();
-
-    const gasEstimate = await web3.eth.estimateGas({
-      from: walletAddress,
-      to: contractAddress,
-      data: transactionData,
+    const { request } = await simulateContract(config, {
+      ...contractInfo,
+      functionName: 'closeReviewRequest',
+      args: [requestName]
     });
 
-    const transaction = {
-      from: walletAddress,
-      to: contractAddress,
-      data: transactionData,
-      gas: gasEstimate,
-    };
-
-    await web3.eth
-      .sendTransaction(transaction)
-      .on("transactionHash", (txHash) => {
-        sendTransactionNotification(txHash, "Transaction in progress");
-      })
-      .on("receipt", (receipt) => {
-        response = receipt;
-      });
+    await writeContract(config, request)
   } catch (e) {
     console.error("An error ocurred while closing the review request.", e);
     throw e;
   }
-
-  return response;
 };
 
 export const submitReview = async (web3, contract, params) => {
@@ -570,3 +576,5 @@ export const createAmendment = async (web3, contract, params) => {
 
   return response;
 };
+
+

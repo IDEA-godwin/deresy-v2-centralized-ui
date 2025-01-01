@@ -9,9 +9,7 @@ export default {
   },
 
   RESET_CONTRACT_INFORMATION(state) {
-    state.provider = null;
-    state.web3 = null;
-    state.contract = null;
+    state.wagmiConfig = null
     state.easSchemaIDs = {
       reviewsSchemaID: null,
       amendmentsSchemaID: null,

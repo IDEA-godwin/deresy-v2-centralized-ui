@@ -1,6 +1,6 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi"
 import { createClient, http } from "viem";
-import { optimism, optimismSepolia } from "viem/chains";
+import { optimism, sepolia } from "viem/chains";
 
 export const projectId = '5c273bafcd34bc0b510415376e6b1a36';
 
@@ -11,7 +11,7 @@ export const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
 };
 
-export const networks = [process.env.NODE_ENV === 'development' ? optimismSepolia : optimism]
+export const networks = [process.env.NODE_ENV === 'development' ? sepolia : optimism]
 
 export const getWagmiAdapter = () => {
   return new WagmiAdapter({

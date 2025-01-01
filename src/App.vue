@@ -31,18 +31,26 @@ export default {
 
     const loading = ref(false);
     const wagmiAdapter = getWagmiAdapter();
-    createAppKit({
-      adapters: [wagmiAdapter],
-      networks,
-      metadata,
-      themeMode: 'light',
-      projectId,
-      features: {
-        email: false, // default to true
-        socials: [],
-        emailShowWallets: false, // default to true
-      },
-    });
+
+    try {
+      createAppKit({
+        adapters: [wagmiAdapter],
+        networks,
+        metadata,
+        themeMode: 'light',
+        projectId,
+        features: {
+          email: false, // default to true
+          socials: [],
+          emailShowWallets: false, // default to true
+        },
+      });
+    } catch (e) {
+      // const modal = useAppKit();
+      // modal.open()
+      dispatch("setLoading", false);
+      console.log(e)
+    }
 
     const config = useConfig();
     const accountInfo = useAppKitAccount().value;
@@ -58,7 +66,6 @@ export default {
             reviewsSchemaID,
             amendmentsSchemaID
           } = await getEasSchemaIds(config);
-          // console.log(data.value)
           console.log(reviewsSchemaID, amendmentsSchemaID);
           dispatch("setWalletInformation", {walletAddress: accountInfo?.address, networkId: chainId, balance: null})
           dispatch("setWagmiConfig", config);

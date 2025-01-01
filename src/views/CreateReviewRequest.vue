@@ -353,16 +353,16 @@ export default {
     const store = useStore();
     const {
       dispatch,
-      state: { contractState, user, root },
+      state: { contractState, user },
     } = store;
 
     const wagmiConfig = computed(() => contractState.wagmiConfig);
-    const isLoading = computed(() => root.loading)
+    const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const router = useRouter();
 
     const reviewFormsTotal = ref([]);
-    const isFormLoading = ref(isLoading);
+    const isFormLoading = ref();
     const paymentOptions = ref({});
     const hypercertOptions = ref([]);
     const hypercertsLoading = ref(false);
@@ -537,11 +537,13 @@ export default {
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
-        const rewardPerReviewToWei = parseEther(requestObject.rewardPerReview.toString()).toString();
+        const rewardPerReview = requestObject.rewardPerReview.toString();
+        const rewardPerReviewToWei = parseEther(rewardPerReview);
         console.log(rewardPerReviewToWei);
-        const totalReward = Number.parseFloat(rewardPerReviewToWei) * (requestObject.reviewsPerHypercert);
+        const totalReward = Number.parseFloat(rewardPerReview) * Number.parseFloat(requestObject.reviewsPerHypercert);
         const targetAddresses = requestObject.targets.map((target) => {
-          return target.address;
+          /* eslint-disable no-undef */
+          return BigInt(target.address);
         });
         const targetHashes = requestObject.targets.map((target) => {
           return target.ipfsHash;
@@ -569,8 +571,9 @@ export default {
           requestHash: requestObject.requestHash,
           rewardPerReview: rewardPerReviewToWei,
           reviewsPerHypercert: requestObject.reviewsPerHypercert,
-          totalReward: totalReward,
-          paymentTokenAddress: requestObject.paymentTokenAddress
+          totalReward: totalReward.toString(),
+          paymentTokenAddress: requestObject.paymentTokenAddress,
+          walletAddress: walletAddress.value
         };
 
         try {
@@ -580,10 +583,10 @@ export default {
             requestObject.isPaidReview
           );
 
-          saveHypercert(hypercertOptions.value
-            .filter(h => targetAddresses.includes(h.tokenID))
+          await saveHypercert(hypercertOptions.value
+            .filter(h => targetAddresses.includes(BigInt(h.tokenID)))
             .map(v => toRaw(v))
-          ).then(() => console.log("hypercerts saved to firebase"))
+          )
 
           ElNotification({
             title: "Success",
