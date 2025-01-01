@@ -2,9 +2,7 @@ import actions from "./actions";
 import mutations from "./mutations";
 
 const state = {
-  provider: null,
-  signer: null,
-  contract: null,
+  wagmiConfig: null,
   easSchemaIDs: {
     reviewsSchemaID: null,
     amendmentsSchemaID: null,

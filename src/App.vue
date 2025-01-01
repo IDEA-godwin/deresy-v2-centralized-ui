@@ -10,17 +10,12 @@
 import { ref, watch, computed } from "vue";
 import Layout from "./components/layout/index.vue";
 import { useStore } from "vuex";
-import { web3WalletClient } from "@/web3";
 
-import { createAppKit, useAppKitAccount, useAppKitNetwork, useAppKitProvider } from '@reown/appkit/vue'
-import { Ethers5Adapter } from '@reown/appkit-adapter-ethers5'
-
-import * as ethers from 'ethers'
-import { optimism, optimismGoerli } from '@reown/appkit/networks'
-
-import { getUserInformation } from "@/services/WalletService";
+import { createAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/vue';
+import { useConfig } from '@wagmi/vue'
 import { NETWORK_IDS } from "@/constants/walletConstants";
-import { getContract } from "@/services/ContractService";
+import { getEasSchemaIds } from "./services/ContractService";
+import { getWagmiAdapter, networks, projectId, metadata } from "./utils/config";
 
 export default {
   name: "App",
@@ -35,29 +30,27 @@ export default {
     dispatch("setLoading", true)
 
     const loading = ref(false);
+    const wagmiAdapter = getWagmiAdapter();
 
-    const projectId = process.env.VUE_APP_WEB3MODAL_PROJECT_ID;
+    try {
+      createAppKit({
+        adapters: [wagmiAdapter],
+        networks,
+        metadata,
+        themeMode: 'light',
+        projectId,
+        features: {
+          email: false, // default to true
+          socials: [],
+          emailShowWallets: false, // default to true
+        },
+      });
+    } catch (e) {
+      dispatch("setLoading", false);
+      console.log(e)
+    }
 
-    const metadata = {
-      name: "Deresy",
-      description: "A DEcentralized REview SYstem on Optimism",
-      url: "https://deresy.xyz/",
-      icons: ["https://avatars.githubusercontent.com/u/37784886"],
-    };
-
-    createAppKit({
-      adapters: [new Ethers5Adapter()],
-      networks: [process.env.NODE_ENV === 'development' ? optimismSepolia : optimism],
-      metadata,
-      themeMode: 'light',
-      projectId,
-      features: {
-        email: false, // default to true
-        socials: [],
-        emailShowWallets: false, // default to true
-      },
-    });
-
+    const config = useConfig();
     const accountInfo = useAppKitAccount().value;
 
     const status = computed(() => accountInfo?.status)
@@ -65,20 +58,17 @@ export default {
       console.log(process.env.NODE_ENV)
       console.log(newStatus)
       if (newStatus === "connected" && accountInfo.isConnected) {
-        const { chainId } = useAppKitNetwork().value
-        const { walletProvider } = useAppKitProvider('eip155')
+        const { chainId } = useAppKitNetwork().value;
         if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
-          const provider = new ethers.providers.Web3Provider(walletProvider)
-          const signer = provider.getSigner()
-
-          const userInformation = await getUserInformation(walletProvider);
-          const contract = await getContract(signer);
-          dispatch("setProvider", provider);
-          dispatch("setSigner", signer);
-          dispatch("setContract", contract);
-          dispatch("setWalletInformation", userInformation);
-          dispatch("setEasSchemaIDs");
-          dispatch("setLoading", false)
+          const {
+            reviewsSchemaID,
+            amendmentsSchemaID
+          } = await getEasSchemaIds(config);
+          console.log(reviewsSchemaID, amendmentsSchemaID);
+          dispatch("setWalletInformation", {walletAddress: accountInfo?.address, networkId: chainId, balance: null})
+          dispatch("setWagmiConfig", config);
+          dispatch("setEasSchemaIDs", { reviewsSchemaID, amendmentsSchemaID });
+          dispatch("setLoading", false);
         } else {
           dispatch("resetContractInformation");
         }

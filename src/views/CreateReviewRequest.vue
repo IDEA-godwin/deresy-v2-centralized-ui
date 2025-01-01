@@ -334,9 +334,8 @@
 </template>
 
 <script>
-import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { CloseBold } from "@element-plus/icons";
-import { getPaymentOptions, handleRequest } from "@/services/ContractService";
+import { getPaymentOptions, getReviewFormNames, handleRequest } from "@/services/ContractService";
 import { useStore } from "vuex";
 import { reactive, computed, ref, watch, onBeforeMount, toRaw } from "vue";
 import { ElNotification } from "element-plus";
@@ -346,7 +345,7 @@ import { useRouter } from "vue-router";
 import { HOME_ROUTE } from "@/constants/routes";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 import { saveHypercert, searchHypercert } from "../services/HypercertService";
-import { getRequestNames } from "../services/ContractService";
+import { parseEther } from "viem";
 
 export default {
   name: "CreateReviewRequest",
@@ -354,21 +353,17 @@ export default {
     const store = useStore();
     const {
       dispatch,
-      state: { contractState, user, root },
+      state: { contractState, user },
     } = store;
 
-    const web3 = computed(() => contractState.web3);
-    const contract = computed(() => contractState.contract);
-    const isLoading = computed(() => root.loading)
+    const wagmiConfig = computed(() => contractState.wagmiConfig);
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const router = useRouter();
 
     const reviewFormsTotal = ref([]);
-    const contractRef = ref(contract);
-    const isFormLoading = ref(isLoading);
+    const isFormLoading = ref();
     const paymentOptions = ref({});
-    const hypercertLastSixMonths = ref(true);
     const hypercertOptions = ref([]);
     const hypercertsLoading = ref(false);
 
@@ -526,11 +521,6 @@ export default {
       if (query) {
         hypercertsLoading.value = true;
 
-        // if (hypercertLastSixMonths.value === true) {
-        //   url += "&lastSixMonths=true";
-        // }
-        // console.log(url);
-
         try {
           hypercertOptions.value = await searchHypercert(query);
         } catch (error) {
@@ -547,18 +537,14 @@ export default {
       v$.value.$validate();
       if (!v$.value.$error) {
         dispatch("setLoading", true);
-        const rewardPerReviewToWei = web3.value.utils.toWei(
-          requestObject.rewardPerReview.toString(),
-          "ether"
-        );
-
-        const totalReward =
-          rewardPerReviewToWei * requestObject.reviewsPerHypercert;
-
+        const rewardPerReview = requestObject.rewardPerReview.toString();
+        const rewardPerReviewToWei = parseEther(rewardPerReview);
+        console.log(rewardPerReviewToWei);
+        const totalReward = Number.parseFloat(rewardPerReview) * Number.parseFloat(requestObject.reviewsPerHypercert);
         const targetAddresses = requestObject.targets.map((target) => {
-          return target.address;
+          /* eslint-disable no-undef */
+          return BigInt(target.address);
         });
-
         const targetHashes = requestObject.targets.map((target) => {
           return target.ipfsHash;
         });
@@ -571,41 +557,36 @@ export default {
           reviewers:
             requestObject.reviewers.length < 1 ||
             requestObject.reviewers.every((reviewer) => reviewer.address === "")
-              ? []
-              : requestObject.reviewers.map((reviewer) => {
-                  return reviewer.address;
-                }),
+              ? [] : requestObject.reviewers.map((reviewer) => {
+                return reviewer.address;
+              }),
           reviewerContracts:
             requestObject.reviewerContracts.length < 1 ||
             requestObject.reviewerContracts.every(
               (reviewerContract) => reviewerContract.address === ""
-            )
-              ? []
+            ) ? []
               : requestObject.reviewerContracts.map((reviewerContract) => {
                   return reviewerContract.address;
                 }),
           requestHash: requestObject.requestHash,
           rewardPerReview: rewardPerReviewToWei,
           reviewsPerHypercert: requestObject.reviewsPerHypercert,
-          totalReward: totalReward,
-          contractAddress: DERESY_CONTRACT_ADDRESS,
+          totalReward: totalReward.toString(),
           paymentTokenAddress: requestObject.paymentTokenAddress,
-          walletAddress: walletAddress.value,
+          walletAddress: walletAddress.value
         };
-
 
         try {
           await requestFunction(
-            web3.value,
-            contract.value,
+            wagmiConfig.value,
             payload,
             requestObject.isPaidReview
           );
 
-          saveHypercert(hypercertOptions.value
-            .filter(h => targetAddresses.includes(h.tokenID))
+          await saveHypercert(hypercertOptions.value
+            .filter(h => targetAddresses.includes(BigInt(h.tokenID)))
             .map(v => toRaw(v))
-          ).then(() => console.log("hypercerts saved to firebase"))
+          )
 
           ElNotification({
             title: "Success",
@@ -652,22 +633,16 @@ export default {
       requestObject.reviewerContracts.push({ address: "" });
       requestObject.targets.push({ address: "", ipfsHash: "" });
 
-      if (contractRef.value) {
-        const payload = {
-          contractMethods: contract.value.methods,
-        };
-        reviewFormsTotal.value = await getRequestNames(payload);
-        paymentOptions.value = await getPaymentOptions(payload);
+      if (wagmiConfig.value) {
+        reviewFormsTotal.value = await getReviewFormNames(wagmiConfig.value);
+        paymentOptions.value = await getPaymentOptions(wagmiConfig.value);
       }
     });
 
-    watch([contractRef], async () => {
-      if (contractRef.value) {
-        const payload = {
-          contractMethods: contract.value.methods,
-        };
-        reviewFormsTotal.value = await getRequestNames(payload);
-        paymentOptions.value = await getPaymentOptions(payload);
+    watch([wagmiConfig], async () => {
+      if (wagmiConfig.value) {
+        reviewFormsTotal.value = await getReviewFormNames(wagmiConfig.value);
+        paymentOptions.value = await getPaymentOptions(wagmiConfig.value);
       }
     });
 
@@ -693,7 +668,6 @@ export default {
       isRewardDisabled,
       isFormLoading,
       paymentOptions,
-      hypercertLastSixMonths,
       hypercertOptions,
       hypercertsLoading,
       disableSubmit,

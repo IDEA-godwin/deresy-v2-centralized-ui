@@ -1,14 +1,6 @@
 export default {
-  SET_PROVIDER(state, payload) {
-    state.provider = payload;
-  },
-
-  SET_SIGNER(state, payload) {
-    state.signer = payload;
-  },
-
-  SET_CONTRACT(state, payload) {
-    state.contract = payload;
+  SET_WAGMI_CONFIG(state, payload) {
+    state.wagmiConfig = payload;
   },
 
   SET_EAS_SCHEMA_IDS(state, payload) {
@@ -17,9 +9,7 @@ export default {
   },
 
   RESET_CONTRACT_INFORMATION(state) {
-    state.provider = null;
-    state.signer = null;
-    state.contract = null;
+    state.wagmiConfig = null
     state.easSchemaIDs = {
       reviewsSchemaID: null,
       amendmentsSchemaID: null,

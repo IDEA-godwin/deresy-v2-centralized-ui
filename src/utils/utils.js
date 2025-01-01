@@ -63,3 +63,20 @@ export const formatDisplayDateValue = (from, to) => {
 }
 
 const buildDateFormat = date => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getUTCDate()}`
+
+export const bigintToUint256Hex = (value) => {
+  if (value < 0n) {
+    throw new Error("uint256 cannot be negative");
+  }
+
+  console.log(value)
+
+  // Convert to hex and remove the `0x` prefix
+  let hex = value.toString(16);
+
+  // Pad the string to 64 characters (32 bytes)
+  hex = hex.padStart(64, "0");
+
+  // Add the `0x` prefix
+  return `0x${hex}`;
+}

@@ -1,4 +1,13 @@
 import { ElNotification } from "element-plus";
+import {
+  readContract,
+  readContracts,
+  simulateContract,
+  estimateFeesPerGas,
+  // prepareTransactionRequest,
+  writeContract } from '@wagmi/core';
+import { parseEther } from "viem";
+
 import { getAmendmentsByRefUID } from "@/services/AmendmentService";
 import { getReviewByAttestationID } from "@/services/ReviewService";
 import {
@@ -9,10 +18,10 @@ import {
   EAS_CONTRACT_ADDRESS,
   ERC_20_ABI,
   PAYMENT_OPTIONS,
+  DERESY_CONTRACT_ABI,
+  DERESY_CONTRACT_ADDRESS
 } from "../constants/contractConstants";
 import { saveAttestationIdToDB } from "./AttestationsService";
-
-import { Contract, formatUnits } from 'ethers'
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -31,49 +40,52 @@ export const sendTransactionNotification = (txHash, title) => {
   });
 };
 
-export const getContract = async (signer) => {
-  return new Contract(DERESY_CONTRACT_ADDRESS, DERESY_CONTRACT_ABI, signer);
-};
+const contractInfo = {
+  abi: DERESY_CONTRACT_ABI,
+  address: DERESY_CONTRACT_ADDRESS
+}
 
-export const createReviewForm = async (web3, contract, params) => {
+export const getEasSchemaIds = async config => {
+  const data = await readContracts(config, {
+    contracts: [
+      {
+        ...contractInfo,
+        functionName: 'reviewsSchemaID'
+      },
+      {
+        ...contractInfo,
+        functionName: 'amendmentsSchemaID'
+      }
+    ]
+  });
+
+  return {
+    reviewsSchemaID: data[0].result,
+    amendmentsSchemaID: data[1].result
+  };
+}
+
+export const createReviewForm = async (config, params) => {
   const {
     formName,
     questions,
     types,
     choices,
-    contractAddress,
-    walletAddress,
   } = params;
-  const { methods } = contract;
 
   let response;
 
   try {
-    const transactionData = methods
-      .createReviewForm(formName, questions, choices, types)
-      .encodeABI();
 
-    const gasEstimate = await web3.eth.estimateGas({
-      from: walletAddress,
-      to: contractAddress,
-      data: transactionData,
+    const { request } = await simulateContract(config, {
+      ...contractInfo,
+      functionName: 'createReviewForm',
+      args: [formName, questions, choices, types]
     });
 
-    const transaction = {
-      from: walletAddress,
-      to: contractAddress,
-      data: transactionData,
-      gas: gasEstimate,
-    };
+    const hash = await writeContract(config, request);
+    console.log(hash)
 
-    await web3.eth
-      .sendTransaction(transaction)
-      .on("transactionHash", (txHash) => {
-        sendTransactionNotification(txHash, "Transaction in progress");
-      })
-      .on("receipt", (receipt) => {
-        response = receipt;
-      });
   } catch (e) {
     console.error("An error ocurred while creating review form.", e);
     throw e;
@@ -94,10 +106,25 @@ export const getReviewForm = async (params) => {
   }
 };
 
-export const getReviewFormsTotal = async (params) => {
-  const { contractMethods } = params;
+export const getReviewFormsTotal = async (config) => {
   try {
-    const response = contractMethods.reviewForms().call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "reviewForms"
+    });
+    return response;
+  } catch (e) {
+    console.error("An error ocurred while getting the review form.", e);
+    throw e;
+  }
+};
+
+export const getReviewFormNames = async (config) => {
+  try {
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "getReviewFormsNames"
+    });
 
     return response;
   } catch (e) {
@@ -106,10 +133,14 @@ export const getReviewFormsTotal = async (params) => {
   }
 };
 
-export const getPaymentOptions = async (params) => {
-  const { contractMethods } = params;
+export const getPaymentOptions = async (config) => {
   try {
-    const response = await contractMethods.getWhitelistedTokens().call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "getWhitelistedTokens"
+    })
+
+    console.log(response)
 
     let newPaymentOptions = {};
 
@@ -120,7 +151,6 @@ export const getPaymentOptions = async (params) => {
         newPaymentOptions[address] = address;
       }
     }
-
     return newPaymentOptions;
   } catch (e) {
     console.error("An error ocurred while getting the review form.", e);
@@ -128,7 +158,7 @@ export const getPaymentOptions = async (params) => {
   }
 };
 
-export const handleRequest = async (web3, contract, params, isPaid) => {
+export const handleRequest = async (config, params, isPaid) => {
   const {
     name,
     reviewFormName,
@@ -140,15 +170,13 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
     rewardPerReview,
     reviewsPerHypercert,
     totalReward,
-    contractAddress,
     paymentTokenAddress,
-    walletAddress,
+    walletAddress
   } = params;
-  const { methods } = contract;
 
-  let methodName = isPaid ? "createRequest" : "createNonPayableRequest";
+  let functionName = isPaid ? "createRequest" : "createNonPayableRequest";
 
-  let methodArgs = isPaid
+  let args = isPaid
     ? [
         name,
         reviewers,
@@ -171,59 +199,49 @@ export const handleRequest = async (web3, contract, params, isPaid) => {
         reviewFormName,
       ];
 
-  let response;
   try {
     if (isPaid && paymentTokenAddress !== DEFAULT_PAYMENT_ADDRESS) {
-      const tokenContract = new web3.eth.Contract(
-        ERC_20_ABI,
-        paymentTokenAddress
-      );
-      await tokenContract.methods
-        .approve(contractAddress, totalReward)
-        .send({ from: walletAddress });
+      const tokenContractInfo = {
+        abi: ERC_20_ABI,
+        address: paymentTokenAddress
+      };
+      await writeContract(config, {
+        ...tokenContractInfo,
+        functionName: "approve",
+        args: [walletAddress, totalReward]
+      });
     }
 
-    const gasEstimate = await web3.eth.estimateGas({
-      from: walletAddress,
-      to: contractAddress,
-      value: isPaid
-        ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
-          ? totalReward : 0
-        : 0,
-      data: methods[methodName](...methodArgs).encodeABI(),
+		const {maxPriorityFeePerGas, maxFeePerGas} = await estimateFeesPerGas(config);
+
+    const value = isPaid
+      ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
+        ? parseEther(totalReward) : 0
+      : 0;
+    console.log(value)
+
+    const { request} = await simulateContract(config, {
+      ...contractInfo,
+      functionName, args,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
+      value
     });
-
-    const transaction = {
-      from: walletAddress,
-      to: contractAddress,
-      value: isPaid
-        ? paymentTokenAddress === DEFAULT_PAYMENT_ADDRESS
-          ? totalReward : 0
-        : 0,
-      data: methods[methodName](...methodArgs).encodeABI(),
-      gas: gasEstimate,
-    };
-
-    await web3.eth
-      .sendTransaction(transaction)
-      .on("transactionHash", (txHash) => {
-        sendTransactionNotification(txHash, "Transaction in progress");
-      })
-      .on("receipt", (receipt) => {
-        response = receipt;
-      });
+    await writeContract(config, request);
   } catch (e) {
     console.error("An error occurred while processing the request.", e);
     throw e;
   }
-
-  return response;
 };
 
 export const getRequest = async (params) => {
-  const { requestName, contractMethods } = params;
+  const { requestName, config } = params;
   try {
-    const response = contractMethods.getRequest(requestName).call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: 'getRequest',
+      args: [requestName]
+    });
 
     return response;
   } catch (e) {
@@ -233,9 +251,12 @@ export const getRequest = async (params) => {
 };
 
 export const getRequestNames = async (params) => {
-  const { contractMethods } = params;
+  const { config } = params;
   try {
-    const response = contractMethods.getReviewRequestsNames().call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "getReviewRequestsNames"
+    });
 
     return response;
   } catch (e) {
@@ -245,11 +266,13 @@ export const getRequestNames = async (params) => {
 };
 
 export const isReviewer = async (params) => {
-  const { contractMethods, requestName, reviewerAddress } = params;
+  const { config, requestName, reviewerAddress } = params;
   try {
-    const response = contractMethods
-      .isReviewer(reviewerAddress, requestName)
-      .call();
+    const response = await readContract(config, {
+      ...contractInfo,
+      functionName: "isReviewer",
+      args: [reviewerAddress, requestName]
+    })
 
     return response;
   } catch (e) {
@@ -258,42 +281,21 @@ export const isReviewer = async (params) => {
   }
 };
 
-export const closeRequest = async (web3, contract, params) => {
-  const { requestName, contractAddress, walletAddress } = params;
-  const { methods } = contract;
-
-  let response;
+export const closeRequest = async (config, params) => {
+  const { requestName } = params;
 
   try {
-    const transactionData = methods.closeReviewRequest(requestName).encodeABI();
-
-    const gasEstimate = await web3.eth.estimateGas({
-      from: walletAddress,
-      to: contractAddress,
-      data: transactionData,
+    const { request } = await simulateContract(config, {
+      ...contractInfo,
+      functionName: 'closeReviewRequest',
+      args: [requestName]
     });
 
-    const transaction = {
-      from: walletAddress,
-      to: contractAddress,
-      data: transactionData,
-      gas: gasEstimate,
-    };
-
-    await web3.eth
-      .sendTransaction(transaction)
-      .on("transactionHash", (txHash) => {
-        sendTransactionNotification(txHash, "Transaction in progress");
-      })
-      .on("receipt", (receipt) => {
-        response = receipt;
-      });
+    await writeContract(config, request)
   } catch (e) {
     console.error("An error ocurred while closing the review request.", e);
     throw e;
   }
-
-  return response;
 };
 
 export const submitReview = async (web3, contract, params) => {
@@ -549,3 +551,5 @@ export const createAmendment = async (web3, contract, params) => {
 
   return response;
 };
+
+

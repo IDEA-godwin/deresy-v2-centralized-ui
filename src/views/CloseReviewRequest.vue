@@ -52,7 +52,6 @@
 </template>
 
 <script>
-import { DERESY_CONTRACT_ADDRESS } from "@/constants/contractConstants";
 import { closeRequest, getRequestNames } from "@/services/ContractService";
 import { useStore } from "vuex";
 import { watch, computed, ref, onBeforeMount } from "vue";
@@ -70,15 +69,12 @@ export default {
       state: { contractState, user },
     } = store;
 
-    const web3 = computed(() => contractState.web3);
-    const walletAddress = computed(() => user.walletAddress);
-    const contract = computed(() => contractState.contract);
+    const wagmiConfig = computed(() => contractState.wagmiConfig);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const router = useRouter();
 
     const requestName = ref("");
     const requestNames = ref();
-    const contractRef = ref(contract);
     const isFormLoading = ref(false);
 
     const disableSubmit = () => {
@@ -104,12 +100,10 @@ export default {
       dispatch("setLoading", true);
       const payload = {
         requestName: requestName.value,
-        contractAddress: DERESY_CONTRACT_ADDRESS,
-        walletAddress: walletAddress.value,
       };
 
       try {
-        await closeRequest(web3.value, contract.value, payload);
+        await closeRequest(wagmiConfig.value, payload);
 
         ElNotification({
           title: "Success",
@@ -151,18 +145,18 @@ export default {
     };
 
     onBeforeMount(async () => {
-      if (contractRef.value) {
+      if (wagmiConfig.value) {
         const payload = {
-          contractMethods: contract.value.methods,
+          config: wagmiConfig.value
         };
         requestNames.value = await getRequestNames(payload);
       }
     });
 
-    watch([contractRef], async () => {
-      if (contractRef.value) {
+    watch([wagmiConfig], async () => {
+      if (wagmiConfig.value) {
         const payload = {
-          contractMethods: contract.value.methods,
+          config: wagmiConfig.value,
         };
         requestNames.value = await getRequestNames(payload);
       }
