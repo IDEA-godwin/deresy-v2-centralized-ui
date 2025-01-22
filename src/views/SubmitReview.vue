@@ -251,7 +251,6 @@ import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
 import { useEthersSigner } from "../utils/ethers-signer-util";
-import { useConnectorClient } from "@wagmi/vue";
 
 export default {
   name: "SubmitReview",

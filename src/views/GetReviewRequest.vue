@@ -246,8 +246,8 @@ export default {
       }
     });
 
-    watch([contractRef], async () => {
-      if (contractRef.value) {
+    watch([config], async () => {
+      if (config.value) {
         const payload = {
           config: config.value,
         };

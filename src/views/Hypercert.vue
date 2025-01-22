@@ -435,7 +435,7 @@ export default {
       hypercertLink.value = `${
         process.env.VUE_APP_HYPERCERTS_BASE_URL
       }${process.env.VUE_APP_HYPERCERT_CONTRACT_ADDRESS.toLowerCase()}-${tokenID}`;
-      if (contractRef.value && currentVersionReviewRequests.value.length > 0) {
+      if (config.value && currentVersionReviewRequests.value.length > 0) {
         for (const request of currentVersionReviewRequests.value) {
           const payload = {
             config: config.value,
