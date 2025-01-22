@@ -311,6 +311,7 @@ import {
   HYPERCERT_CONTRACT_ABI,
 } from "@/constants/contractConstants";
 import { optimismWeb3 } from "@/web3";
+import { getHypercertURI } from "../services/ContractService";
 
 export default {
   name: "Grant",
@@ -346,6 +347,7 @@ export default {
     const easExplorerUrl = ref("");
     const walletAddress = computed(() => user.walletAddress);
     const easSchemaIDs = computed(() => contractState.easSchemaIDs);
+    const config = computed(() => contractState.wagmiConfig);
 
     const hypercertLink = ref("");
     const hypercertName = ref("");
@@ -517,17 +519,7 @@ export default {
     };
 
     const getHypercertName = async () => {
-      const hypercertContract = new optimismWeb3.eth.Contract(
-        HYPERCERT_CONTRACT_ABI,
-        HYPERCERT_CONTRACT_ADDRESS,
-        {
-          from: walletAddress.value,
-        }
-      );
-
-      const uri = await hypercertContract.methods
-        .uri(grant.value.hypercertID.toString())
-        .call();
+      const uri = await getHypercertURI(config.value, grant.value.hypercertID.toString())
       if (uri) {
         const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
         const data = await (

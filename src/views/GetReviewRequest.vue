@@ -182,21 +182,20 @@ export default {
       state: { contractState },
     } = store;
 
-    const contract = computed(() => contractState.contract);
+    const config = computed(() => contractState.wagmiConfig);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
     const requestName = ref("");
     const requestNames = ref();
     const requestObject = ref();
     const reviewForm = ref({});
-    const contractRef = ref(contract);
     const formData = ref();
 
     const sendBtn = async () => {
       dispatch("setLoading", true);
       const payload = {
         requestName: requestName.value,
-        contractMethods: contract.value.methods,
+        config: config.value,
       };
 
       try {
@@ -206,7 +205,7 @@ export default {
 
         const reviewFormPayload = {
           reviewFormIndex: requestObject.value.reviewFormIndex,
-          contractMethods: contract.value.methods,
+          config: config.value,
         };
         reviewForm.value = await getReviewForm(reviewFormPayload);
         reviewForm.value[0].forEach((question, index) => {
@@ -239,9 +238,9 @@ export default {
     };
 
     onBeforeMount(async () => {
-      if (contractRef.value) {
+      if (config.value) {
         const payload = {
-          contractMethods: contract.value.methods,
+          config: config.value,
         };
         requestNames.value = await getRequestNames(payload);
       }
@@ -250,7 +249,7 @@ export default {
     watch([contractRef], async () => {
       if (contractRef.value) {
         const payload = {
-          contractMethods: contract.value.methods,
+          config: config.value,
         };
         requestNames.value = await getRequestNames(payload);
       }

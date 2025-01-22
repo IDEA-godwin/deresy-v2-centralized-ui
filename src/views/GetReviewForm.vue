@@ -66,20 +66,19 @@ export default {
       state: { contractState },
     } = store;
 
-    const contract = computed(() => contractState.contract);
+    const config = computed(() => contractState.wagmiConfig);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
     const reviewFormIndex = ref();
     const reviewForm = ref();
     const reviewFormsTotal = ref(0);
-    const contractRef = ref(contract);
     const tableData = ref();
 
     const sendBtn = async () => {
       dispatch("setLoading", true);
       const payload = {
         reviewFormIndex: reviewFormIndex.value,
-        contractMethods: contract.value.methods,
+        config: config.value,
       };
 
       try {
@@ -115,20 +114,14 @@ export default {
     };
 
     onBeforeMount(async () => {
-      if (contractRef.value) {
-        const payload = {
-          contractMethods: contract.value.methods,
-        };
-        reviewFormsTotal.value = await getReviewFormsTotal(payload);
+      if (config.value) {
+        reviewFormsTotal.value = await getReviewFormsTotal(config.value);
       }
     });
 
-    watch([contractRef], async () => {
-      if (contractRef.value) {
-        const payload = {
-          contractMethods: contract.value.methods,
-        };
-        reviewFormsTotal.value = await getReviewFormsTotal(payload);
+    watch([config], async () => {
+      if (config.value) {
+        reviewFormsTotal.value = await getReviewFormsTotal(config.value);
       }
     });
 

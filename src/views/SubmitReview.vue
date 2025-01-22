@@ -224,463 +224,450 @@
 </template>
 
 <script>
-// import { nextTick } from "vue";
-// import { useRoute, useRouter } from "vue-router";
-// import {
-//   DERESY_CONTRACT_ADDRESS,
-//   HYPERCERT_CONTRACT_ADDRESS,
-//   HYPERCERT_CONTRACT_ABI,
-// } from "@/constants/contractConstants";
-// import {
-//   filterReviewRequests,
-//   getMatchingReview,
-//   populateAnswers,
-// } from "@/helpers/ReviewsHelper";
-// import {
-//   getRequestNames,
-//   isReviewer,
-//   submitReview,
-// } from "@/services/ContractService";
-// import { getHypercert } from "@/services/HypercertService";
-// import {
-//   getReviewRequest,
-//   getCurrentVersionReviewRequestsByHypercert,
-// } from "@/services/ReviewRequestService";
-// import { getReviewForm } from "@/services/ReviewFormService";
-// import { getReviews } from "@/services/ReviewService";
-// import { useStore } from "vuex";
-// import { watch, computed, ref, onBeforeMount, reactive } from "vue";
-// import { ElNotification } from "element-plus";
-// import { useVuelidate } from "@vuelidate/core";
-// import { helpers, required } from "@vuelidate/validators";
-// // import { optimismWeb3 } from "@/web3";
-// import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
+import { nextTick } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import {
+  filterReviewRequests,
+  getMatchingReview,
+  populateAnswers,
+} from "@/helpers/ReviewsHelper";
+import {
+  getHypercertURI,
+  getRequestNames,
+  isReviewer,
+  submitReview,
+} from "@/services/ContractService";
+import { getHypercert } from "@/services/HypercertService";
+import {
+  getReviewRequest,
+  getCurrentVersionReviewRequestsByHypercert,
+} from "@/services/ReviewRequestService";
+import { getReviewForm } from "@/services/ReviewFormService";
+import { getReviews } from "@/services/ReviewService";
+import { useStore } from "vuex";
+import { watch, computed, ref, onBeforeMount, reactive } from "vue";
+import { ElNotification } from "element-plus";
+import { useVuelidate } from "@vuelidate/core";
+import { helpers, required } from "@vuelidate/validators";
+import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
+import { useEthersSigner } from "../utils/ethers-signer-util";
+import { useConnectorClient } from "@wagmi/vue";
 
 export default {
   name: "SubmitReview",
   setup() {
-    // const store = useStore();
-    // const {
-    //   dispatch,
-    //   state: { contractState, user },
-    // } = store;
+    const store = useStore();
+    const {
+      dispatch,
+      state: { contractState, user },
+    } = store;
 
-    // const web3 = computed(() => contractState.web3);
-    // const walletAddress = computed(() => user.walletAddress);
-    // const contract = computed(() => contractState.contract);
-    // const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
+    const walletAddress = computed(() => user.walletAddress);
+    const config = computed(() => contractState.wagmiConfig);
+    const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
-    // const router = useRouter();
-    // const route = useRoute();
-    // const tokenID = route.params.token_id;
+    const router = useRouter();
+    const route = useRoute();
+    const tokenID = route.params.token_id;
 
-    // const walletAddressRef = ref(walletAddress);
-    // const contractRef = ref(contract);
-    // const isReviewerForAny = ref(false);
-    // const reviewRequests = ref([]);
-    // const selectedReviewRequest = ref(null);
-    // const requestObjectReady = ref(false);
-    // const requestNames = ref();
-    // const requestObject = ref();
-    // const reviewForm = ref({});
-    // const hypercertObj = ref({});
-    // const ipfsHashes = ref([]);
-    // const simpleMDEInstances = ref([]);
-    // const hypercertName = ref("");
-    // const hypercertReviews = ref([]);
-    // const loading = ref(true);
-    // const isFormLoading = ref(false);
-    // const attachedFiles = ref([]);
+    const walletAddressRef = ref(walletAddress);
+    const isReviewerForAny = ref(false);
+    const reviewRequests = ref([]);
+    const selectedReviewRequest = ref(null);
+    const requestObjectReady = ref(false);
+    const requestNames = ref();
+    const requestObject = ref();
+    const reviewForm = ref({});
+    const hypercertObj = ref({});
+    const ipfsHashes = ref([]);
+    const simpleMDEInstances = ref([]);
+    const hypercertName = ref("");
+    const hypercertReviews = ref([]);
+    const loading = ref(true);
+    const isFormLoading = ref(false);
+    const attachedFiles = ref([]);
 
-    // const reviewObject = reactive({
-    //   requestName: "",
-    //   hypercertID: null,
-    //   reviews: [],
-    // });
+    const reviewObject = reactive({
+      requestName: "",
+      hypercertID: null,
+      reviews: [],
+    });
 
-    // const rules = computed(() => {
-    //   return {
-    //     requestName: { required },
-    //     hypercertID: { required },
-    //     reviews: {
-    //       $each: helpers.forEach({
-    //         answer: {
-    //           required,
-    //         },
-    //       }),
-    //     },
-    //   };
-    // });
+    const rules = computed(() => {
+      return {
+        requestName: { required },
+        hypercertID: { required },
+        reviews: {
+          $each: helpers.forEach({
+            answer: {
+              required,
+            },
+          }),
+        },
+      };
+    });
 
-    // let v$ = useVuelidate(rules, reviewObject);
+    let v$ = useVuelidate(rules, reviewObject);
 
-    // const getHypercertName = async () => {
-    //   const hypercertContract = new optimismWeb3.eth.Contract(
-    //     HYPERCERT_CONTRACT_ABI,
-    //     HYPERCERT_CONTRACT_ADDRESS,
-    //     {
-    //       from: walletAddress.value,
-    //     }
-    //   );
-    //   const uri = await hypercertContract.methods.uri(tokenID).call();
-    //   if (uri) {
-    //     const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
-    //     const data = await (
-    //       await fetch(
-    //         `${process.env.VUE_APP_PINATA_GATEWAY_BASE_URL}${sanitizedUri}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`
-    //       )
-    //     ).json();
-    //     return `${data.name} (ID: ${tokenID})`;
-    //   } else {
-    //     return "Name unavailable";
-    //   }
-    // };
+    const getHypercertName = async () => {
+      const uri = await getHypercertURI(config.value, tokenID);
+      if (uri) {
+        const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
+        const data = await (
+          await fetch(
+            `${process.env.VUE_APP_PINATA_GATEWAY_BASE_URL}${sanitizedUri}?pinataGatewayToken=${process.env.VUE_APP_PINATA_GATEWAY_TOKEN}`
+          )
+        ).json();
+        return `${data.name} (ID: ${tokenID})`;
+      } else {
+        return "Name unavailable";
+      }
+    };
 
-    // const forbiddenMessage = () => {
-    //   if (requestObject.value.isClosed) {
-    //     return "This request is closed and does no longer accept reviews.";
-    //   } else if (
-    //     !requestObject.value.reviewers.includes(walletAddressRef.value)
-    //   ) {
-    //     return `Your address (${walletAddressRef.value}) is not authorized to submit a review for this request.`;
-    //   } else if (
-    //     hypercertReviews.value.some((r) => r.reviewer == walletAddressRef.value)
-    //   ) {
-    //     return `This address (${walletAddressRef.value}) has already submitted a review for this Request and Hypercert.`;
-    //   }
-    // };
+    const forbiddenMessage = () => {
+      if (requestObject.value.isClosed) {
+        return "This request is closed and does no longer accept reviews.";
+      } else if (
+        !requestObject.value.reviewers.includes(walletAddressRef.value)
+      ) {
+        return `Your address (${walletAddressRef.value}) is not authorized to submit a review for this request.`;
+      } else if (
+        hypercertReviews.value.some((r) => r.reviewer == walletAddressRef.value)
+      ) {
+        return `This address (${walletAddressRef.value}) has already submitted a review for this Request and Hypercert.`;
+      }
+    };
 
-    // const allowToSubmit = () => {
-    //   return (
-    //     reviewObject.requestName &&
-    //     reviewObject.targetIndex &&
-    //     reviewObject.reviews.length == reviewForm.value.questions.length &&
-    //     !reviewObject.reviews.includes(undefined)
-    //   );
-    // };
+    const allowToSubmit = () => {
+      return (
+        reviewObject.requestName &&
+        reviewObject.targetIndex &&
+        reviewObject.reviews.length == reviewForm.value.questions.length &&
+        !reviewObject.reviews.includes(undefined)
+      );
+    };
 
-    // const isEmptyHashes = () => {
-    //   return ipfsHashes.value.every((hash) => hash === "");
-    // };
+    const isEmptyHashes = () => {
+      return ipfsHashes.value.every((hash) => hash === "");
+    };
 
-    // const simpleMDEInitializer = async () => {
-    //   await nextTick();
+    const simpleMDEInitializer = async () => {
+      await nextTick();
 
-    //   const textAreas = document.getElementsByClassName("textarea-markdown");
-    //   for (let textArea of textAreas) {
-    //     const index = parseInt(textArea.id.replace("simplemde-", ""), 10);
-    //     const SimpleMDE = window.SimpleMDE;
-    //     const simplemde = new SimpleMDE({ element: textArea, forceSync: true });
-    //     simpleMDEInstances.value.push(simplemde);
+      const textAreas = document.getElementsByClassName("textarea-markdown");
+      for (let textArea of textAreas) {
+        const index = parseInt(textArea.id.replace("simplemde-", ""), 10);
+        const SimpleMDE = window.SimpleMDE;
+        const simplemde = new SimpleMDE({ element: textArea, forceSync: true });
+        simpleMDEInstances.value.push(simplemde);
 
-    //     const parentContent = textArea.closest(".el-form-item__content");
-    //     if (parentContent) {
-    //       parentContent.style.display = "block";
-    //     }
+        const parentContent = textArea.closest(".el-form-item__content");
+        if (parentContent) {
+          parentContent.style.display = "block";
+        }
 
-    //     simplemde.codemirror.on("change", function () {
-    //       reviewObject.reviews[index].answer = simplemde.value();
-    //     });
-    //   }
-    // };
+        simplemde.codemirror.on("change", function () {
+          reviewObject.reviews[index].answer = simplemde.value();
+        });
+      }
+    };
 
-    // const loadPastAnswers = async (
-    //   reviewFormName,
-    //   reviewRequests,
-    //   hypercertID,
-    //   requestName,
-    //   types
-    // ) => {
-    //   const filteredRequests = filterReviewRequests(
-    //     reviewRequests,
-    //     hypercertID,
-    //     reviewFormName,
-    //     walletAddress,
-    //     requestName
-    //   );
+    const loadPastAnswers = async (
+      reviewFormName,
+      reviewRequests,
+      hypercertID,
+      requestName,
+      types
+    ) => {
+      const filteredRequests = filterReviewRequests(
+        reviewRequests,
+        hypercertID,
+        reviewFormName,
+        walletAddress,
+        requestName
+      );
 
-    //   if (filteredRequests.length == 0) {
-    //     return;
-    //   }
+      if (filteredRequests.length == 0) {
+        return;
+      }
 
-    //   const review = await getMatchingReview(
-    //     filteredRequests,
-    //     walletAddress,
-    //     reviewFormName
-    //   );
+      const review = await getMatchingReview(
+        filteredRequests,
+        walletAddress,
+        reviewFormName
+      );
 
-    //   if (!review) {
-    //     return;
-    //   }
+      if (!review) {
+        return;
+      }
 
-    //   populateAnswers(review, types, reviewObject);
+      populateAnswers(review, types, reviewObject);
 
-    //   return;
-    // };
+      return;
+    };
 
-    // const disableSubmit = () => {
-    //   return (
-    //     !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
-    //   );
-    // };
+    const disableSubmit = () => {
+      return (
+        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+      );
+    };
 
-    // const submitMessage = () => {
-    //   if (!user.networkId) {
-    //     return "Please connect your wallet";
-    //   } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
-    //     return `Please connect your wallet to the ${
-    //       NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
-    //     } network`;
-    //   } else {
-    //     return "";
-    //   }
-    // };
+    const submitMessage = () => {
+      if (!user.networkId) {
+        return "Please connect your wallet";
+      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
+        return `Please connect your wallet to the ${
+          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
+        } network`;
+      } else {
+        return "";
+      }
+    };
 
-    // const sendBtn = async () => {
-    //   const questionTypes = [];
-    //   for (let i = 0; i < reviewForm.value.questions.length; i++) {
-    //     let questionType =
-    //       reviewForm.value.types[i] == 0
-    //         ? "Text"
-    //         : reviewForm.value.types[i] == 1
-    //         ? "Yes/No"
-    //         : `SingleChoice (${reviewForm.value.choices[i].choices.join(
-    //             " | "
-    //           )})`;
-    //     questionTypes.push(questionType);
-    //   }
+    const sendBtn = async () => {
+      const questionTypes = [];
+      for (let i = 0; i < reviewForm.value.questions.length; i++) {
+        let questionType =
+          reviewForm.value.types[i] == 0
+            ? "Text"
+            : reviewForm.value.types[i] == 1
+            ? "Yes/No"
+            : `SingleChoice (${reviewForm.value.choices[i].choices.join(
+                " | "
+              )})`;
+        questionTypes.push(questionType);
+      }
 
-    //   isFormLoading.value = true;
+      isFormLoading.value = true;
 
-    //   v$.value.$validate();
-    //   if (!v$.value.$error) {
-    //     dispatch("setLoading", true);
+      v$.value.$validate();
+      if (!v$.value.$error) {
+        dispatch("setLoading", true);
 
-    //     const reviewsAnswers = reviewObject.reviews.map((review) => {
-    //       return review.answer;
-    //     });
+        const reviewsAnswers = reviewObject.reviews.map((review) => {
+          return review.answer;
+        });
 
-    //     const attachmentsIpfsHashes = attachedFiles.value.map(
-    //       (file) => file.ipfsHash
-    //     );
+        const attachmentsIpfsHashes = attachedFiles.value.map(
+          (file) => file.ipfsHash
+        );
 
-    //     const payload = {
-    //       name: reviewObject.requestName,
-    //       answers: reviewsAnswers,
-    //       questions: reviewForm.value.questions,
-    //       questionTypes: questionTypes,
-    //       tokenID: tokenID,
-    //       hypercertID: reviewObject.hypercertID,
-    //       contractAddress: DERESY_CONTRACT_ADDRESS,
-    //       attachmentsIpfsHashes: attachmentsIpfsHashes,
-    //       walletAddress: walletAddress.value,
-    //     };
+        const payload = {
+          name: reviewObject.requestName,
+          answers: reviewsAnswers,
+          questions: reviewForm.value.questions,
+          questionTypes: questionTypes,
+          tokenID: tokenID,
+          hypercertID: reviewObject.hypercertID,
+          attachmentsIpfsHashes: attachmentsIpfsHashes,
+          walletAddress: walletAddress.value,
+        };
 
-    //     try {
-    //       ElNotification({
-    //         title: "Info",
-    //         message: "Submitting data you will be asked to sign in a moment.",
-    //         type: "info",
-    //         duration: 8000,
-    //       });
-    //       await submitReview(web3.value, contract.value, payload);
+        try {
+          ElNotification({
+            title: "Info",
+            message: "Submitting data you will be asked to sign in a moment.",
+            type: "info",
+            duration: 8000,
+          });
 
-    //       ElNotification({
-    //         title: "Success",
-    //         message: "Successful transaction.",
-    //         type: "success",
-    //         duration: notificationTime,
-    //       });
+          const signer = useEthersSigner({ chainId: user?.networkId });
 
-    //       router.push({
-    //         path: `/hypercerts/${tokenID}`,
-    //       });
-    //     } catch (e) {
-    //       if (e.code === 4001) {
-    //         ElNotification({
-    //           title: "Error",
-    //           message: "Transaction cancelled.",
-    //           type: "error",
-    //           duration: notificationTime,
-    //         });
-    //       } else if (e.code === -32603) {
-    //         ElNotification({
-    //           title: "Error",
-    //           message: "Error processing TX.",
-    //           type: "error",
-    //           duration: notificationTime,
-    //         });
-    //       } else {
-    //         ElNotification({
-    //           title: "Error",
-    //           message: `Transaction failed: ${e.message}`,
-    //           type: "error",
-    //           duration: notificationTime,
-    //         });
-    //       }
-    //     }
-    //     dispatch("setLoading", false);
-    //   }
-    //   isFormLoading.value = false;
-    // };
+          await submitReview(signer, config, payload);
 
-    // onBeforeMount(async () => {
-    //   if (contractRef.value) {
-    //     const requestNamesPayload = {
-    //       contractMethods: contract.value.methods,
-    //     };
-    //     requestNames.value = await getRequestNames(requestNamesPayload);
-    //   }
+          ElNotification({
+            title: "Success",
+            message: "Successful transaction.",
+            type: "success",
+            duration: notificationTime,
+          });
 
-    //   reviewObject.targetIndex = null;
-    //   requestObject.value = null;
-    //   reviewForm.value = null;
+          router.push({
+            path: `/hypercerts/${tokenID}`,
+          });
+        } catch (e) {
+          if (e.code === 4001) {
+            ElNotification({
+              title: "Error",
+              message: "Transaction cancelled.",
+              type: "error",
+              duration: notificationTime,
+            });
+          } else if (e.code === -32603) {
+            ElNotification({
+              title: "Error",
+              message: "Error processing TX.",
+              type: "error",
+              duration: notificationTime,
+            });
+          } else {
+            ElNotification({
+              title: "Error",
+              message: `Transaction failed: ${e.message}`,
+              type: "error",
+              duration: notificationTime,
+            });
+          }
+        }
+        dispatch("setLoading", false);
+      }
+      isFormLoading.value = false;
+    };
 
-    //   hypercertObj.value = (await getHypercert(tokenID)).response;
-    //   reviewRequests.value = (
-    //     await getCurrentVersionReviewRequestsByHypercert(tokenID)
-    //   ).response;
+    onBeforeMount(async () => {
+      if (config.value) {
+        requestNames.value = await getRequestNames({ config: config.value});
+      }
 
-    //   loading.value = false;
-    // });
+      reviewObject.targetIndex = null;
+      requestObject.value = null;
+      reviewForm.value = null;
 
-    // const updateSubmitForm = async () => {
-    //   if (selectedReviewRequest.value == null) {
-    //     return;
-    //   }
+      hypercertObj.value = (await getHypercert(tokenID)).response;
+      reviewRequests.value = (
+        await getCurrentVersionReviewRequestsByHypercert(tokenID)
+      ).response;
 
-    //   requestObjectReady.value = false;
-    //   loading.value = true;
+      loading.value = false;
+    });
 
-    //   if (contractRef.value) {
-    //     const isReviewerPayload = {
-    //       contractMethods: contractRef.value.methods,
-    //       reviewerAddress: walletAddressRef.value,
-    //       requestName: selectedReviewRequest.value,
-    //     };
-    //     isReviewerForAny.value = await isReviewer(isReviewerPayload);
-    //   }
+    const updateSubmitForm = async () => {
+      if (selectedReviewRequest.value == null) {
+        return;
+      }
 
-    //   requestObject.value = (
-    //     await getReviewRequest(selectedReviewRequest.value)
-    //   ).response;
+      requestObjectReady.value = false;
+      loading.value = true;
 
-    //   reviewObject.requestName = selectedReviewRequest.value;
-    //   reviewObject.hypercertID = tokenID;
+      if (config.value) {
+        const isReviewerPayload = {
+          config: config.value,
+          reviewerAddress: walletAddressRef.value,
+          requestName: selectedReviewRequest.value,
+        };
+        isReviewerForAny.value = await isReviewer(isReviewerPayload);
+      }
 
-    //   reviewForm.value = (
-    //     await getReviewForm(requestObject.value.reviewFormName)
-    //   ).response;
+      requestObject.value = (
+        await getReviewRequest(selectedReviewRequest.value)
+      ).response;
 
-    //   simpleMDEInstances.value.forEach((instance) => instance.toTextArea());
-    //   simpleMDEInstances.value = [];
+      reviewObject.requestName = selectedReviewRequest.value;
+      reviewObject.hypercertID = tokenID;
 
-    //   ipfsHashes.value = requestObject.value.targetsIPFSHashes;
+      reviewForm.value = (
+        await getReviewForm(requestObject.value.reviewFormName)
+      ).response;
 
-    //   reviewObject.reviews = [];
-    //   for (let i = 0; i < reviewForm.value.questions.length; i++) {
-    //     reviewObject.reviews.push({ answer: "" });
-    //   }
-    //   hypercertReviews.value = (
-    //     await getReviews(requestObject.value.requestName)
-    //   ).response?.reviews.filter((r) => r.hypercertID == tokenID);
-    //   hypercertName.value = await getHypercertName();
+      simpleMDEInstances.value.forEach((instance) => instance.toTextArea());
+      simpleMDEInstances.value = [];
 
-    //   requestObjectReady.value = true;
-    //   await loadPastAnswers(
-    //     requestObject.value.reviewFormName,
-    //     reviewRequests.value,
-    //     tokenID,
-    //     selectedReviewRequest.value,
-    //     reviewForm.value.types
-    //   );
+      ipfsHashes.value = requestObject.value.targetsIPFSHashes;
 
-    //   await simpleMDEInitializer();
+      reviewObject.reviews = [];
+      for (let i = 0; i < reviewForm.value.questions.length; i++) {
+        reviewObject.reviews.push({ answer: "" });
+      }
+      hypercertReviews.value = (
+        await getReviews(requestObject.value.requestName)
+      ).response?.reviews.filter((r) => r.hypercertID == tokenID);
+      hypercertName.value = await getHypercertName();
 
-    //   loading.value = false;
-    // };
+      requestObjectReady.value = true;
+      await loadPastAnswers(
+        requestObject.value.reviewFormName,
+        reviewRequests.value,
+        tokenID,
+        selectedReviewRequest.value,
+        reviewForm.value.types
+      );
 
-    // watch([contractRef], async () => {
-    //   if (contractRef.value) {
-    //     const payload = {
-    //       contractMethods: contract.value.methods,
-    //     };
-    //     requestNames.value = await getRequestNames(payload);
-    //   }
-    // });
+      await simpleMDEInitializer();
 
-    // function fileToBase64(file) {
-    //   return new Promise((resolve, reject) => {
-    //     const reader = new FileReader();
-    //     reader.onload = () => resolve(reader.result.split(",")[1]);
-    //     reader.onerror = (error) => reject(error);
-    //     reader.readAsDataURL(file);
-    //   });
-    // }
+      loading.value = false;
+    };
 
-    // const handleFileChange = async (file) => {
-    //   isFormLoading.value = true;
-    //   try {
-    //     const base64File = await fileToBase64(file.raw);
-    //     const response = await fetch(
-    //       process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
-    //         "/api/upload-file-to-ipfs",
-    //       {
-    //         method: "POST",
-    //         body: JSON.stringify({ file: base64File }),
-    //       }
-    //     );
+    watch([config], async () => {
+      if (config.value) {
+        const payload = {
+          config: config.value,
+        };
+        requestNames.value = await getRequestNames(payload);
+      }
+    });
 
-    //     const data = await response.json();
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
 
-    //     attachedFiles.value.push({
-    //       fileName: file.name,
-    //       ipfsHash: data.ipfsHash,
-    //     });
-    //   } catch (error) {
-    //     ElNotification({
-    //       title: "Error",
-    //       message: "Attachment not processed. The file size limit is 50mb.",
-    //       type: "error",
-    //       duration: notificationTime,
-    //     });
-    //     console.error("Error uploading the file: ", error);
-    //   }
-    //   isFormLoading.value = false;
-    // };
+    const handleFileChange = async (file) => {
+      isFormLoading.value = true;
+      try {
+        const base64File = await fileToBase64(file.raw);
+        const response = await fetch(
+          process.env.VUE_APP_CLOUD_FUNCTIONS_BASE_URL +
+            "/api/upload-file-to-ipfs",
+          {
+            method: "POST",
+            body: JSON.stringify({ file: base64File }),
+          }
+        );
 
-    // const removeAttachment = (index) => {
-    //   attachedFiles.value.splice(index, 1);
-    // };
+        const data = await response.json();
 
-    // return {
-    //   attachedFiles,
-    //   walletAddressRef,
-    //   reviewObject,
-    //   requestObjectReady,
-    //   requestNames,
-    //   reviewRequests,
-    //   selectedReviewRequest,
-    //   hypercertName,
-    //   ipfsHashes,
-    //   loading,
-    //   isFormLoading,
-    //   simpleMDEInstances,
-    //   requestObject,
-    //   reviewForm,
-    //   isReviewerForAny,
-    //   disableSubmit,
-    //   submitMessage,
-    //   isEmptyHashes,
-    //   forbiddenMessage,
-    //   allowToSubmit,
-    //   updateSubmitForm,
-    //   loadPastAnswers,
-    //   sendBtn,
-    //   handleFileChange,
-    //   removeAttachment,
-    //   v$,
-    // };
+        attachedFiles.value.push({
+          fileName: file.name,
+          ipfsHash: data.ipfsHash,
+        });
+      } catch (error) {
+        ElNotification({
+          title: "Error",
+          message: "Attachment not processed. The file size limit is 50mb.",
+          type: "error",
+          duration: notificationTime,
+        });
+        console.error("Error uploading the file: ", error);
+      }
+      isFormLoading.value = false;
+    };
+
+    const removeAttachment = (index) => {
+      attachedFiles.value.splice(index, 1);
+    };
+
+    return {
+      attachedFiles,
+      walletAddressRef,
+      reviewObject,
+      requestObjectReady,
+      requestNames,
+      reviewRequests,
+      selectedReviewRequest,
+      hypercertName,
+      ipfsHashes,
+      loading,
+      isFormLoading,
+      simpleMDEInstances,
+      requestObject,
+      reviewForm,
+      isReviewerForAny,
+      disableSubmit,
+      submitMessage,
+      isEmptyHashes,
+      forbiddenMessage,
+      allowToSubmit,
+      updateSubmitForm,
+      loadPastAnswers,
+      sendBtn,
+      handleFileChange,
+      removeAttachment,
+      v$,
+    };
   },
 };
 </script>

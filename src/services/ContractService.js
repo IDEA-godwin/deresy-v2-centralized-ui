@@ -4,7 +4,6 @@ import {
   readContracts,
   simulateContract,
   estimateFeesPerGas,
-  // prepareTransactionRequest,
   writeContract } from '@wagmi/core';
 import { parseEther } from "viem";
 
@@ -14,14 +13,14 @@ import {
   DERESY_CONTRACT_ABI,
   DERESY_CONTRACT_ADDRESS,
   DEFAULT_PAYMENT_ADDRESS,
-  EAS_CONTRACT_ABI,
   EAS_CONTRACT_ADDRESS,
   ERC_20_ABI,
   PAYMENT_OPTIONS,
-  DERESY_CONTRACT_ABI,
-  DERESY_CONTRACT_ADDRESS
+  HYPERCERT_CONTRACT_ABI,
+  HYPERCERT_CONTRACT_ADDRESS
 } from "../constants/contractConstants";
 import { saveAttestationIdToDB } from "./AttestationsService";
+import { EAS, NO_EXPIRATION, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -65,6 +64,16 @@ export const getEasSchemaIds = async config => {
   };
 }
 
+export const getHypercertURI = async (config, tokenID) => {
+  const uri = await readContract(config, {
+    abi: HYPERCERT_CONTRACT_ABI,
+    address: HYPERCERT_CONTRACT_ADDRESS,
+    functionName: 'uri',
+    args: [tokenID]
+  });
+  return uri;
+}
+
 export const createReviewForm = async (config, params) => {
   const {
     formName,
@@ -95,10 +104,14 @@ export const createReviewForm = async (config, params) => {
 };
 
 export const getReviewForm = async (params) => {
-  const { contractMethods, reviewFormName } = params;
+  const { config, reviewFormName } = params;
   try {
-    const response = await contractMethods.getReviewForm(reviewFormName).call();
-
+    const response = await readContract(config, {
+      abi: DERESY_CONTRACT_ABI,
+      address: DERESY_CONTRACT_ADDRESS,
+      functionName: 'getReviewForm',
+      args: reviewFormName
+    });
     return response;
   } catch (e) {
     console.error("An error ocurred while getting the review form.", e);
@@ -298,7 +311,7 @@ export const closeRequest = async (config, params) => {
   }
 };
 
-export const submitReview = async (web3, contract, params) => {
+export const submitReview = async (signer, config, params) => {
   const {
     name,
     hypercertID,
@@ -310,25 +323,34 @@ export const submitReview = async (web3, contract, params) => {
     walletAddress,
   } = params;
 
-  const { methods } = contract;
-  const { eth } = web3;
-
   const notes1Value = "";
   const notes2Value = "";
   const rfu1Value = [];
   const rfu2Value = [];
 
-  const easContract = new eth.Contract(EAS_CONTRACT_ABI, EAS_CONTRACT_ADDRESS, {
-    from: walletAddress,
-  });
+  const easContract = new EAS(EAS_CONTRACT_ADDRESS);
+  easContract.connect(signer);
 
   let response;
 
   let attestationID;
 
   try {
-    const requestReviewForm = await methods.getRequestReviewForm(name).call();
-    const reviewsSchemaID = await methods.reviewsSchemaID().call();
+    const call = await readContracts(config, {
+      contracts: [
+        {
+          ...contractInfo,
+          functionName: 'getRequestReviewForm',
+          args: [name]
+        },
+        {
+          ...contractInfo,
+          functionName: 'reviewsSchemaID'
+        }
+      ]
+    });
+    const requestReviewForm = call[0].result;
+    const reviewsSchemaID = call[1].result;
     const pdfRequestData = {
       name: name,
       accountID: walletAddress,
@@ -365,8 +387,7 @@ export const submitReview = async (web3, contract, params) => {
       { type: "string[]", name: "rfu1" },
       { type: "string[]", name: "rfu2" },
     ];
-
-    const encodedData = web3.eth.abi.encodeParameters(abi, [
+    const values = [
       name,
       hypercertID,
       answers,
@@ -377,91 +398,66 @@ export const submitReview = async (web3, contract, params) => {
       notes1Value,
       notes2Value,
       rfu1Value,
-      rfu2Value,
-    ]);
+      rfu2Value
+    ];
 
-    const data = await easContract.methods
-      .attest({
-        schema: reviewsSchemaID,
-        data: {
-          recipient: "0x0000000000000000000000000000000000000000",
-          expirationTime: 0n,
-          revocable: false,
-          refUID:
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          data: encodedData,
-          value: 0,
-        },
-      })
-      .encodeABI();
+    const schemaEncoder = new SchemaEncoder(abi.map(a => `${a.type} ${a.name}`).join(" ,"));
+    const encodedData = schemaEncoder.encodeData(abi.map((a, i) => ({...a, value: values[i]})));
 
-    const gasEstimate = await web3.eth.estimateGas({
-      from: walletAddress,
-      to: EAS_CONTRACT_ADDRESS,
-      data: data,
-    });
+    const transaction = await easContract.attest({
+      schema: reviewsSchemaID,
+      data: {
+        recipient: "0x0000000000000000000000000000000000000000",
+        expirationTime: NO_EXPIRATION,
+        revocable: false,
+        refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        data: encodedData,
+        value: 0,
+      }
+    })
 
-    const transaction = {
-      from: walletAddress,
-      to: EAS_CONTRACT_ADDRESS,
-      data: data,
-      gas: gasEstimate,
-    };
-
-    await web3.eth
-      .sendTransaction(transaction)
-      .on("transactionHash", (txHash) => {
-        sendTransactionNotification(txHash, "Transaction in progress");
-      })
-      .on("receipt", (receipt) => {
-        response = receipt;
-
-        attestationID = receipt.logs[0].data;
-      });
+    attestationID = await transaction.wait()
   } catch (e) {
     console.error("An error ocurred while submitting the review.", e);
     throw e;
   }
 
   await saveAttestationIdToDB(attestationID);
-
   return response;
 };
 
-export const createAmendment = async (web3, contract, params) => {
+export const createAmendment = async (signer, config, params) => {
   const {
     name,
     hypercertID,
     tokenID,
     amendment,
     attachmentsIpfsHashes,
+    amendmentsSchemaID,
+    reviewsSchemaID,
     refUID,
     walletAddress,
   } = params;
 
-  const { methods } = contract;
-  const { eth } = web3;
-
-  const easContract = new eth.Contract(EAS_CONTRACT_ABI, EAS_CONTRACT_ADDRESS, {
-    from: walletAddress,
-  });
+  const easContract = new EAS(EAS_CONTRACT_ADDRESS);
+  easContract.connect(signer);
 
   let response;
-
   let attestationID;
 
   try {
-    const amendmentsSchemaID = await methods.amendmentsSchemaID().call();
     const reviewAmendments = (await getAmendmentsByRefUID(refUID)).response;
     reviewAmendments.push({
       amendment: amendment,
       attachmentsIpfsHashes: attachmentsIpfsHashes,
       createdAt: Math.floor(Date.now() / 1000),
     });
-    const amendmentReview = (await getReviewByAttestationID(tokenID, refUID))
-      .response;
-    const requestReviewForm = await methods.getRequestReviewForm(name).call();
-    const reviewsSchemaID = await methods.reviewsSchemaID().call();
+    const amendmentReview = (await getReviewByAttestationID(tokenID, refUID)).response;
+    const requestReviewForm = await readContract(config, {
+      ...contractInfo,
+      functionName: 'getRquestReviewForm',
+      args: [name]
+    });
     const pdfRequestData = {
       name: name,
       accountID: walletAddress,
@@ -497,17 +493,19 @@ export const createAmendment = async (web3, contract, params) => {
       { type: "string[]", name: "attachmentsIpfsHashes" },
     ];
 
-    const encodedData = web3.eth.abi.encodeParameters(abi, [
+    const values = [
       name,
       hypercertID,
       amendment,
       pdfIpfsHash,
       attachmentsIpfsHashes,
-    ]);
+    ]
 
-    const data = await easContract.methods
-      .attest({
-        schema: amendmentsSchemaID,
+    const schemaEncoder = new SchemaEncoder(abi.map(a => `${a.type} ${a.name}`).join(" ,"));
+    const encodedData = schemaEncoder.encodeData(abi.map((a, i) => ({...a, value: values[i]})));
+
+    const transaction = await easContract.attest({
+      schema: amendmentsSchemaID,
         data: {
           recipient: "0x0000000000000000000000000000000000000000",
           expirationTime: 0n,
@@ -516,32 +514,10 @@ export const createAmendment = async (web3, contract, params) => {
           data: encodedData,
           value: 0,
         },
-      })
-      .encodeABI();
+    })
 
-    const gasEstimate = await web3.eth.estimateGas({
-      from: walletAddress,
-      to: EAS_CONTRACT_ADDRESS,
-      data: data,
-    });
+    attestationID = await transaction.wait();
 
-    const transaction = {
-      from: walletAddress,
-      to: EAS_CONTRACT_ADDRESS,
-      data: data,
-      gas: gasEstimate,
-    };
-
-    await web3.eth
-      .sendTransaction(transaction)
-      .on("transactionHash", (txHash) => {
-        sendTransactionNotification(txHash, "Transaction in progress");
-      })
-      .on("receipt", (receipt) => {
-        response = receipt;
-
-        attestationID = receipt.logs[0].data;
-      });
   } catch (e) {
     console.error("An error ocurred while submitting the review.", e);
     throw e;

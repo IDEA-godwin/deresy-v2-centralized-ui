@@ -275,10 +275,9 @@ export default {
 
     const walletAddress = computed(() => user.walletAddress);
     const easSchemaIDs = computed(() => contractState.easSchemaIDs);
-    const contract = computed(() => contractState.contract);
+    const config = computed(() => contractState.wagmiConfig);
 
     const walletAddressRef = ref(walletAddress);
-    const contractRef = ref(contract);
     const dataTable = ref([]);
     const tokenID = route.params.token_id;
     const hypercert = ref(null);
@@ -439,7 +438,7 @@ export default {
       if (contractRef.value && currentVersionReviewRequests.value.length > 0) {
         for (const request of currentVersionReviewRequests.value) {
           const payload = {
-            contractMethods: contractRef.value.methods,
+            config: config.value,
             reviewerAddress: walletAddressRef.value,
             requestName: request.requestName,
           };
@@ -458,12 +457,12 @@ export default {
       return parse(markdown);
     };
 
-    watch([contractRef, walletAddressRef], async () => {
-      if (contractRef.value && reviewRequests.value.length > 0) {
+    watch([config.value, walletAddressRef], async () => {
+      if (config.value && reviewRequests.value.length > 0) {
         isReviewerForAny.value = false;
         for (const request of reviewRequests.value) {
           const payload = {
-            contractMethods: contractRef.value.methods,
+            config: config.value,
             reviewerAddress: walletAddressRef.value,
             requestName: request.requestName,
           };

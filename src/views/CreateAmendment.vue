@@ -168,6 +168,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { optimismWeb3 } from "@/web3";
 import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
+import { useEthersSigner } from "../utils/ethers-signer-util";
 
 export default {
   name: "Create Amendment",
@@ -177,12 +178,12 @@ export default {
     const store = useStore();
     const {
       dispatch,
-      state: { contractState, user },
+      state: { contractState, user,  },
     } = store;
 
-    const web3 = computed(() => contractState.web3);
+    const config = computed(() => contractState.wagmiConfig);
+    const easSchemaIds = computed(() => contractState.easSchemaIds)
     const walletAddress = computed(() => user.walletAddress);
-    const contract = computed(() => contractState.contract);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     const tokenID = route.params.token_id;
     const refUID = route.params.review_id;
@@ -218,16 +219,7 @@ export default {
     let v$ = useVuelidate(rules, amendmentObject);
 
     const getHypercertName = async () => {
-      const hypercertContract = new optimismWeb3.eth.Contract(
-        HYPERCERT_CONTRACT_ABI,
-        HYPERCERT_CONTRACT_ADDRESS,
-        {
-          from: walletAddress.value,
-        }
-      );
-      const uri = await hypercertContract.methods
-        .uri(refReviewObject.value.hypercertID.toString())
-        .call();
+      const uri = await getHypercertURI(config.value, refReviewObject.value.hypercertID.toString());
       if (uri) {
         const sanitizedUri = uri.replace(/^ipfs:\/\//, "");
         const data = await (
@@ -293,9 +285,10 @@ export default {
           amendment: amendmentObject.amendment,
           hypercertID: refReviewObject.value.hypercertID,
           tokenID: tokenID,
+          amendmentsSchemaID: easSchemaIds.value.amendmentsSchemaID,
+          reviewsSchemaID: easSchemaIds.value.reviewsSchemaID,
           attachmentsIpfsHashes: attachmentsIpfsHashes,
           refUID: refUID,
-          contractAddress: DERESY_CONTRACT_ADDRESS,
           walletAddress: walletAddress.value,
         };
 
@@ -306,8 +299,9 @@ export default {
             type: "info",
             duration: 8000,
           });
+          const signer = useEthersSigner({ chainId: user?.networkId })
 
-          await createAmendment(web3.value, contract.value, payload);
+          await createAmendment(signer, config, payload);
 
           ElNotification({
             title: "Success",

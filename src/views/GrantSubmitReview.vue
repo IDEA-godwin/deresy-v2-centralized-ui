@@ -162,6 +162,7 @@ import { computed, ref, onBeforeMount, reactive } from "vue";
 import { ElNotification } from "element-plus";
 import { useVuelidate } from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
+import { useEthersSigner } from "../utils/ethers-signer-util";
 export default {
   name: "GrantSubmitReview",
   setup() {
@@ -172,9 +173,8 @@ export default {
     } = store;
     const route = useRoute();
     const loading = ref(true);
-    const web3 = computed(() => contractState.web3);
+    const config = computed(() => contractState.wagmiConfig);
     const walletAddress = computed(() => user.walletAddress);
-    const contract = computed(() => contractState.contract);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
     //const contractRef = ref(contract);
     const walletAddressRef = ref(walletAddress);
@@ -236,7 +236,8 @@ export default {
           walletAddress: walletAddress.value,
         };
         try {
-          await submitReview(web3.value, contract.value, payload);
+          const signer = useEthersSigner( { chainId: user?.networkId})
+          await submitReview(config, payload);
 
           ElNotification({
             title: "Success",
