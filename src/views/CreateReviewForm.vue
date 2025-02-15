@@ -123,7 +123,7 @@ export default {
 
     const disableSubmit = () => {
       return (
-        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+        !user.networkId || !NETWORK_IDS[process.env.NODE_ENV].includes(user.networkId)
       );
     };
 

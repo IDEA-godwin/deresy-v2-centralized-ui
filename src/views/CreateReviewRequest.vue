@@ -22,19 +22,28 @@
           <el-row class="form-section">
             <el-col :span="22">
               <el-form-item label="Review Form Name">
-                <el-select
-                  v-model="requestObject.reviewFormName"
-                  placeholder="Select a review form name"
-                  size="large"
-                  style="width: 100%"
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  placement="top"
+                  :content="submitMessage()"
+                  :disabled="!disableReviewForm()"
                 >
-                  <el-option
-                    v-for="value in reviewFormsTotal"
-                    :key="value"
-                    :label="`${value}`"
-                    :value="value"
-                  ></el-option>
-                </el-select>
+                  <el-select
+                    v-model="requestObject.reviewFormName"
+                    placeholder="Select a review form name"
+                    size="large"
+                    style="width: 100%"
+                    :disabled="disableReviewForm()"
+                  >
+                    <el-option
+                      v-for="value in reviewFormsTotal"
+                      :key="value"
+                      :label="`${value}`"
+                      :value="value"
+                    ></el-option>
+                  </el-select>
+                </el-tooltip>
                 <span
                   class="vuelidation-error"
                   v-if="v$.reviewFormName.$error"
@@ -343,7 +352,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
 import { HOME_ROUTE } from "@/constants/routes";
-import { NETWORK_IDS, NETWORK_NAMES } from "@/constants/walletConstants";
+import { NETWORK_IDS } from "@/constants/walletConstants";
 import { saveHypercert, searchHypercert } from "../services/HypercertService";
 import { parseEther } from "viem";
 
@@ -356,6 +365,7 @@ export default {
       state: { contractState, user },
     } = store;
 
+    const chain = computed(() => user.networkId);
     const wagmiConfig = computed(() => contractState.wagmiConfig);
     const walletAddress = computed(() => user.walletAddress);
     const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
@@ -385,20 +395,14 @@ export default {
 
     const disableSubmit = () => {
       return (
-        !user.networkId || NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+        !user.networkId || !NETWORK_IDS[process.env.NODE_ENV].includes(!user.networkId)
       );
     };
 
+    const disableReviewForm = () => !wagmiConfig.value
+
     const submitMessage = () => {
-      if (!user.networkId) {
-        return "Please connect your wallet";
-      } else if (NETWORK_IDS[process.env.NODE_ENV] !== user.networkId) {
-        return `Please connect your wallet to the ${
-          NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]]
-        } network`;
-      } else {
-        return "";
-      }
+      return `Please connect your wallet`;
     };
 
     const isValidEthereumAddress = (value) => {
@@ -639,7 +643,8 @@ export default {
       }
     });
 
-    watch([wagmiConfig], async () => {
+    watch([wagmiConfig, chain], async () => {
+      console.log(chain.value);
       if (wagmiConfig.value) {
         reviewFormsTotal.value = await getReviewFormNames(wagmiConfig.value);
         paymentOptions.value = await getPaymentOptions(wagmiConfig.value);
@@ -671,6 +676,7 @@ export default {
       hypercertOptions,
       hypercertsLoading,
       disableSubmit,
+      disableReviewForm,
       submitMessage,
       remoteMethod,
       addReviewer,

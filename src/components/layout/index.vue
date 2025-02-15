@@ -53,7 +53,7 @@
           </div>
         </el-header>
         <el-main class="main" id="main">
-          <NetworkAlert />
+          <!-- <NetworkAlert /> -->
           <notifications width="400px" :duration="300000" />
           <slot />
         </el-main>
@@ -132,7 +132,7 @@ import { useRoute, useRouter } from "vue-router";
 import { Fold } from "@element-plus/icons";
 
 import Logo from "../logo";
-import NetworkAlert from "../network-alert";
+// import NetworkAlert from "../network-alert";
 import Wallet from "../wallet";
 import { useStore } from "vuex";
 
@@ -141,7 +141,7 @@ export default defineComponent({
   components: {
     Logo,
     Fold,
-    NetworkAlert,
+    // NetworkAlert,
     Wallet,
   },
 

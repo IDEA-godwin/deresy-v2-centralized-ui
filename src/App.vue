@@ -7,12 +7,11 @@
 </template>
 
 <script>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onBeforeMount } from "vue";
 import Layout from "./components/layout/index.vue";
 import { useStore } from "vuex";
 
 import { createAppKit, useAppKitAccount, useAppKitNetwork } from '@reown/appkit/vue';
-import { useConfig } from '@wagmi/vue'
 import { NETWORK_IDS } from "@/constants/walletConstants";
 import { getEasSchemaIds } from "./services/ContractService";
 import { getWagmiAdapter, networks, projectId, metadata } from "./utils/config";
@@ -27,50 +26,81 @@ export default {
     const store = useStore();
     const { dispatch } = store;
 
-    dispatch("setLoading", true)
+    dispatch("setLoading", true);
 
     const loading = ref(false);
+    let modalKit;
     const wagmiAdapter = getWagmiAdapter();
 
-    try {
-      createAppKit({
-        adapters: [wagmiAdapter],
-        networks,
-        metadata,
-        themeMode: 'light',
-        projectId,
-        features: {
-          email: false, // default to true
-          socials: [],
-          emailShowWallets: false, // default to true
-        },
-      });
-    } catch (e) {
-      dispatch("setLoading", false);
-      console.log(e)
-    }
+    onBeforeMount(async () => {
+      try {
+        modalKit = createAppKit({
+          adapters: [wagmiAdapter],
+          networks,
+          metadata,
+          themeMode: 'light',
+          projectId,
+          features: {
+            email: false, // default to true
+            socials: [],
+            emailShowWallets: false, // default to true
+          },
+        });
+      } catch (e) {
+        dispatch("setLoading", false);
+        dispatch("resetContractInformation");
+        dispatch("resetWalletInformation");
+        console.log(e);
+      }
+    });
 
-    const config = useConfig();
     const accountInfo = useAppKitAccount().value;
+    const network = useAppKitNetwork().value;
 
-    const status = computed(() => accountInfo?.status)
+    const status = computed(() => accountInfo?.status);
+    const chainId = computed(() => network?.chainId);
+
     watch(status, async (newStatus) => {
-      console.log(process.env.NODE_ENV)
-      console.log(newStatus)
+      const config = modalKit?.chainAdapters['eip155'].wagmiConfig;
+      console.log(status.value, newStatus);
+      console.log(modalKit, config)
+
       if (newStatus === "connected" && accountInfo.isConnected) {
-        const { chainId } = useAppKitNetwork().value;
-        if (chainId === NETWORK_IDS[process.env.NODE_ENV]) {
+        console.log(chainId.value, config?.state.chainId)
+        if (NETWORK_IDS[process.env.NODE_ENV].includes(chainId.value)) {
           const {
             reviewsSchemaID,
             amendmentsSchemaID
           } = await getEasSchemaIds(config);
-          console.log(reviewsSchemaID, amendmentsSchemaID);
-          dispatch("setWalletInformation", {walletAddress: accountInfo?.address, networkId: chainId, balance: null})
+          dispatch("setWalletInformation", { walletAddress: accountInfo?.address, networkId: chainId.value, balance: null });
           dispatch("setWagmiConfig", config);
           dispatch("setEasSchemaIDs", { reviewsSchemaID, amendmentsSchemaID });
           dispatch("setLoading", false);
         } else {
           dispatch("resetContractInformation");
+          modalKit.disconnect();
+        }
+      }
+    })
+
+
+    watch(chainId, async (newChainId) => {
+      const config = modalKit?.chainAdapters['eip155'].wagmiConfig;
+      console.log(newChainId, config?.state.chainId);
+
+      if (accountInfo.isConnected) {
+        if (NETWORK_IDS[process.env.NODE_ENV].includes(newChainId)) {
+          const {
+            reviewsSchemaID,
+            amendmentsSchemaID
+          } = await getEasSchemaIds(config);
+          dispatch("setWalletInformation", { walletAddress: accountInfo?.address, networkId: newChainId, balance: null })
+          dispatch("setWagmiConfig", config);
+          dispatch("setEasSchemaIDs", { reviewsSchemaID, amendmentsSchemaID });
+          dispatch("setLoading", false);
+        } else {
+          dispatch("resetContractInformation");
+          modalKit.disconnect();
         }
       }
     })

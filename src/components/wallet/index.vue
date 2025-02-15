@@ -20,17 +20,13 @@
 </template>
 
 <script>
-import { useStore } from "vuex";
 import { computed, ref } from "vue";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/vue";
 
 export default {
   name: "Wallet",
   setup() {
-    const store = useStore();
     const accountInfo = useAppKitAccount();
-
-    const { dispatch } = store;
 
     const isConnected = computed(() => accountInfo.value.isConnected)
 
@@ -47,8 +43,6 @@ export default {
 
     const disconnectWallet = async () => {
       modal.open();
-      dispatch("resetWalletInformation");
-      dispatch("resetContractInformation");
     };
 
     return {

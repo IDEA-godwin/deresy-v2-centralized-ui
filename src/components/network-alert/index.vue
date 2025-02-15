@@ -28,7 +28,7 @@ export default defineComponent({
 
     const showAlert = computed(
       () =>
-        user.networkId && NETWORK_IDS[process.env.NODE_ENV] !== user.networkId
+        user.networkId && !NETWORK_IDS[process.env.NODE_ENV].includes(user.networkId)
     );
 
     const desiredNetworkName = NETWORK_NAMES[NETWORK_IDS[process.env.NODE_ENV]];

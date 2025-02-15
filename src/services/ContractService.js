@@ -11,7 +11,6 @@ import { getAmendmentsByRefUID } from "@/services/AmendmentService";
 import { getReviewByAttestationID } from "@/services/ReviewService";
 import {
   DERESY_CONTRACT_ABI,
-  DERESY_CONTRACT_ADDRESS,
   DEFAULT_PAYMENT_ADDRESS,
   EAS_CONTRACT_ADDRESS,
   ERC_20_ABI,
@@ -21,6 +20,7 @@ import {
 } from "../constants/contractConstants";
 import { saveAttestationIdToDB } from "./AttestationsService";
 import { EAS, NO_EXPIRATION, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { getContractAddress } from "../utils/getContractAddress";
 
 const notificationTime = process.env.VUE_APP_NOTIFICATION_DURATION;
 
@@ -39,20 +39,20 @@ export const sendTransactionNotification = (txHash, title) => {
   });
 };
 
-const contractInfo = {
+const contractInfo = (chainId) => ({
   abi: DERESY_CONTRACT_ABI,
-  address: DERESY_CONTRACT_ADDRESS
-}
+  address: getContractAddress(chainId)
+})
 
 export const getEasSchemaIds = async config => {
   const data = await readContracts(config, {
     contracts: [
       {
-        ...contractInfo,
+        ...contractInfo(config.state.chainId),
         functionName: 'reviewsSchemaID'
       },
       {
-        ...contractInfo,
+        ...contractInfo(config.state.chainId),
         functionName: 'amendmentsSchemaID'
       }
     ]
@@ -85,9 +85,8 @@ export const createReviewForm = async (config, params) => {
   let response;
 
   try {
-
     const { request } = await simulateContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: 'createReviewForm',
       args: [formName, questions, choices, types]
     });
@@ -107,8 +106,7 @@ export const getReviewForm = async (params) => {
   const { config, reviewFormName } = params;
   try {
     const response = await readContract(config, {
-      abi: DERESY_CONTRACT_ABI,
-      address: DERESY_CONTRACT_ADDRESS,
+      ...contractInfo(config.state.chainId),
       functionName: 'getReviewForm',
       args: reviewFormName
     });
@@ -122,7 +120,7 @@ export const getReviewForm = async (params) => {
 export const getReviewFormsTotal = async (config) => {
   try {
     const response = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: "reviewForms"
     });
     return response;
@@ -135,7 +133,7 @@ export const getReviewFormsTotal = async (config) => {
 export const getReviewFormNames = async (config) => {
   try {
     const response = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: "getReviewFormsNames"
     });
 
@@ -149,11 +147,9 @@ export const getReviewFormNames = async (config) => {
 export const getPaymentOptions = async (config) => {
   try {
     const response = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: "getWhitelistedTokens"
     })
-
-    console.log(response)
 
     let newPaymentOptions = {};
 
@@ -234,7 +230,7 @@ export const handleRequest = async (config, params, isPaid) => {
     console.log(value)
 
     const { request} = await simulateContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName, args,
       maxPriorityFeePerGas,
       maxFeePerGas,
@@ -251,7 +247,7 @@ export const getRequest = async (params) => {
   const { requestName, config } = params;
   try {
     const response = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: 'getRequest',
       args: [requestName]
     });
@@ -267,7 +263,7 @@ export const getRequestNames = async (params) => {
   const { config } = params;
   try {
     const response = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: "getReviewRequestsNames"
     });
 
@@ -282,7 +278,7 @@ export const isReviewer = async (params) => {
   const { config, requestName, reviewerAddress } = params;
   try {
     const response = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: "isReviewer",
       args: [reviewerAddress, requestName]
     })
@@ -299,7 +295,7 @@ export const closeRequest = async (config, params) => {
 
   try {
     const { request } = await simulateContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: 'closeReviewRequest',
       args: [requestName]
     });
@@ -339,12 +335,12 @@ export const submitReview = async (signer, config, params) => {
     const call = await readContracts(config, {
       contracts: [
         {
-          ...contractInfo,
+          ...contractInfo(config.state.chainId),
           functionName: 'getRequestReviewForm',
           args: [name]
         },
         {
-          ...contractInfo,
+          ...contractInfo(config.state.chainId),
           functionName: 'reviewsSchemaID'
         }
       ]
@@ -454,7 +450,7 @@ export const createAmendment = async (signer, config, params) => {
     });
     const amendmentReview = (await getReviewByAttestationID(tokenID, refUID)).response;
     const requestReviewForm = await readContract(config, {
-      ...contractInfo,
+      ...contractInfo(config.state.chainId),
       functionName: 'getRquestReviewForm',
       args: [name]
     });
